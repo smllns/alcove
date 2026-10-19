@@ -1,0 +1,47 @@
+/* Page transitions (View Transitions API). setPageTransition() puts the kind
+   on <html data-transition> just before a transition starts. */
+
+:root {
+  --page-turn: 1.05s cubic-bezier(0.76, 0, 0.18, 1);
+}
+
+/* forward: the old page sinks back and dims; the new one rises over it like a sheet */
+:root[data-transition='forward']::view-transition-old(root) {
+  animation: page-sink var(--page-turn) both;
+}
+:root[data-transition='forward']::view-transition-new(root) {
+  animation: page-rise var(--page-turn) both;
+}
+
+/* back isn't a view transition: see shared/lib/curtain.ts */
+
+/* theme: the new palette grows from the toggle in a circle (animated from JS) */
+:root[data-transition='theme']::view-transition-old(root),
+:root[data-transition='theme']::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@keyframes page-rise {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes page-sink {
+  to {
+    transform: scale(0.94) translateY(-2%);
+    opacity: 0.35;
+    filter: blur(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,51 @@
+/* Shadows under the covers. Dark paper needs a near-black, denser shadow to
+   read at all; a lifted card casts a bigger, softer one. */
+.cover-fan {
+  --cover-shadow:
+    0 24px 40px -18px rgba(40, 28, 14, 0.55), 0 2px 6px rgba(40, 28, 14, 0.18);
+  --cover-shadow-lifted:
+    0 46px 60px -22px rgba(40, 28, 14, 0.42), 0 6px 14px rgba(40, 28, 14, 0.12);
+}
+:root[data-theme='dark'] .cover-fan {
+  --cover-shadow:
+    0 28px 44px -14px rgba(0, 0, 0, 0.8), 0 3px 10px rgba(0, 0, 0, 0.55);
+  --cover-shadow-lifted:
+    0 52px 70px -18px rgba(0, 0, 0, 0.72), 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.cover-fan-image {
+  box-shadow: var(--cover-shadow);
+  transition: box-shadow 0.7s cubic-bezier(0.37, 0, 0.63, 1);
+}
+.cover-fan-image[data-lifted] {
+  box-shadow: var(--cover-shadow-lifted);
+}
+
+/* Each card's wrapper nudges outward on hover, so the fan opens a little wider.
+   The cards themselves are placed and shuffled from JS. */
+.cover-fan-card {
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cover-fan:hover .cover-fan-card[data-slot='left'] {
+  transform: translate(-14px, -4px) rotate(-4deg);
+}
+.cover-fan:hover .cover-fan-card[data-slot='right'] {
+  transform: translate(14px, 2px) rotate(4deg);
+}
+.cover-fan:hover .cover-fan-card[data-slot='top'] {
+  transform: translateY(-6px);
+}
+
+/* A slow drift so the fan never sits dead still */
+@media (prefers-reduced-motion: no-preference) {
+  .cover-fan {
+    animation: cover-fan-drift 7s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes cover-fan-drift {
+  to {
+    translate: 0 -10px;
+    rotate: 0.6deg;
+  }
+}
