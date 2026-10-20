@@ -43,6 +43,7 @@ export function toBookInput(
     authors: names(fields.authors),
     isbn: optional(fields.isbn),
     publisher: optional(fields.publisher),
+    firstPublishedYear: whole(fields.firstPublishedYear),
     publishedYear: whole(fields.publishedYear),
     pages: whole(fields.pages),
     format: fields.format || undefined,
@@ -70,6 +71,8 @@ export function toBookInput(
           }
         : undefined,
       reading: fields['copy.reading'] || undefined,
+      started: optional(fields['copy.started']),
+      finished: optional(fields['copy.finished']),
       rating: number(fields['copy.rating']) || undefined,
       acquired: {
         how:

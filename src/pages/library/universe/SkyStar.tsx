@@ -1,11 +1,13 @@
 import { memo, type CSSProperties } from 'react';
 import { BookCover } from '@/entities/book/ui/BookCover';
 import { cn } from '@/shared/lib/cn';
+import { Rating } from '@/shared/ui/Rating';
 import { raisedClass } from '@/shared/ui/surfaces';
 import type { SkyStar as Star } from './layout';
 
 // One book in the sky, at its place, wandering a little. Hovering brings
-// it forward with its title underneath. `lit`: found by a search.
+// it forward with its title (and rating) underneath. `lit`: found by a
+// search.
 export const SkyStar = memo(function SkyStar({
   star,
   lit,
@@ -48,7 +50,8 @@ export const SkyStar = memo(function SkyStar({
             title={book.title}
             author={author}
             url={book.cover?.url}
-            size={width > 110 ? 'L' : 'M'}
+            // The same picture as in the grid and the list
+            size='L'
             className='star-cover sky-twinkle'
           />
         </div>
@@ -70,6 +73,9 @@ export const SkyStar = memo(function SkyStar({
                 {author}
               </p>
             )}
+            {book.copy?.rating ? (
+              <Rating value={book.copy.rating} className='mt-1 text-[13px]' />
+            ) : null}
           </div>
         </div>
       </div>

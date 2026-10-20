@@ -1,6 +1,16 @@
 /* The universe view of the library: books as stars in a sky you can drag.
    Layout and camera live in pages/library/universe; this is how it moves. */
 
+/* While the sky fills the screen, the page around it holds still: exactly
+   one screen tall (not the taller 100vh a phone's browser bars hide
+   behind), and no bounce when it's pulled; the sky itself is what moves */
+html:has([data-sky-page]),
+html:has([data-sky-page]) body {
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 /* Dust: tiny specks in two layers, panned slower than the books for depth
    (--dust-x/y come from the camera, see Universe.tsx), with a few brighter
    ones glimmering. */
@@ -80,9 +90,13 @@
 }
 
 /* A hovered star grows a little and comes forward; the rest of the sky
-   dims */
+   dims. Unhurried both ways, so a pointer sweeping across the sky doesn't
+   make it flicker: the dimming waits a beat (a star only passed over
+   doesn't start it), and the light comes back only once the pointer has
+   stayed off the books for a moment (moving from one to the next keeps the
+   sky dim). The transition delay used is the one of the state arrived at. */
 .sky .star {
-  transition: opacity 0.6s var(--ease-soft);
+  transition: opacity 0.7s var(--ease-soft) 0.35s;
 }
 .star-body {
   transform: rotate(var(--tilt));
@@ -130,12 +144,25 @@
 }
 .sky:has(.star:hover) .star:not(:hover) {
   opacity: 0.4;
+  transition-delay: 0.12s;
+}
+/* The one under the pointer lights at once */
+.sky .star:hover {
+  transition-delay: 0s;
 }
 .sky .star:hover {
   z-index: 1000;
 }
 .sky .star:hover .star-body {
   transform: rotate(0deg) scale(1.25);
+}
+/* A book is something to open, even out in the sky; while the sky is being
+   dragged, though, the hand holding it stays */
+.sky .star-body {
+  cursor: pointer;
+}
+.sky[data-dragging] .star-body {
+  cursor: grabbing;
 }
 .sky .star:hover .star-caption {
   opacity: 1;

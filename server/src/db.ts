@@ -17,8 +17,12 @@ export type SessionDoc = {
   expiresAt: Date;
 };
 
-export const coverSources = ['openlibrary', 'upload'] as const;
+// Where a cover came from: the catalogue (shown from there), a photo the
+// reader uploaded, or a catalogue cover we keep a copy of. The last two are
+// files in our own storage.
+export const coverSources = ['openlibrary', 'upload', 'mirror'] as const;
 export type CoverSource = (typeof coverSources)[number];
+export const storedCoverSources: CoverSource[] = ['upload', 'mirror'];
 
 // Where a reader keeps books, named however they like: homes, the rooms in
 // them, the bookcases (or chests, or boxes) in those, and their shelves.
@@ -62,8 +66,11 @@ export type CopyDetails = {
   // Free text from before places existed
   location?: string;
   status: CopyStatus;
-  // Whether the reader has read it yet
+  // Whether the reader has read it yet, and when: a finish only for a book
+  // that's been read
   reading?: ReadingState;
+  started?: string;
+  finished?: string;
   // Stars out of five, in halves
   rating?: number;
   // How it came to the reader: 'bought', 'gift', … or their own words
@@ -91,6 +98,9 @@ export type BookDoc = {
   authors: string[];
   isbn?: string;
   publisher?: string;
+  // The year the book first came out, in any edition; and the year of
+  // this copy's edition
+  firstPublishedYear?: number;
   publishedYear?: number;
   pages?: number;
   language?: string;
@@ -100,7 +110,8 @@ export type BookDoc = {
   series?: { name: string; number?: number };
   format?: BookFormat;
   genres?: string[];
-  cover?: { url: string; source: CoverSource };
+  // `uncopied`: a catalogue cover we couldn't keep a copy of
+  cover?: { url: string; source: CoverSource; uncopied?: boolean };
   // Where the details came from, for refreshing them later
   openLibrary?: { work?: string; edition?: string };
   copy?: CopyDetails;

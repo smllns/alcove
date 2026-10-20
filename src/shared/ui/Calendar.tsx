@@ -14,20 +14,35 @@ import {
 
 const YEARS = 12;
 
-const step = softClass(false, 'grid size-8 place-items-center');
+const step = softClass(
+  false,
+  'grid size-8 place-items-center disabled:pointer-events-none disabled:opacity-30',
+);
 
 // A month of days to pick one from, opening on the chosen day (or today).
 // The month name opens a grid of years, for days long past. Arrow keys move
-// a day or a week, Page Up and Down a month, Enter picks.
+// a day or a week, Page Up and Down a month, Enter picks. Given `earliest`
+// or `latest`, nothing outside them can be picked, or even moved to.
 export function Calendar({
   value,
   onPick,
+  earliest,
+  latest,
 }: {
   value: string;
   // '' to clear
   onPick: (day: string) => void;
+  earliest?: string;
+  latest?: string;
 }) {
-  const [focus, setFocus] = useState(() => fromDay(value) ?? new Date());
+  const first = earliest ? fromDay(earliest) : null;
+  const last = latest ? fromDay(latest) : null;
+  const within = (date: Date) =>
+    last && date > last ? last : first && date < first ? first : date;
+  const [focus, setFocusAnywhere] = useState(() =>
+    within(fromDay(value) ?? new Date()),
+  );
+  const setFocus = (date: Date) => setFocusAnywhere(within(date));
   const [years, setYears] = useState(false);
   const grid = useRef<HTMLDivElement>(null);
   const focusDay = toDay(focus);
@@ -54,6 +69,13 @@ export function Calendar({
   };
 
   const firstYear = focus.getFullYear() - (focus.getFullYear() % YEARS);
+  // Whether there's anything to go back or forward to
+  const earlier = years
+    ? !first || firstYear > first.getFullYear()
+    : !first || new Date(focus.getFullYear(), focus.getMonth(), 0) >= first;
+  const later = years
+    ? !last || firstYear + YEARS <= last.getFullYear()
+    : !last || new Date(focus.getFullYear(), focus.getMonth() + 1, 1) <= last;
 
   return (
     <div className='p-3'>
@@ -62,6 +84,7 @@ export function Calendar({
           type='button'
           aria-label={years ? 'Earlier years' : 'Previous month'}
           onClick={() => setFocus(addMonths(focus, years ? -YEARS * 12 : -1))}
+          disabled={!earlier}
           className={step}
         >
           <ChevronLeft size={16} />
@@ -81,6 +104,7 @@ export function Calendar({
           type='button'
           aria-label={years ? 'Later years' : 'Next month'}
           onClick={() => setFocus(addMonths(focus, years ? YEARS * 12 : 1))}
+          disabled={!later}
           className={step}
         >
           <ChevronRight size={16} />
@@ -94,6 +118,10 @@ export function Calendar({
               <button
                 key={year}
                 type='button'
+                disabled={Boolean(
+                  (last && year > last.getFullYear()) ||
+                  (first && year < first.getFullYear()),
+                )}
                 onClick={() => {
                   setFocus(
                     new Date(
@@ -105,7 +133,7 @@ export function Calendar({
                   setYears(false);
                 }}
                 className={cn(
-                  'cursor-pointer rounded-full py-2.5 text-sm tabular-nums transition-colors duration-300 ease-soft',
+                  'cursor-pointer rounded-full py-2.5 text-sm tabular-nums transition-colors duration-300 ease-soft disabled:pointer-events-none disabled:opacity-30',
                   year === focus.getFullYear()
                     ? 'bg-button text-button-text'
                     : 'text-ink-soft hover:bg-ink/6 hover:text-ink',
@@ -121,6 +149,8 @@ export function Calendar({
           gridRef={grid}
           focus={focus}
           value={value}
+          earliest={earliest}
+          latest={latest}
           onKeyDown={onKeyDown}
           onPick={onPick}
         />

@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { fitted, MIN_ZOOM, zoomedAt, type Camera } from './camera';
+import { fitted, MIN_ZOOM, zoomedAt, type Camera, type Size } from './camera';
 import { between, easeOut, GLIDE_MS } from './glide';
 import type { Bounds } from './layout';
 import { useSkyGestures } from './useSkyGestures';
@@ -20,6 +20,13 @@ const READABLE_WIDTH = 36;
 const UNFOCUS_GLIDE_MS = 1000;
 // How far an arrow key moves the sky, in screen pixels
 const KEY_STEP = 80;
+
+// The sky's own size, unscaled: it may be growing or shrinking into view
+// as it comes or goes
+const sizeOf = (el: HTMLElement): Size => ({
+  width: el.clientWidth,
+  height: el.clientHeight,
+});
 
 // Where the sky is looked at from, and every way of moving it. Until the
 // reader moves it themselves, it keeps every book in view as more of them
@@ -56,7 +63,7 @@ export function useSkyCamera(
   }, []);
 
   const glideTo = (target: Camera, duration = GLIDE_MS) => {
-    const box = sky.current?.getBoundingClientRect();
+    const box = sky.current && sizeOf(sky.current);
     stopGliding();
     // Without motion, it's there on the next frame, like any other glide
     if (!box || matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -83,9 +90,7 @@ export function useSkyCamera(
     if (!el) return;
     const refit = () => {
       if (!touched.current)
-        setCamera(
-          fitted(el.getBoundingClientRect(), insetTop, bounds, readable),
-        );
+        setCamera(fitted(sizeOf(el), insetTop, bounds, readable));
       setPlaced(true);
     };
     refit();
@@ -115,7 +120,7 @@ export function useSkyCamera(
 
   // Zooming around the middle, gliding, for the buttons and the keyboard
   const zoomBy = (factor: number) => {
-    const box = sky.current?.getBoundingClientRect();
+    const box = sky.current && sizeOf(sky.current);
     if (!box) return;
     touched.current = true;
     const from = goal.current ?? latest.current;
@@ -128,7 +133,7 @@ export function useSkyCamera(
     : '';
   const wasFocused = useRef(false);
   const onFocusChange = useEffectEvent(() => {
-    const box = sky.current?.getBoundingClientRect();
+    const box = sky.current && sizeOf(sky.current);
     if (!box) return;
     if (focus) {
       touched.current = true;
@@ -144,7 +149,7 @@ export function useSkyCamera(
   // Every book in view, however small that makes them
   const fit = () => {
     touched.current = false;
-    const box = sky.current?.getBoundingClientRect();
+    const box = sky.current && sizeOf(sky.current);
     if (box) glideTo(fitted(box, insetTop, bounds));
   };
 

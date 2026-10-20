@@ -1,29 +1,38 @@
-import { Star } from 'lucide-react';
 import { formatLabel } from '@/entities/book/formats';
 import type { Book } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
-import { halves } from '@/shared/lib/halves';
+import { cn } from '@/shared/lib/cn';
+import { Rating } from '@/shared/ui/Rating';
+import { publishedIn } from './order';
 import { RemoveBook } from './RemoveBook';
 
 // One book in the list: a small cover, then its title, author and the odd
 // detail
-export function BookRow({ book }: { book: Book }) {
+export function BookRow({
+  book,
+  size = 'md',
+}: {
+  book: Book;
+  size?: 'md' | 'lg';
+}) {
   const author = book.authors.join(', ');
   const rating = book.copy?.rating;
   const details = [
-    book.publishedYear,
+    publishedIn(book),
     book.format && formatLabel(book.format),
-    rating ? (
-      <span className='inline-flex items-center gap-0.5 text-ink-soft'>
-        <Star size={11} className='fill-accent text-accent' />
-        {halves(rating)}
-      </span>
-    ) : null,
+    rating ? <Rating value={rating} /> : null,
   ];
 
   return (
-    <article className='group flex items-center gap-4 rounded-2xl p-2.5 transition-colors duration-500 ease-soft hover:bg-surface/70'>
+    <article
+      className={cn(
+        // Hovered, the row lifts into a card of its own
+        'group flex cursor-pointer items-center gap-4 rounded-2xl p-2.5 ring-1 ring-transparent transition-[background-color,box-shadow] duration-500 ease-soft hover:bg-surface/90 hover:shadow-[0_16px_34px_-22px_rgba(40,28,14,0.5)] hover:ring-line/70 dark:hover:bg-ink/6 dark:hover:shadow-[0_16px_34px_-20px_rgba(0,0,0,0.7)]',
+        size === 'lg' && 'sm:p-3.5',
+      )}
+    >
       <BookLine
+        size={size}
         title={book.title}
         byline={author}
         coverUrl={book.cover?.url}

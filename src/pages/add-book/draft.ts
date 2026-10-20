@@ -14,6 +14,8 @@ export type DraftFields = {
   authors: string;
   isbn: string;
   publisher: string;
+  // The year it first came out, and the year of this edition
+  firstPublishedYear: string;
   publishedYear: string;
   pages: string;
   format: BookFormat | '';
@@ -32,6 +34,8 @@ export type DraftFields = {
   'copy.place.unit': string;
   'copy.place.shelf': string;
   'copy.reading': ReadingState | '';
+  'copy.started': string;
+  'copy.finished': string;
   // Stars out of five in halves, as text: '3.5'
   'copy.rating': string;
   // One of the usual ways, or 'other' for the reader's own words
@@ -61,6 +65,7 @@ export const emptyFields: DraftFields = {
   authors: '',
   isbn: '',
   publisher: '',
+  firstPublishedYear: '',
   publishedYear: '',
   pages: '',
   format: '',
@@ -75,6 +80,8 @@ export const emptyFields: DraftFields = {
   'copy.place.unit': '',
   'copy.place.shelf': '',
   'copy.reading': '',
+  'copy.started': '',
+  'copy.finished': '',
   'copy.rating': '',
   'copy.acquired.how': '',
   'copy.acquired.other': '',
@@ -113,6 +120,7 @@ export const bookFieldNames = [
   'authors',
   'isbn',
   'publisher',
+  'firstPublishedYear',
   'publishedYear',
   'pages',
   'format',

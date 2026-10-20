@@ -4,17 +4,22 @@ import { monthGrid, toDay, today, weekdays } from '@/shared/lib/dates';
 
 // The month around the focused day, Monday first: the chosen day filled,
 // today ringed, days of the months either side faint. Only the focused
-// day is in the tab order; the arrow keys move it.
+// day is in the tab order; the arrow keys move it. Days before `earliest`
+// or after `latest` can't be picked.
 export function CalendarDays({
   gridRef,
   focus,
   value,
+  earliest,
+  latest,
   onKeyDown,
   onPick,
 }: {
   gridRef: RefObject<HTMLDivElement | null>;
   focus: Date;
   value: string;
+  earliest?: string;
+  latest?: string;
   onKeyDown: (e: KeyboardEvent) => void;
   onPick: (day: string) => void;
 }) {
@@ -38,6 +43,9 @@ export function CalendarDays({
           const day = toDay(date);
           const inMonth = date.getMonth() === focus.getMonth();
           const chosen = day === value;
+          const outside = Boolean(
+            (latest && day > latest) || (earliest && day < earliest),
+          );
           return (
             <button
               key={day}
@@ -47,6 +55,7 @@ export function CalendarDays({
               tabIndex={day === focusDay ? 0 : -1}
               aria-selected={chosen}
               aria-label={date.toDateString()}
+              disabled={outside}
               onClick={() => onPick(day)}
               className={cn(
                 'mx-auto grid size-9 cursor-pointer place-items-center rounded-full text-sm tabular-nums transition-colors duration-200 outline-offset-1 focus-visible:outline-2 focus-visible:outline-ink',
@@ -56,6 +65,7 @@ export function CalendarDays({
                     ? 'text-ink hover:bg-ink/7'
                     : 'text-faint/70 hover:bg-ink/5',
                 !chosen && day === now && 'ring-1 ring-inset ring-ink/30',
+                outside && 'pointer-events-none opacity-30',
               )}
             >
               {date.getDate()}

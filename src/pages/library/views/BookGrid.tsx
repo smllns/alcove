@@ -17,18 +17,28 @@ export function BookGrid({
   books,
   size,
   rise = true,
+  faded,
   ...paging
 }: {
   books: Book[];
   size: CardSize;
   // Cards rise into place, unless they've already eased in
   rise?: boolean;
+  // Books to fade back, so the others stand out
+  faded?: (book: Book) => boolean;
 } & Paging) {
   return (
     <>
       <ul className={cn('grid sm:justify-center', columns[size])}>
         {books.map((book, i) => (
-          <li key={book.id} {...shelfItem(book.id, i, { rise, step: 45 })}>
+          <li
+            key={book.id}
+            {...shelfItem(book.id, i, {
+              rise,
+              step: 45,
+              faded: faded?.(book),
+            })}
+          >
             <BookCard book={book} size={size} />
           </li>
         ))}

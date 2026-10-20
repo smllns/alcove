@@ -10,6 +10,7 @@ const sizes = {
     image: 'S',
     title: 'text-[15px] leading-snug',
     byline: 'mt-0.5 text-xs',
+    details: 'mt-1 text-xs',
   },
   // In a list of books
   md: {
@@ -18,6 +19,17 @@ const sizes = {
     image: 'M',
     title: 'text-[17px] leading-tight',
     byline: 'mt-1 text-sm',
+    details: 'mt-1 text-xs',
+  },
+  // A list with room to spare: the size of `md` on a phone, larger above
+  lg: {
+    gap: 'gap-4 sm:gap-6',
+    cover:
+      'w-12 shadow-[0_8px_14px_-8px_rgba(40,28,14,0.5)] sm:w-20 sm:shadow-[0_14px_24px_-12px_rgba(40,28,14,0.5)]',
+    image: 'L',
+    title: 'text-[17px] leading-tight sm:text-2xl',
+    byline: 'mt-1 text-sm sm:mt-1.5 sm:text-base',
+    details: 'mt-1 text-xs sm:mt-2 sm:text-sm',
   },
 } as const;
 
@@ -50,7 +62,11 @@ export function BookLine({
         author={byline}
         url={coverUrl}
         size={look.image}
-        className={cn('shrink-0', look.cover)}
+        // Picked up a little when the row around it (a `group`) is hovered
+        className={cn(
+          'shrink-0 transition-transform duration-500 ease-soft group-hover:-translate-y-1 group-hover:-rotate-2',
+          look.cover,
+        )}
       />
       <span className='min-w-0 flex-1'>
         <span
@@ -67,7 +83,7 @@ export function BookLine({
           </span>
         )}
         {shown.length > 0 && (
-          <span className='mt-1 block text-xs text-faint'>
+          <span className={cn('block text-faint', look.details)}>
             {shown.map((detail, i) => (
               <Fragment key={i}>
                 {i > 0 && ' · '}

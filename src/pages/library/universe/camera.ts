@@ -1,5 +1,8 @@
 import type { Bounds } from './layout';
 
+// How big the sky is on screen, in pixels
+export type Size = { width: number; height: number };
+
 // Where the sky is looked at from: the screen position of the sky's origin,
 // and the zoom
 export type Camera = { x: number; y: number; zoom: number };
@@ -38,7 +41,7 @@ export function zoomedAt(
 // galaxy; only then, so a sky that nearly fits is never cropped for a few
 // pixels.
 export function fitted(
-  box: DOMRect,
+  box: Size,
   insetTop: number,
   bounds: Bounds,
   readable = MIN_ZOOM,

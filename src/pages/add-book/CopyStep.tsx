@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import type { CopyCondition, ReadingState } from '@/entities/book/types';
+import type { CopyCondition } from '@/entities/book/types';
 import { PlacePicker } from '@/features/places';
 import { Button } from '@/shared/ui/Button';
 import { Choices } from '@/shared/ui/Choices';
@@ -12,6 +12,7 @@ import { placeOf, withPlace } from './draft';
 import type { DraftLists } from './entries';
 import { LinkEntries } from './LinkEntries';
 import { LoanFields } from './LoanFields';
+import { ReadingFields } from './ReadingFields';
 import { TextEntries } from './TextEntries';
 
 type CopyStepProps = {
@@ -23,12 +24,6 @@ type CopyStepProps = {
   notice: ReactNode;
   onBack: () => void;
 };
-
-const readingStates: { value: ReadingState; label: string }[] = [
-  { value: 'read', label: 'Read it' },
-  { value: 'reading', label: 'Reading now' },
-  { value: 'unread', label: 'Not yet' },
-];
 
 const conditions: { value: CopyCondition; label: string }[] = [
   { value: 'new', label: 'Like new' },
@@ -55,13 +50,7 @@ export function CopyStep({
 
   return (
     <div className='flex flex-col gap-8'>
-      <Choices
-        label='Have you read it?'
-        options={readingStates}
-        value={form.values['copy.reading']}
-        onChange={(reading) => form.setValue('copy.reading', reading)}
-        clearable
-      />
+      <ReadingFields form={form} />
 
       <StarRating
         label='Your rating'

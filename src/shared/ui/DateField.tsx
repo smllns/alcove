@@ -1,7 +1,7 @@
 import { useId, useRef, useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
-import { fromDay, longDate } from '@/shared/lib/dates';
+import { fromDay, longDate, today } from '@/shared/lib/dates';
 import { Calendar } from './Calendar';
 import { FieldNote } from './FieldNote';
 import { labelClass } from './fieldStyles';
@@ -17,6 +17,10 @@ type DateFieldProps = {
   hint?: string;
   placeholder?: string;
   className?: string;
+  // Only days that have already come: for things that have happened
+  past?: boolean;
+  // Nothing before this day, e.g. a finish before the start
+  earliest?: string;
 };
 
 // A day, picked from a calendar that opens below the field, and shown
@@ -29,6 +33,8 @@ export function DateField({
   hint,
   placeholder = 'Pick a day',
   className,
+  past = false,
+  earliest,
 }: DateFieldProps) {
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
@@ -92,7 +98,12 @@ export function DateField({
         width={304}
       >
         <div role='dialog' aria-label={`Choose ${label.toLowerCase()}`}>
-          <Calendar value={value} onPick={pick} />
+          <Calendar
+            value={value}
+            onPick={pick}
+            earliest={earliest || undefined}
+            latest={past ? today() : undefined}
+          />
         </div>
       </Popover>
     </div>

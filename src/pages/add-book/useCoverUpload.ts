@@ -23,19 +23,19 @@ export function useCoverUpload(
     onChange(next);
   };
 
-  // True once the picture is the cover
+  // The cover's address once the picture is the cover, or null
   const upload = async (picture: () => Promise<Blob>) => {
     setBusy(true);
     setError(null);
     try {
       const url = await uploadCover(await shrinkImage(await picture()));
       choose({ url, source: 'upload' });
-      return true;
+      return url;
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'That picture didn’t work.',
       );
-      return false;
+      return null;
     } finally {
       setBusy(false);
     }

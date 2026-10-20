@@ -9,12 +9,15 @@ export function BookList({
   books,
   columns,
   rise = true,
+  faded,
   ...paging
 }: {
   books: Book[];
   columns: boolean;
   // Rows rise into place, unless they've already eased in
   rise?: boolean;
+  // Books to fade back, so the others stand out
+  faded?: (book: Book) => boolean;
 } & Paging) {
   return (
     <>
@@ -23,12 +26,19 @@ export function BookList({
           // One column as wide as the screen, however long a title: it's
           // cut short with an ellipsis rather than widening the column
           'grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-1',
-          columns ? 'md:grid-cols-2 xl:grid-cols-3' : 'mx-auto max-w-3xl',
+          columns ? 'md:grid-cols-2 xl:grid-cols-3' : 'mx-auto max-w-4xl',
         )}
       >
         {books.map((book, i) => (
-          <li key={book.id} {...shelfItem(book.id, i, { rise, step: 30 })}>
-            <BookRow book={book} />
+          <li
+            key={book.id}
+            {...shelfItem(book.id, i, {
+              rise,
+              step: 30,
+              faded: faded?.(book),
+            })}
+          >
+            <BookRow book={book} size={columns ? 'md' : 'lg'} />
           </li>
         ))}
       </ul>

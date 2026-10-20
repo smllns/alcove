@@ -17,11 +17,15 @@ const DUST_DEPTH = 0.35;
 export function Universe({
   books,
   lit = null,
+  eased = false,
   notice,
   insetTop = 0,
 }: {
   books: Book[];
   lit?: Set<string> | null;
+  // The sky came in by a transition, already faded in, so it needn't fade
+  // in again on its own
+  eased?: boolean;
   // Shown over the sky, e.g. that a search found nothing
   notice?: ReactNode;
   // How far down the tabs and the search reach over the sky; the books
@@ -64,9 +68,11 @@ export function Universe({
     >
       <div
         className={cn(
-          'absolute left-0 top-0 z-1 origin-top-left transition-opacity duration-700 ease-soft will-change-transform',
-          // Fades in once it's in place, rather than appearing in a blink
-          placed ? 'opacity-100' : 'opacity-0',
+          'absolute left-0 top-0 z-1 origin-top-left will-change-transform',
+          // Fades in once it's in place, rather than appearing in a blink;
+          // unless the switch to it faded it in already
+          !eased && 'transition-opacity duration-700 ease-soft',
+          placed || eased ? 'opacity-100' : 'opacity-0',
         )}
         style={{
           transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`,

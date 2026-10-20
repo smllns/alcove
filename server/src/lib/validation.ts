@@ -58,6 +58,18 @@ export const list = <T extends z.ZodType>(
   );
 
 // A calendar day, YYYY-MM-DD
-export const day = maybe(
-  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Check the date.'),
+const calendarDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Check the date.');
+export const day = maybe(calendarDay);
+
+// The reader's today may already be tomorrow here, on the other side of
+// the world
+const latestToday = () =>
+  new Date(Date.now() + 14 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+// A day that has already come: when something happened
+export const pastDay = maybe(
+  calendarDay.refine(
+    (value) => value <= latestToday(),
+    'That day hasn’t come yet.',
+  ),
 );

@@ -1,7 +1,6 @@
 import { ObjectId, type Filter } from 'mongodb';
-import { books, type BookDoc } from '../db.js';
+import { books, storedCoverSources, type BookDoc } from '../db.js';
 import type { BookInput } from './schemas.js';
-import { searchFilter } from './search.js';
 
 // What the client sees of a book
 export const toPublicBook = ({ _id, userId: _userId, ...book }: BookDoc) => ({
@@ -24,25 +23,15 @@ export async function addBook(userId: ObjectId, input: BookInput) {
   return book;
 }
 
-// A reader's books, or those matching `search`
-const shelf = (userId: ObjectId, search?: string): Filter<BookDoc> => ({
-  userId,
-  ...searchFilter(search),
-});
-
-// One page of a reader's books (or of those matching `search`), newest
-// first. Pass the last id of the previous page as `after` to get the next.
+// One page of a reader's books, newest first. Pass the last id of the
+// previous page as `after` to get the next.
 export async function listBooks(
   userId: ObjectId,
-  {
-    limit,
-    after,
-    search,
-  }: { limit: number; after?: ObjectId; search?: string },
+  { limit, after }: { limit: number; after?: ObjectId },
 ) {
   const page = await books()
     .find({
-      ...shelf(userId, search),
+      userId,
       ...(after && { _id: { $lt: after } }),
     })
     .sort({ _id: -1 })
@@ -80,12 +69,13 @@ export const findBook = (userId: ObjectId, id: ObjectId) =>
 export const deleteBook = (userId: ObjectId, id: ObjectId) =>
   books().findOneAndDelete({ _id: id, userId });
 
-// The photos a reader uploaded that a book still shows
-export const uploadedCoversInUse = async (userId: ObjectId) =>
+// The covers in our storage (uploaded photos, copied catalogue covers)
+// that a book still shows
+export const storedCoversInUse = async (userId: ObjectId) =>
   new Set(
     await books().distinct('cover.url', {
       userId,
-      'cover.source': 'upload',
+      'cover.source': { $in: storedCoverSources },
     }),
   );
 
@@ -93,5 +83,5 @@ export const uploadedCoversInUse = async (userId: ObjectId) =>
 export const deleteAllBooks = (userId: ObjectId) =>
   books().deleteMany({ userId });
 
-export const countBooks = (userId: ObjectId, search?: string) =>
-  books().countDocuments(shelf(userId, search));
+export const countBooks = (userId: ObjectId) =>
+  books().countDocuments({ userId });

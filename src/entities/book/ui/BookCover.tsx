@@ -10,6 +10,10 @@ type BookCoverProps = {
   className?: string;
 };
 
+// Pictures already loaded once on this visit: shown again at once, without
+// fading in a second time (from one view of the library to another, say)
+const seen = new Set<string>();
+
 // A cover at a fixed 2:3 shape. Fades in once loaded; books without a
 // picture (or whose picture fails) get a plain cloth binding with the title.
 export function BookCover({
@@ -19,29 +23,34 @@ export function BookCover({
   size = 'M',
   className,
 }: BookCoverProps) {
+  const src = url && sizedCover(url, size);
   const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(
-    url ? 'loading' : 'failed',
+    !src ? 'failed' : seen.has(src) ? 'loaded' : 'loading',
   );
-  const showPicture = url && state !== 'failed';
+  const showPicture = src && state !== 'failed';
 
   return (
     <div
       className={cn(
-        '@container relative aspect-2/3 overflow-hidden rounded-[3px] bg-line/40',
+        // book-cover: what flies between the views of the library
+        'book-cover @container relative aspect-2/3 overflow-hidden rounded-[3px] bg-line/40',
         className,
       )}
       style={showPicture ? undefined : { backgroundColor: clothFor(title) }}
     >
       {showPicture ? (
         <img
-          src={sizedCover(url, size)}
+          src={src}
           alt=''
           loading='lazy'
-          decoding='async'
+          // One seen before is drawn with the rest of the page, not after
+          decoding={seen.has(src) ? 'sync' : 'async'}
           draggable={false}
           onLoad={(e) => {
             // Open Library answers a missing cover with a 1×1 pixel
-            setState(e.currentTarget.naturalWidth > 1 ? 'loaded' : 'failed');
+            const found = e.currentTarget.naturalWidth > 1;
+            if (found) seen.add(src);
+            setState(found ? 'loaded' : 'failed');
           }}
           onError={() => setState('failed')}
           className={cn(

@@ -8,6 +8,9 @@ export type Book = {
   authors: string[];
   isbn?: string;
   publisher?: string;
+  // The year the book first came out, in any edition; and the year of
+  // this copy's edition
+  firstPublishedYear?: number;
   publishedYear?: number;
   pages?: number;
   language?: string;
@@ -27,7 +30,11 @@ export type Book = {
 export type BookCover = {
   url: string;
   // From the catalogue, or a photo the reader took
-  source: 'openlibrary' | 'upload';
+  // The catalogue (shown from there), a photo the reader took, or a
+  // catalogue cover we keep a copy of. Mirrors the server.
+  source: 'openlibrary' | 'upload' | 'mirror';
+  // A catalogue cover we couldn't keep a copy of
+  uncopied?: boolean;
 };
 
 // On the reader's shelf, lent to someone, or someone else's book on loan
@@ -46,8 +53,11 @@ export type CopyDetails = {
   // Free text from before places existed
   location?: string;
   status: CopyStatus;
-  // Whether the reader has read it yet
+  // Whether the reader has read it yet, and when: a finish only for a book
+  // that's been read
   reading?: ReadingState;
+  started?: string;
+  finished?: string;
   // Stars out of five, in halves
   rating?: number;
   // How it came to the reader: 'bought', 'gift', … or their own words

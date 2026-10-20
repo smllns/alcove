@@ -1,13 +1,11 @@
 import { useSearchParams } from 'react-router';
-import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 
 // What the reader is searching their shelves for. Kept in the address
-// (?q=…), so it survives a reload and the back button; `settled` is what
-// to actually search for, once the typing pauses.
+// (?q=…), so it survives a reload and the back button. The books are all
+// at hand, so it searches as they type: `query` is the text, trimmed.
 export function useShelfSearch() {
   const [params, setParams] = useSearchParams();
   const text = params.get('q') ?? '';
-  const settled = useDebouncedValue(text.trim(), 250);
 
   const setText = (next: string) =>
     setParams(
@@ -16,8 +14,9 @@ export function useShelfSearch() {
         else current.delete('q');
         return current;
       },
-      { replace: true },
+      // Typing stays where the reader is on the page
+      { replace: true, preventScrollReset: true },
     );
 
-  return { text, setText, settled };
+  return { text, setText, query: text.trim() };
 }

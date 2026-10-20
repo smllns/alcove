@@ -93,38 +93,51 @@ export function PlacePicker({
     const open = !above || Boolean(value[above]);
     const { label } = levels[index];
     return (
+      // Waiting for the level above: on a wide screen it holds its place in
+      // the row, faded out; on a phone, stacked, it folds away instead of
+      // leaving a gap
       <div
         inert={!open}
         className={cn(
-          'transition-opacity duration-500 ease-soft',
-          open ? 'opacity-100' : 'opacity-0',
+          'grid transition-[grid-template-rows,opacity] duration-500 ease-soft',
+          open
+            ? 'grid-rows-[1fr] opacity-100'
+            : 'grid-rows-[0fr] opacity-0 sm:grid-rows-[1fr]',
         )}
       >
-        <Select
-          label={label}
-          value={creating === level ? NEW : value[level]}
-          disabled={places.isPending}
-          placeholder={places.isPending ? 'Loading…' : 'Not set'}
-          options={[
-            ...(value[level]
-              ? [{ value: NONE, label: 'Not set', muted: true }]
-              : []),
-            ...options[level].map((node) => ({
-              value: node.id,
-              label: node.name,
-            })),
-            { value: NEW, label: `+ New ${label.toLowerCase()}…`, muted: true },
-          ]}
-          onChange={(picked) => {
-            if (picked === NEW) {
-              setCreating(level);
-              setNewName('');
-            } else {
-              setCreating(null);
-              choose(level, picked === NONE ? '' : picked);
-            }
-          }}
-        />
+        <div
+          className={cn('min-h-0 overflow-hidden', index % 2 && 'max-sm:pt-5')}
+        >
+          <Select
+            label={label}
+            value={creating === level ? NEW : value[level]}
+            disabled={places.isPending}
+            placeholder={places.isPending ? 'Loading…' : 'Not set'}
+            options={[
+              ...(value[level]
+                ? [{ value: NONE, label: 'Not set', muted: true }]
+                : []),
+              ...options[level].map((node) => ({
+                value: node.id,
+                label: node.name,
+              })),
+              {
+                value: NEW,
+                label: `+ New ${label.toLowerCase()}…`,
+                muted: true,
+              },
+            ]}
+            onChange={(picked) => {
+              if (picked === NEW) {
+                setCreating(level);
+                setNewName('');
+              } else {
+                setCreating(null);
+                choose(level, picked === NONE ? '' : picked);
+              }
+            }}
+          />
+        </div>
       </div>
     );
   };
@@ -134,12 +147,12 @@ export function PlacePicker({
   return (
     <fieldset className='flex flex-col'>
       <legend className={cn('mb-4', labelClass)}>Where it lives</legend>
-      <div className='grid gap-x-6 gap-y-5 sm:grid-cols-2'>
+      <div className='grid gap-x-6 sm:grid-cols-2 sm:gap-y-5'>
         {select('home', 0)}
         {select('room', 1)}
       </div>
       <Collapse open={Boolean(value.room)}>
-        <div className='grid gap-x-6 gap-y-5 pt-5 sm:grid-cols-2'>
+        <div className='grid gap-x-6 pt-5 sm:grid-cols-2 sm:gap-y-5'>
           {select('unit', 2)}
           {select('shelf', 3)}
         </div>

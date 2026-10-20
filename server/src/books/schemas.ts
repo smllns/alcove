@@ -20,6 +20,14 @@ const coverHost = (url: string) => {
 };
 
 const thisYear = new Date().getFullYear();
+// A year in print, from the earliest books to one announced for next year
+const year = maybe(
+  z
+    .number({ error: 'Check the year.' })
+    .int('Check the year.')
+    .min(1, 'Check the year.')
+    .max(thisYear + 2, 'Check the year.'),
+);
 
 export const bookInputSchema = z.object({
   title: z
@@ -40,13 +48,8 @@ export const bookInputSchema = z.object({
       .refine(looksLikeIsbn, 'An ISBN has 10 or 13 digits.'),
   ),
   publisher: optionalText(200),
-  publishedYear: maybe(
-    z
-      .number({ error: 'Check the year.' })
-      .int('Check the year.')
-      .min(1, 'Check the year.')
-      .max(thisYear + 2, 'Check the year.'),
-  ),
+  firstPublishedYear: year,
+  publishedYear: year,
   pages: maybe(
     z
       .number({ error: 'Check the page count.' })

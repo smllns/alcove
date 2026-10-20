@@ -17,8 +17,8 @@ const text = (value: string | number | null | undefined) =>
   value === undefined || value === null ? '' : String(value);
 
 // The fields that belong to one printing, for switching editions. With
-// none chosen they empty, all but the year, which the work still knows,
-// and the language, which the reader may have set themselves.
+// none chosen they empty, all but the language, which the reader may have
+// set themselves.
 // An edition that doesn't say its language leaves the one chosen.
 const editionFields = (
   edition: CatalogueEdition | null,
@@ -32,7 +32,7 @@ const editionFields = (
         format: edition.format ?? '',
         ...(edition.language && { language: edition.language }),
       }
-    : { isbn: '', publisher: '', pages: '', format: '' };
+    : { isbn: '', publisher: '', publishedYear: '', pages: '', format: '' };
 
 // The draft with a different edition chosen (or none): its printing's
 // details, and its language carrying the original along
@@ -98,7 +98,7 @@ export function draftFromCatalogue(
       title: work.title,
       subtitle: text(work.subtitle),
       authors: work.authors.join(', '),
-      publishedYear: text(work.firstPublishYear),
+      firstPublishedYear: text(work.firstPublishYear),
     },
     edition ?? null,
   );

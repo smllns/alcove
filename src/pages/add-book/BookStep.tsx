@@ -65,14 +65,24 @@ export function BookStep({
         {...form.field('authors')}
       />
       <SeriesFields form={form} />
+      {/* When the book first came out, then this particular printing */}
       <div className='grid gap-6 sm:grid-cols-2'>
-        <TextField label='ISBN' inputMode='numeric' {...form.field('isbn')} />
-        <TextField label='Publisher' {...form.field('publisher')} />
         <TextField
-          label='Year'
+          label='First published'
           inputMode='numeric'
+          placeholder='1992'
+          hint='The year it first came out, in any edition.'
+          {...form.field('firstPublishedYear')}
+        />
+        <TextField
+          label='This edition'
+          inputMode='numeric'
+          placeholder='2004'
+          hint='The year your copy was printed.'
           {...form.field('publishedYear')}
         />
+        <TextField label='ISBN' inputMode='numeric' {...form.field('isbn')} />
+        <TextField label='Publisher' {...form.field('publisher')} />
         <TextField label='Pages' inputMode='numeric' {...form.field('pages')} />
       </div>
 

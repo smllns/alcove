@@ -4,6 +4,8 @@ import { currentUser } from '../auth/middleware.js';
 import { HttpError } from '../lib/errors.js';
 import { parseBody } from '../lib/validation.js';
 import { getPlaces, resolvePlace } from '../places/repository.js';
+import { storedCoverSources } from '../db.js';
+import { copyCatalogueCovers } from '../uploads/mirror.js';
 import { deleteCover } from '../uploads/storage.js';
 import {
   addBook,
@@ -47,11 +49,9 @@ const alreadyShelved = (book: { title: string; createdAt: Date }) => {
 booksRouter.get('/', async (req, res) => {
   const limit = Math.min(Math.max(Number(req.query.limit) || 48, 1), 100);
   const after = req.query.after ? objectId(req.query.after) : undefined;
-  const search =
-    typeof req.query.q === 'string' ? req.query.q.slice(0, 100) : undefined;
   const [page, total] = await Promise.all([
-    listBooks(me(req), { limit, after, search }),
-    countBooks(me(req), search),
+    listBooks(me(req), { limit, after }),
+    countBooks(me(req)),
   ]);
   res.json({
     books: page.items.map(toPublicBook),
@@ -74,6 +74,12 @@ booksRouter.post('/', async (req, res) => {
   res.status(201).json({ book: toPublicBook(book) });
 });
 
+// Keeps copies of catalogue covers in our own storage, a few at a time;
+// the library calls it again while any are left
+booksRouter.post('/covers/copy', async (req, res) => {
+  res.json(await copyCatalogueCovers(me(req)));
+});
+
 booksRouter.get('/:id', async (req, res) => {
   const book = await findBook(me(req), objectId(req.params.id));
   if (!book) throw notOnShelves();
@@ -83,7 +89,7 @@ booksRouter.get('/:id', async (req, res) => {
 booksRouter.delete('/:id', async (req, res) => {
   const book = await deleteBook(me(req), objectId(req.params.id));
   if (!book) throw notOnShelves();
-  if (book.cover?.source === 'upload')
+  if (book.cover && storedCoverSources.includes(book.cover.source))
     await deleteCover(book.cover.url).catch(() => {});
   res.status(204).end();
 });

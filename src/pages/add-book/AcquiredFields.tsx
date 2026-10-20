@@ -28,16 +28,19 @@ export function AcquiredFields({ form }: { form: DraftForm }) {
           />
         </div>
       </Collapse>
-      {/* The date comes first, so the "from" beside it can fold away
-          without leaving a gap */}
-      <div className='grid gap-6 pt-6 sm:grid-cols-2'>
+      {/* The date comes first, so the "from" after it can fold away
+          without leaving a gap; stacked on a phone, the space above it
+          folds away with it */}
+      <div className='grid gap-x-6 pt-6 sm:grid-cols-2 sm:gap-y-6'>
         <DateField
+          past
           label='When'
           hint='If you remember.'
           {...form.choice('copy.acquired.date')}
         />
         <Collapse open={Boolean(source)}>
           <TextField
+            className='max-sm:pt-6'
             label={source?.label ?? 'From'}
             placeholder={source?.placeholder}
             {...form.field('copy.acquired.from')}

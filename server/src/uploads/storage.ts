@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { del, list, put } from '@vercel/blob';
 import type { ObjectId } from 'mongodb';
-import { uploadedCoversInUse } from '../books/repository.js';
+import { storedCoversInUse } from '../books/repository.js';
 import { config } from '../config.js';
 import { HttpError } from '../lib/errors.js';
 
@@ -15,6 +15,8 @@ import { HttpError } from '../lib/errors.js';
 const auth = config.BLOB_READ_WRITE_TOKEN
   ? { token: config.BLOB_READ_WRITE_TOKEN }
   : {};
+
+const YEAR = 365 * 24 * 60 * 60;
 
 const folder = (userId: ObjectId) => `covers/${userId.toHexString()}/`;
 
@@ -42,7 +44,8 @@ export async function saveCover(
     const blob = await put(
       `${folder(userId)}${randomUUID()}.${extension}`,
       image,
-      { access: 'public', contentType, ...auth },
+      // Every file has a name of its own, so it never needs checking again
+      { access: 'public', contentType, cacheControlMaxAge: YEAR, ...auth },
     );
     return blob.url;
   } catch (err) {
@@ -77,7 +80,7 @@ export function isOwnCover(userId: ObjectId, url: string) {
 // A photo the reader uploaded and then didn't use, gone straight away
 export async function discardCover(userId: ObjectId, url: string) {
   if (!isOwnCover(userId, url)) return;
-  if ((await uploadedCoversInUse(userId)).has(url)) return;
+  if ((await storedCoversInUse(userId)).has(url)) return;
   await deleteCover(url);
 }
 
@@ -91,7 +94,7 @@ export async function sweepOrphanCovers(
   if (!uploadsEnabled()) return;
   const [{ blobs }, inUse] = await Promise.all([
     list({ prefix: folder(userId), ...auth }),
-    uploadedCoversInUse(userId),
+    storedCoversInUse(userId),
   ]);
   const cutoff = Date.now() - olderThanMs;
   const orphans = blobs

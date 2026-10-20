@@ -38,6 +38,15 @@ export function CoverPicker({
   const fileInput = useRef<HTMLInputElement>(null);
   const [linking, setLinking] = useState(false);
   const upload = useCoverUpload(cover, onChange);
+  // The link the cover was last taken from. While that's still the cover,
+  // the link stays chosen and on show, marked as added.
+  const [linked, setLinked] = useState<{ cover: string; link: string }>();
+  const addedLink = linked && linked.cover === cover?.url ? linked.link : null;
+
+  const onLink = async (link: string) => {
+    const url = await upload.fromLink(link);
+    if (url) setLinked({ cover: url, link });
+  };
 
   const onFile = async (file: File | undefined) => {
     if (!file) return;
@@ -85,7 +94,7 @@ export function CoverPicker({
               <ThumbButton
                 label='Upload your own photo'
                 dashed
-                chosen={cover?.source === 'upload'}
+                chosen={cover?.source === 'upload' && !addedLink}
                 onClick={() => fileInput.current?.click()}
               >
                 <ImageUp size={16} />
@@ -93,7 +102,7 @@ export function CoverPicker({
               <ThumbButton
                 label='Use a picture from a link'
                 dashed
-                chosen={linking}
+                chosen={linking || Boolean(addedLink)}
                 onClick={() => {
                   setLinking((open) => !open);
                   upload.clearError();
@@ -118,7 +127,8 @@ export function CoverPicker({
             open={linking}
             busy={upload.busy}
             error={linking ? upload.error : null}
-            onSubmit={upload.fromLink}
+            added={addedLink}
+            onSubmit={onLink}
             onClose={() => setLinking(false)}
           />
         </div>

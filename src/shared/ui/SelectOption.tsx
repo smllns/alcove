@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
-import type { SelectOption } from './selectOptions';
+import { optionClass, type SelectOption } from './selectOptions';
 
 // One choice in a Select's menu
 export function Option<T extends string>({
@@ -32,7 +32,7 @@ export function Option<T extends string>({
       onPointerDown={(e) => e.preventDefault()}
       onClick={onPick}
       className={cn(
-        'flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] leading-snug transition-colors duration-150',
+        optionClass,
         active && 'bg-ink/6',
         option.muted ? 'text-muted' : 'text-ink',
       )}

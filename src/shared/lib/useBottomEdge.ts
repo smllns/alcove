@@ -1,9 +1,13 @@
 import { useLayoutEffect, useState } from 'react';
 
-// How far down the screen an element ends, in pixels, kept up to date as
-// it or the window changes size. For fitting things into the room below.
+// How far down the page an element ends, in pixels, kept up to date as it
+// or the window changes size: from the page's top, so it reads the same
+// however far the page happens to be scrolled while it's measured (it may
+// still be on its way back up from the page before). For fitting things
+// into the room below, on a page that doesn't scroll.
 // Returns a ref to put on the element: it may appear later than the
-// component (once data has loaded, say), and is measured when it does.
+// component (once data has loaded, say), and is measured when it does;
+// and the element itself, once it's there.
 export function useBottomEdge() {
   const [element, setElement] = useState<HTMLElement | null>(null);
   const [bottom, setBottom] = useState(0);
@@ -12,7 +16,7 @@ export function useBottomEdge() {
   useLayoutEffect(() => {
     if (!element) return;
     const measure = () =>
-      setBottom(Math.round(element.getBoundingClientRect().bottom));
+      setBottom(Math.round(element.getBoundingClientRect().bottom + scrollY));
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(element);
@@ -23,5 +27,5 @@ export function useBottomEdge() {
     };
   }, [element]);
 
-  return [setElement, bottom] as const;
+  return [setElement, bottom, element] as const;
 }

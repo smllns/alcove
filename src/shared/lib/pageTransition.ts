@@ -5,7 +5,9 @@
 //   theme:       the light/dark circle reveal
 //   shelf:       books on the page rearranging (a search, say): each glides
 //                to its new place, those leaving fade, newcomers fade in
-export type PageTransition = 'forward' | 'back' | 'theme' | 'shelf';
+//   view:        the books shown another way (grid, list): each cover in
+//                sight flies to where it is in the new view
+export type PageTransition = 'forward' | 'back' | 'theme' | 'shelf' | 'view';
 
 // back is done with a curtain over the page rather than a View Transition
 export const usesCurtain = (kind: PageTransition) => kind === 'back';

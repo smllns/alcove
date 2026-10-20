@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Collapse } from '@/shared/ui/Collapse';
 import { RemoveButton } from '@/shared/ui/ListControls';
@@ -8,27 +9,28 @@ type CoverLinkFieldProps = {
   open: boolean;
   busy: boolean;
   error: string | null;
-  // Resolves true once the picture is the cover
-  onSubmit: (url: string) => Promise<boolean>;
+  // The link the cover now comes from, if it does
+  added: string | null;
+  onSubmit: (url: string) => Promise<void>;
   onClose: () => void;
 };
 
-// A place to paste the address of a picture found somewhere online
+// A place to paste the address of a picture found somewhere online. Once
+// it's the cover, the link stays, marked as added, until it's changed.
 export function CoverLinkField({
   open,
   busy,
   error,
+  added,
   onSubmit,
   onClose,
 }: CoverLinkFieldProps) {
   const [url, setUrl] = useState('');
+  const isAdded = Boolean(added) && url.trim() === added;
 
-  const submit = async () => {
-    if (!url.trim() || busy) return;
-    if (await onSubmit(url.trim())) {
-      setUrl('');
-      onClose();
-    }
+  const submit = () => {
+    if (!url.trim() || busy || isAdded) return;
+    void onSubmit(url.trim());
   };
 
   return (
@@ -46,19 +48,26 @@ export function CoverLinkField({
             // Enter uses the picture rather than moving the form on
             if (e.key === 'Enter') {
               e.preventDefault();
-              void submit();
+              submit();
             }
           }}
         />
-        <Button
-          variant='pill'
-          onClick={() => void submit()}
-          loading={busy}
-          disabled={!url.trim()}
-        >
-          Use
-        </Button>
-        <RemoveButton onClick={onClose} label='Cancel' />
+        {isAdded ? (
+          <span className='inline-flex items-center gap-1.5 px-3 py-2 text-sm text-muted'>
+            <Check size={15} />
+            Added
+          </span>
+        ) : (
+          <Button
+            variant='pill'
+            onClick={submit}
+            loading={busy}
+            disabled={!url.trim()}
+          >
+            Use
+          </Button>
+        )}
+        <RemoveButton onClick={onClose} label='Close' />
       </div>
     </Collapse>
   );

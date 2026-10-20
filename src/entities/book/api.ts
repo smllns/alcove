@@ -7,11 +7,10 @@ export type BooksPage = {
   total: number;
 };
 
-// A page of the reader's books, or of those matching `search`
-export function fetchBooks(after: string | null, search = '') {
+// A page of the reader's books
+export function fetchBooks(after: string | null) {
   const params = new URLSearchParams({ limit: '48' });
   if (after) params.set('after', after);
-  if (search) params.set('q', search);
   return request<BooksPage>(`/books?${params}`);
 }
 
@@ -42,6 +41,11 @@ export const uploadCover = async (image: string) =>
       body: { image },
     })
   ).url;
+
+// Copies a few more catalogue covers into our own storage, where they load
+// quickly; how many are still to go
+export const copyCatalogueCovers = () =>
+  request<{ remaining: number }>('/books/covers/copy', { method: 'POST' });
 
 // The picture at a link someone found, fetched by the server (sites rarely
 // let the browser read their images), to be shrunk and uploaded like a photo

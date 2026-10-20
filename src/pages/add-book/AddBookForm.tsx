@@ -1,4 +1,4 @@
-import { useRef, useState, type SubmitEvent } from 'react';
+import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { useAddBook } from '@/entities/book/queries';
 import type { CatalogueEdition } from '@/entities/book/types';
 import { ApiError } from '@/shared/api/http';
@@ -48,7 +48,6 @@ export function AddBookForm({
 }: AddBookFormProps) {
   const navigate = useTransitionNavigate();
   const addBook = useAddBook();
-  const formRef = useRef<HTMLFormElement>(null);
   const [step, setStep] = useState<Step>('book');
   const [extras, setExtras] = useState(initialExtras);
   const [lists, setLists] = useState<DraftLists>(emptyLists);
@@ -68,12 +67,20 @@ export function AddBookForm({
     },
   );
 
-  const goTo = (next: Step) => {
-    setStep(next);
-    // Start the new step from its top if the reader had scrolled past it
-    const top = formRef.current?.getBoundingClientRect().top ?? 0;
-    if (top < 0) window.scrollBy({ top: top - 120, behavior: 'smooth' });
-  };
+  // Each step starts from its heading. Once the new step is on screen, as
+  // the page may have changed height with it (on a phone the second step
+  // drops the cover choices); only if the heading is out of easy view.
+  const stepHeading = useRef<HTMLParagraphElement>(null);
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    const top = stepHeading.current?.getBoundingClientRect().top;
+    if (top === undefined || (top > 0 && top < innerHeight / 3)) return;
+    window.scrollTo({ top: scrollY + top - 96, behavior: 'smooth' });
+  }, [step]);
 
   // A problem with the book's own fields sends the reader back to them
   const bookError = bookFieldNames.some((name) => form.errors[name]);
@@ -98,7 +105,7 @@ export function AddBookForm({
       form.setErrors((errors) => ({ ...errors, ...missing }));
       return;
     }
-    goTo('copy');
+    setStep('copy');
   };
 
   const chooseEdition = (edition: CatalogueEdition | null) => {
@@ -135,7 +142,6 @@ export function AddBookForm({
 
   return (
     <form
-      ref={formRef}
       onSubmit={onSubmit}
       noValidate
       className='grid animate-rise gap-10 lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-16'
@@ -150,7 +156,10 @@ export function AddBookForm({
       />
 
       <div className='min-w-0'>
-        <p className={cn('mb-8 flex items-baseline gap-3', labelClass)}>
+        <p
+          ref={stepHeading}
+          className={cn('mb-8 flex items-baseline gap-3', labelClass)}
+        >
           <span className='text-faint'>
             Step {step === 'book' ? 1 : 2} of 2
           </span>
@@ -177,7 +186,7 @@ export function AddBookForm({
               onListsChange={setLists}
               saving={form.status === 'saving'}
               notice={notice}
-              onBack={() => goTo('book')}
+              onBack={() => setStep('book')}
             />
           )}
         </div>

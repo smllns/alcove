@@ -3,6 +3,8 @@
 
 :root {
   --page-turn: 1.05s cubic-bezier(0.76, 0, 0.18, 1);
+  /* How far a faded book steps back */
+  --faded: 0.3;
 }
 
 /* forward: the old page sinks back and dims; the new one rises over it like a sheet */
@@ -10,6 +12,10 @@
   animation: page-sink var(--page-turn) both;
 }
 :root[data-transition='forward']::view-transition-new(root) {
+  /* Already where the rise starts, hidden below, even before the animation
+     takes hold: WebKit (Safari, every iPhone browser) can paint the new page
+     whole for a frame first, which flashes */
+  clip-path: inset(100% 0 0 0);
   animation: page-rise var(--page-turn) both;
 }
 
@@ -52,11 +58,45 @@
 :root[data-transition='shelf'] .shelf-item {
   view-transition-name: var(--shelf-name);
 }
-:root[data-transition='shelf']::view-transition-group(*) {
+
+/* view: the books shown another way. Only the covers carry a name (set as
+   --cover-name on the card or the row), so each one in sight flies from
+   where it was to where it is now, while the rest of the page, titles and
+   all, cross-fades. */
+:root[data-transition='view'] .shelf-item .book-cover {
+  view-transition-name: var(--cover-name, none);
+}
+
+/* A book faded back (to let the others stand out) steps forward again
+   when hovered. Its cover, flying on its own between views, is lifted out
+   from under the card's fade, so it carries the same fade with it. */
+.shelf-faded {
+  opacity: var(--faded);
+}
+.shelf-faded:hover {
+  opacity: 1;
+}
+:root[data-transition='view'] .shelf-faded .book-cover {
+  view-transition-class: faded;
+}
+::view-transition-group(.faded) {
+  opacity: var(--faded);
+}
+
+:root:is(
+    [data-transition='shelf'],
+    [data-transition='view']
+  )::view-transition-group(*) {
   animation-duration: 0.6s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
-:root[data-transition='shelf']::view-transition-old(*),
-:root[data-transition='shelf']::view-transition-new(*) {
+:root:is(
+    [data-transition='shelf'],
+    [data-transition='view']
+  )::view-transition-old(*),
+:root:is(
+    [data-transition='shelf'],
+    [data-transition='view']
+  )::view-transition-new(*) {
   animation-duration: 0.45s;
 }

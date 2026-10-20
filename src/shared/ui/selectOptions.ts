@@ -1,5 +1,9 @@
 // The choices in a Select, and finding one by its first letter
 
+// One choice in a menu, as a Select and other menus draw it
+export const optionClass =
+  'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[15px] leading-snug transition-colors duration-150';
+
 export type SelectOption<T extends string> = {
   value: T;
   label: string;

@@ -4,6 +4,7 @@ import { Collapse } from '@/shared/ui/Collapse';
 import { DateField } from '@/shared/ui/DateField';
 import { TextField } from '@/shared/ui/TextField';
 import type { DraftForm } from './AddBookForm';
+import { startOfSpan } from './dayRange';
 
 const statuses: { value: CopyStatus; label: string }[] = [
   { value: 'shelf', label: 'With me' },
@@ -37,12 +38,14 @@ export function LoanFields({ form }: { form: DraftForm }) {
             {...form.field('copy.person')}
           />
           <DateField
+            past
             label={lending ? 'Lent on' : 'Borrowed on'}
             hint='If you remember.'
-            {...form.choice('copy.since')}
+            {...startOfSpan(form, 'copy.since', 'copy.due')}
           />
           <DateField
             label={lending ? 'Due back' : 'Give back by'}
+            earliest={form.values['copy.since']}
             hint='If you agreed on a day.'
             {...form.choice('copy.due')}
           />

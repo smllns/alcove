@@ -3,7 +3,7 @@ import { Fragment, type ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { Tooltip } from '@/shared/ui/Tooltip';
 import { kindOf, type BookView, type ViewKind } from './views';
-import { floatingClass } from '@/shared/ui/surfaces';
+import { capsuleClass } from '@/shared/ui/surfaces';
 import { softClass } from '@/shared/ui/buttonStyles';
 
 type Option = { value: BookView; label: string; icon: ReactNode };
@@ -46,11 +46,7 @@ function Group<T extends string>({
     <div
       role='radiogroup'
       aria-label={label}
-      className={cn(
-        'flex animate-rise rounded-full p-1',
-        floatingClass,
-        className,
-      )}
+      className={cn('flex animate-rise', capsuleClass, className)}
     >
       {options.map((option) => {
         const on = option.value === current;

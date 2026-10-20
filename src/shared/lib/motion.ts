@@ -11,3 +11,10 @@ export const reducedMotionNow = () =>
 
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
+
+// Back up to the top of the page: gliding there, unless motion is reduced
+export const scrollToTop = () =>
+  window.scrollTo({
+    top: 0,
+    behavior: reducedMotionNow() ? 'auto' : 'smooth',
+  });

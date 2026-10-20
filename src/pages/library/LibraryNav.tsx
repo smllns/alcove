@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/shared/lib/cn';
+import { scrollToTop } from '@/shared/lib/motion';
 import { sections, type SectionKey } from './sections';
 import { floatingClass } from '@/shared/ui/surfaces';
 import { softClass } from '@/shared/ui/buttonStyles';
@@ -54,6 +55,12 @@ export function LibraryNav({
               <Link
                 to={section.path}
                 aria-current={on ? 'page' : undefined}
+                // The section already open: back to its top instead
+                onClick={(e) => {
+                  if (!on) return;
+                  e.preventDefault();
+                  scrollToTop();
+                }}
                 className={softClass(
                   on,
                   'flex items-baseline gap-1.5 whitespace-nowrap px-2.5 py-2 font-serif text-[15px] tracking-[-0.01em] sm:gap-2 sm:px-5 sm:text-[17px]',

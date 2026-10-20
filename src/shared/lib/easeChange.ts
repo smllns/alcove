@@ -1,15 +1,27 @@
 import { flushSync } from 'react-dom';
 import { reducedMotionNow } from './motion';
-import { setPageTransition } from './pageTransition';
+import { setPageTransition, type PageTransition } from './pageTransition';
 
-// Runs a DOM update as a 'shelf' view transition (styled in
+let easing = false;
+
+// Whether a change is easing in right now
+export const isEasing = () => easing;
+
+// Runs a DOM update as a view transition of the given kind (styled in
 // styles/transitions.css): what stays glides to where it now belongs, what
 // goes fades out, what's new fades in. A plain update where unsupported.
-export function easeChange(update: () => void) {
+export function easeChange(
+  update: () => void,
+  kind: Extract<PageTransition, 'shelf' | 'view'> = 'shelf',
+) {
   if (!document.startViewTransition || reducedMotionNow()) {
     update();
     return;
   }
-  setPageTransition('shelf');
-  document.startViewTransition(() => flushSync(update));
+  setPageTransition(kind);
+  easing = true;
+  const transition = document.startViewTransition(() => flushSync(update));
+  void transition.finished.finally(() => {
+    easing = false;
+  });
 }

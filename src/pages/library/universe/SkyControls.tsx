@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import { Tooltip } from '@/shared/ui/Tooltip';
 import { shapeNames, type SkyShape } from './shape';
 import { cn } from '@/shared/lib/cn';
-import { floatingClass } from '@/shared/ui/surfaces';
+import { capsuleClass } from '@/shared/ui/surfaces';
 import { softClass } from '@/shared/ui/buttonStyles';
 
 const shapeIcons: Record<SkyShape, ReactNode> = {
@@ -60,8 +60,8 @@ export function SkyControls({
   return (
     <div
       className={cn(
-        'absolute bottom-5 right-5 z-2 flex flex-col rounded-full p-1 sm:bottom-8 sm:right-8',
-        floatingClass,
+        'absolute bottom-5 right-5 z-2 flex flex-col sm:bottom-8 sm:right-8',
+        capsuleClass,
       )}
     >
       <Control label={`Shape: ${shapeNames[shape]}`} onClick={onShape}>
