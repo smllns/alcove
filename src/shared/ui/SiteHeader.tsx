@@ -7,9 +7,11 @@ type SiteHeaderProps = {
   // Page-specific actions, shown after the theme toggle
   children?: ReactNode;
   className?: string;
+  // Where the logo leads; inside the app, that's the library
+  home?: string;
 };
 
-export function SiteHeader({ children, className }: SiteHeaderProps) {
+export function SiteHeader({ children, className, home }: SiteHeaderProps) {
   return (
     <header
       className={cn(
@@ -17,7 +19,7 @@ export function SiteHeader({ children, className }: SiteHeaderProps) {
         className,
       )}
     >
-      <Logo />
+      <Logo to={home} />
       <div className='flex items-center gap-2 sm:gap-2.5'>
         <ThemeToggle />
         {children}

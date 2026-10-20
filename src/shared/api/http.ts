@@ -24,10 +24,13 @@ type ErrorBody = {
   error?: { code?: string; message?: string; fields?: Record<string, string> };
 };
 
-export async function request<T>(
+type RequestOptions = { method?: string; body?: unknown };
+
+// Sends the request; any answer but a success becomes an ApiError
+async function send(
   path: string,
-  { method = 'GET', body }: { method?: string; body?: unknown } = {},
-): Promise<T> {
+  { method = 'GET', body }: RequestOptions,
+): Promise<Response> {
   let res: Response;
   try {
     res = await fetch(`/api${path}`, {
@@ -44,18 +47,26 @@ export async function request<T>(
       'Can’t reach the server. Check your connection and try again.',
     );
   }
+  if (res.ok) return res;
 
-  if (res.status === 204) return undefined as T;
-
-  const data: unknown = await res.json().catch(() => null);
-  if (!res.ok) {
-    const error = (data as ErrorBody | null)?.error;
-    throw new ApiError(
-      res.status,
-      error?.code ?? 'unknown',
-      error?.message ?? 'Something went wrong. Please try again.',
-      error?.fields,
-    );
-  }
-  return data as T;
+  const data = (await res.json().catch(() => null)) as ErrorBody | null;
+  throw new ApiError(
+    res.status,
+    data?.error?.code ?? 'unknown',
+    data?.error?.message ?? 'Something went wrong. Please try again.',
+    data?.error?.fields,
+  );
 }
+
+export async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const res = await send(path, options);
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
+}
+
+// For answers that are a file rather than JSON, e.g. a picture
+export const requestBlob = async (path: string, options: RequestOptions = {}) =>
+  (await send(path, options)).blob();

@@ -1,7 +1,7 @@
 import { useRef, type RefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { SceneSlot } from '@/entities/book/types';
+import type { SceneSlot } from '@/entities/book/demo';
 import { prefersReducedMotion } from '@/shared/lib/motion';
 
 const damp = THREE.MathUtils.damp;

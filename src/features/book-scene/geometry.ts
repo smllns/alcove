@@ -1,4 +1,4 @@
-import type { ShowcaseBook } from '@/entities/book/types';
+import type { ShowcaseBook } from '@/entities/book/demo';
 import { coverAspect } from './textures/cover';
 
 // Hardcover spines are half an ellipse, squashed by this much

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import type { Book } from '@/entities/book/types';
+import type { DemoBook } from '@/entities/book/demo';
 import type { BookDimensions } from './geometry';
 import { seededRandom } from './textures/canvas';
 import { createBackCover, createFrontCover } from './textures/cover';
@@ -9,7 +9,7 @@ import { createSurfaceMap } from './textures/wear';
 
 // Every printed and paper surface of one book, disposed when it changes
 export function useBookTextures(
-  book: Book,
+  book: DemoBook,
   image: HTMLImageElement | null,
   size: BookDimensions,
 ) {

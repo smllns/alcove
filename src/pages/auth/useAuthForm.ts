@@ -6,7 +6,8 @@ import type { AuthMode } from './authCopy';
 
 // One form for both modes, so the email you typed survives switching between
 // log in and sign up. On success, goes back to the page that sent the reader
-// here, or to the library.
+// here; otherwise a new reader is welcomed in, and a returning one goes to
+// their library.
 export function useAuthForm(mode: AuthMode) {
   const { login, register } = useAuth();
   const navigate = useTransitionNavigate();
@@ -21,7 +22,11 @@ export function useAuthForm(mode: AuthMode) {
         await register(values);
       }
       const from = (location.state as { from?: string } | null)?.from;
-      navigate(from ?? '/library', 'forward', { replace: true });
+      navigate(
+        from ?? (mode === 'register' ? '/welcome' : '/library'),
+        'forward',
+        { replace: true },
+      );
     },
     // Old complaints don't carry over to the other form
     { resetErrorsOn: mode },

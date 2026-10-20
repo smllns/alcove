@@ -1,6 +1,6 @@
 import { useState, type RefObject } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
-import type { ShowcaseBook } from '@/entities/book/types';
+import type { ShowcaseBook } from '@/entities/book/demo';
 import { BookModel } from './BookModel';
 import { bookDimensions } from './geometry';
 import { entrancePose, restPose, useBookMotion } from './useBookMotion';

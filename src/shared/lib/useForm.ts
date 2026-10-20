@@ -18,9 +18,9 @@ export function useForm<Values extends Record<string, string>>(
   { clearOnSuccess = [], resetErrorsOn }: FormOptions<Values> = {},
 ) {
   const [values, setValues] = useState(initial);
-  const [fieldErrors, setFieldErrors] = useState<
-    Partial<Record<keyof Values, string>>
-  >({});
+  // Keyed by field name; may also hold keys for things outside `values`
+  // (e.g. `links.0` for an item in a list the form keeps elsewhere)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>('idle');
   const savedTimer = useRef<number | undefined>(undefined);
@@ -35,6 +35,27 @@ export function useForm<Values extends Record<string, string>>(
 
   useEffect(() => () => window.clearTimeout(savedTimer.current), []);
 
+  const clearError = (key: string) =>
+    setFieldErrors((errors) => {
+      if (!(key in errors)) return errors;
+      const rest = { ...errors };
+      delete rest[key];
+      return rest;
+    });
+
+  // Errors about a whole list, e.g. after an item is removed and the rest
+  // move up a place, so their errors no longer line up
+  const clearErrorsUnder = (prefix: string) =>
+    setFieldErrors((errors) =>
+      Object.fromEntries(
+        Object.entries(errors).filter(([key]) => !key.startsWith(prefix)),
+      ),
+    );
+
+  // For fields that aren't typed into, like a row of choices
+  const setValue = <K extends keyof Values>(name: K, value: Values[K]) =>
+    setValues((v) => ({ ...v, [name]: value }));
+
   // Props for one input: value, onChange, and its error cleared as you type
   const field = (name: keyof Values & string) => ({
     name,
@@ -42,7 +63,7 @@ export function useForm<Values extends Record<string, string>>(
     error: fieldErrors[name],
     onChange: (e: { target: { value: string } }) => {
       setValues((v) => ({ ...v, [name]: e.target.value }));
-      setFieldErrors((errors) => ({ ...errors, [name]: undefined }));
+      clearError(name);
       setStatus((s) => (s === 'saved' ? 'idle' : s));
     },
   });
@@ -67,7 +88,7 @@ export function useForm<Values extends Record<string, string>>(
     } catch (err) {
       const error = err instanceof ApiError ? err : null;
       const fields = error?.fields ?? {};
-      setFieldErrors(fields as Partial<Record<keyof Values, string>>);
+      setFieldErrors(fields);
       // Field problems speak for themselves; anything else gets its own line
       if (!Object.keys(fields).length)
         setFormError(error?.message ?? 'Something went wrong.');
@@ -76,5 +97,17 @@ export function useForm<Values extends Record<string, string>>(
     }
   };
 
-  return { values, setValues, field, onSubmit, formError, status };
+  return {
+    values,
+    setValues,
+    setValue,
+    field,
+    errors: fieldErrors,
+    setErrors: setFieldErrors,
+    clearError,
+    clearErrorsUnder,
+    onSubmit,
+    formError,
+    status,
+  };
 }

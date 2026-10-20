@@ -26,13 +26,15 @@ src/
     landing/        Start page: hero, footer, intro animation
       preloader/      Wordmark that fills with covers, then lifts away
     auth/           Log in and sign up
-    library/        The reader's library (placeholder for now)
+    library/        The reader's books as a grid of covers
+    add-book/       Search the catalogue, pick an edition and cover, add
     settings/       Account settings
   features/       Self-contained pieces of UI that more than one page could use
     auth/           Who's signed in, route guards
     book-scene/     3D floating books: model, motion, lighting, canvas textures
   entities/       Domain types and data access
-    book/           Book types, cover image cache, demo books
+    book/           Library books: types, API, query hooks, <BookCover>;
+                    plus the landing page's demo books
     user/           User type and auth API calls
   shared/         No knowledge of books or pages
     api/            fetch wrapper and ApiError
@@ -55,11 +57,27 @@ one serverless function, `api/index.ts`, which wraps the same Express app as
 the connection while warm.
 
 Project settings: framework preset **Vite**, defaults for everything else.
+The function runs in São Paulo (`regions: ["gru1"]` in `vercel.json`), next
+to the Atlas cluster (`sa-east-1`); keep the two together if either moves.
 Environment variables: `MONGODB_URI` and `MONGODB_DB`. In MongoDB Atlas,
 Network Access must allow `0.0.0.0/0`, since Vercel doesn't have fixed IPs.
 
 Server code imports with `.js` extensions (`./app.js` for `app.ts`), the
 standard for Node ESM, so it runs unchanged under tsx, plain Node and Vercel.
+
+## Books and covers
+
+Book details come from [Open Library](https://openlibrary.org): search finds
+works, then the reader picks an edition (English, with a cover and ISBN, comes
+first). Answers are cached in the `lookupCache` collection for days.
+
+Photos people upload go to **Vercel Blob**. In Vercel: Storage → Create → Blob,
+connect it to the project; that adds `BLOB_READ_WRITE_TOKEN`. Copy the same
+token into `server/.env` for local uploads. Without it the upload button is
+simply hidden. Photos are shrunk in the browser before they're sent.
+
+Data on the client goes through TanStack Query (`entities/book/queries.ts`), so
+pages show cached data instantly and refresh in the background.
 
 ## Server
 
@@ -71,22 +89,33 @@ server/src/
   db.ts           Mongo client, collection types, indexes
   auth/           Register, log in, log out, current user; sessions
   account/        Change name, email, password; delete the account
+  books/          A reader's books: list (paged), add, read, delete
+  lookup/         Open Library search and editions, cached in Mongo
+  uploads/        Cover photos in Vercel Blob
   lib/            Password hashing, error responses
 ```
 
 API, all under `/api`:
 
-| Method | Path                | Body                               | Returns                        |
-| ------ | ------------------- | ---------------------------------- | ------------------------------ |
-| GET    | `/health`           |                                    | `{ ok }` if Mongo is up        |
-| POST   | `/auth/register`    | `{ name, email, password }`        | `{ user }` + cookie            |
-| POST   | `/auth/login`       | `{ email, password }`              | `{ user }` + cookie            |
-| POST   | `/auth/logout`      |                                    | 204, cookie cleared            |
-| GET    | `/auth/me`          |                                    | `{ user }` or 401              |
-| PATCH  | `/account/name`     | `{ name }`                         | `{ user }`                     |
-| PATCH  | `/account/email`    | `{ email, password }`              | `{ user }`                     |
-| PATCH  | `/account/password` | `{ currentPassword, newPassword }` | 204; other devices signed out  |
-| DELETE | `/account`          | `{ password }`                     | 204, account and sessions gone |
+| Method | Path                          | Body                               | Returns                                   |
+| ------ | ----------------------------- | ---------------------------------- | ----------------------------------------- |
+| GET    | `/health`                     |                                    | `{ ok }` if Mongo is up                   |
+| POST   | `/auth/register`              | `{ name, email, password }`        | `{ user }` + cookie                       |
+| POST   | `/auth/login`                 | `{ email, password }`              | `{ user }` + cookie                       |
+| POST   | `/auth/logout`                |                                    | 204, cookie cleared                       |
+| GET    | `/auth/me`                    |                                    | `{ user }` or 401                         |
+| PATCH  | `/account/name`               | `{ name }`                         | `{ user }`                                |
+| PATCH  | `/account/email`              | `{ email, password }`              | `{ user }`                                |
+| PATCH  | `/account/password`           | `{ currentPassword, newPassword }` | 204; other devices signed out             |
+| GET    | `/books?after=`               |                                    | `{ books, nextCursor, total }`, 48 a page |
+| POST   | `/books`                      | title, authors, isbn, cover…       | `{ book }`                                |
+| GET    | `/books/:id`                  |                                    | `{ book }`                                |
+| DELETE | `/books/:id`                  |                                    | 204                                       |
+| GET    | `/lookup/search?q=`           | title, author or ISBN              | `{ results, isbnEdition }`                |
+| GET    | `/lookup/works/:key/editions` |                                    | `{ editions }`, best first                |
+| GET    | `/uploads/status`             |                                    | `{ enabled }`                             |
+| POST   | `/uploads/cover`              | `{ image }` (data URL)             | `{ url }`                                 |
+| DELETE | `/account`                    | `{ password }`                     | 204, account and sessions gone            |
 
 Errors look like `{ error: { code, message, fields? } }`; `fields` maps form
 fields to messages.

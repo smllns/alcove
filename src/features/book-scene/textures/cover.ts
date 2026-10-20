@@ -1,4 +1,4 @@
-import type { Book } from '@/entities/book/types';
+import type { DemoBook } from '@/entities/book/demo';
 import {
   COVER_W,
   SANS,
@@ -32,7 +32,7 @@ function drawCover(
 
 function drawTypographicCover(
   ctx: CanvasRenderingContext2D,
-  book: Book,
+  book: DemoBook,
   w: number,
   h: number,
 ) {
@@ -57,7 +57,7 @@ function drawTypographicCover(
 }
 
 export function createFrontCover(
-  book: Book,
+  book: DemoBook,
   image: HTMLImageElement | null,
   rand: Rand,
   { paperback }: BindingOptions,
@@ -119,7 +119,7 @@ function drawBarcode(
 }
 
 export function createBackCover(
-  book: Book,
+  book: DemoBook,
   image: HTMLImageElement | null,
   rand: Rand,
   { paperback }: BindingOptions,

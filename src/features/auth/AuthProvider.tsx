@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import * as userApi from '@/entities/user/api';
 import type { User } from '@/entities/user/types';
 import { AuthContext, type AuthState } from './AuthContext';
@@ -15,6 +16,7 @@ const guest: AuthState = { status: 'guest', user: null };
 // Knows who's signed in. Asks the server once on load; login, register and
 // logout keep it up to date after that.
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,
@@ -44,13 +46,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user;
   }, []);
 
+  // Signing out drops every cached answer, so the next person on this
+  // browser never glimpses someone else's shelves
   const logout = useCallback(async () => {
     await userApi.logout();
+    queryClient.clear();
     setState(guest);
-  }, []);
+  }, [queryClient]);
 
   const replaceUser = useCallback((user: User) => setState(signedIn(user)), []);
-  const forgetUser = useCallback(() => setState(guest), []);
+  const forgetUser = useCallback(() => {
+    queryClient.clear();
+    setState(guest);
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({ ...state, login, register, logout, replaceUser, forgetUser }),

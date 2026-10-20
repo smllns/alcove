@@ -6,9 +6,13 @@ import helmet from 'helmet';
 import { accountRouter } from './account/routes.js';
 import { loadUser, requireUser } from './auth/middleware.js';
 import { authRouter } from './auth/routes.js';
+import { booksRouter } from './books/routes.js';
 import { config } from './config.js';
 import { pingDb } from './db.js';
 import { errorHandler, HttpError, notFound } from './lib/errors.js';
+import { lookupRouter } from './lookup/routes.js';
+import { placesRouter } from './places/routes.js';
+import { uploadsRouter } from './uploads/routes.js';
 
 // Writes must be JSON. Browsers can't send cross-site JSON without a CORS
 // preflight (which we never allow), so this doubles as CSRF protection
@@ -36,18 +40,23 @@ export function createApp() {
   if (config.isProduction) app.set('trust proxy', 1);
 
   const api = express.Router();
-  api.use(
-    express.json({ limit: '100kb' }),
-    cookieParser(),
-    requireJson,
-    loadUser,
+  // Small bodies everywhere, except cover photos (already shrunk in the browser)
+  const smallJson = express.json({ limit: '100kb' });
+  const photoJson = express.json({ limit: '3mb' });
+  api.use((req, res, next) =>
+    (req.path.startsWith('/uploads/') ? photoJson : smallJson)(req, res, next),
   );
+  api.use(cookieParser(), requireJson, loadUser);
   api.get('/health', async (_req, res) => {
     await pingDb();
     res.json({ ok: true });
   });
   api.use('/auth', authRouter);
   api.use('/account', requireUser, accountRouter);
+  api.use('/books', requireUser, booksRouter);
+  api.use('/lookup', requireUser, lookupRouter);
+  api.use('/places', requireUser, placesRouter);
+  api.use('/uploads', requireUser, uploadsRouter);
   api.use(notFound);
 
   app.use('/api', helmet(), api);

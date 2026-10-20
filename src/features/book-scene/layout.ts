@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { ShowcaseBook } from '@/entities/book/types';
+import type { ShowcaseBook } from '@/entities/book/demo';
 
 type Viewport = { width: number; height: number; aspect: number };
 

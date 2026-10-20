@@ -17,8 +17,91 @@ export type SessionDoc = {
   expiresAt: Date;
 };
 
+export type CoverSource = 'openlibrary' | 'upload';
+
+// Where a reader keeps books, named however they like: homes, the rooms in
+// them, the bookcases (or chests, or boxes) in those, and their shelves.
+// Only the home is required of a book's place; the rest narrows it down.
+export type ShelfNode = { id: string; name: string };
+export type UnitNode = { id: string; name: string; shelves: ShelfNode[] };
+export type RoomNode = { id: string; name: string; units: UnitNode[] };
+export type HomeNode = { id: string; name: string; rooms: RoomNode[] };
+
+// One per reader, keyed by their id
+export type PlacesDoc = {
+  _id: ObjectId;
+  homes: HomeNode[];
+  updatedAt: Date;
+};
+
+// A spot in that tree
+export type PlaceRef = {
+  home: string;
+  room?: string;
+  unit?: string;
+  shelf?: string;
+};
+
+// On the reader's shelf, lent to someone, or someone else's book on loan
+export type CopyStatus = 'shelf' | 'lent' | 'borrowed';
+export type CopyCondition = 'new' | 'good' | 'worn' | 'battered';
+export type ReadingState = 'read' | 'reading' | 'unread';
+
+// The reader's own copy: where it is, who has it, what they make of it.
+// Dates are calendar days (YYYY-MM-DD), not moments.
+export type CopyDetails = {
+  place?: PlaceRef;
+  // Free text from before places existed
+  location?: string;
+  status: CopyStatus;
+  // Whether the reader has read it yet
+  reading?: ReadingState;
+  // Who it's lent to, or borrowed from
+  person?: string;
+  since?: string;
+  due?: string;
+  condition?: CopyCondition;
+  // What the reader thought of it, in one piece
+  review?: string;
+  // Things worth saying about it, one at a time
+  notes?: string[];
+  quotes?: string[];
+  // e.g. { label: 'Spotify playlist', url: 'https://open.spotify.com/…' }
+  links?: { label?: string; url: string }[];
+};
+
+// One physical copy on someone's shelves
+export type BookDoc = {
+  _id: ObjectId;
+  userId: ObjectId;
+  title: string;
+  subtitle?: string;
+  authors: string[];
+  isbn?: string;
+  publisher?: string;
+  publishedYear?: number;
+  pages?: number;
+  language?: string;
+  genres?: string[];
+  cover?: { url: string; source: CoverSource };
+  // Where the details came from, for refreshing them later
+  openLibrary?: { work?: string; edition?: string };
+  copy?: CopyDetails;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// Answers from Open Library, kept for a while so repeat searches are instant
+export type LookupCacheDoc = {
+  _id: string;
+  value: unknown;
+  expiresAt: Date;
+};
+
 const client = new MongoClient(config.MONGODB_URI, {
   serverSelectionTimeoutMS: 10_000,
+  // An optional field left empty is simply absent, not stored as null
+  ignoreUndefined: true,
 });
 
 let db: Db | null = null;
@@ -39,6 +122,10 @@ function database() {
 
 export const users = () => database().collection<UserDoc>('users');
 export const sessions = () => database().collection<SessionDoc>('sessions');
+export const books = () => database().collection<BookDoc>('books');
+export const places = () => database().collection<PlacesDoc>('places');
+export const lookupCache = () =>
+  database().collection<LookupCacheDoc>('lookupCache');
 
 export async function pingDb() {
   await database().command({ ping: 1 });
@@ -55,4 +142,9 @@ async function ensureIndexes(db: Db) {
       { key: { expiresAt: 1 }, expireAfterSeconds: 0 },
       { key: { userId: 1 } },
     ]);
+  // A reader's shelf, newest first; the sort key doubles as the page cursor
+  await db.collection<BookDoc>('books').createIndex({ userId: 1, _id: -1 });
+  await db
+    .collection<LookupCacheDoc>('lookupCache')
+    .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 }

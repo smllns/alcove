@@ -1,10 +1,10 @@
 import { SANS, SERIF, makeCanvas, toTexture, type Rand } from './canvas';
 import type { BindingOptions } from './cover';
 import { weather } from './wear';
-import type { Book } from '@/entities/book/types';
+import type { DemoBook } from '@/entities/book/demo';
 
 export function createSpineTexture(
-  book: Book,
+  book: DemoBook,
   aspect: number,
   rand: Rand,
   { paperback }: BindingOptions,

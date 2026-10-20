@@ -1,12 +1,19 @@
 import { cn } from '@/shared/lib/cn';
 import { TransitionLink } from './TransitionLink';
 
-export function Logo({ className }: { className?: string }) {
+// Leads home: the start page for guests, the library once signed in
+export function Logo({
+  className,
+  to = '/',
+}: {
+  className?: string;
+  to?: string;
+}) {
   return (
     <TransitionLink
-      to='/'
+      to={to}
       transition='back'
-      aria-label='Alcove home'
+      aria-label={to === '/' ? 'Alcove home' : 'All books'}
       className={cn(
         'text-glow font-serif text-xl tracking-[-0.04em] sm:text-2xl',
         className,

@@ -1,13 +1,54 @@
+import type { ReactNode } from 'react';
+import type { User } from '@/entities/user/types';
 import { useAuth } from '@/features/auth';
-import { BackLink } from '@/shared/ui/BackLink';
-import { ButtonLink } from '@/shared/ui/ButtonLink';
+import { InnerPage } from '@/shared/ui/InnerPage';
 import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
-import { SiteHeader } from '@/shared/ui/SiteHeader';
 import { DeleteAccount } from './DeleteAccount';
 import { EmailForm } from './EmailForm';
+import { LogoutButton } from './LogoutButton';
 import { NameForm } from './NameForm';
 import { PasswordForm } from './PasswordForm';
+import { PlacesSettings } from './PlacesSettings';
 import { SettingsSection } from './SettingsSection';
+
+type Section = {
+  title: string;
+  description: string;
+  tone?: 'danger';
+  form: (user: User) => ReactNode;
+};
+
+// Top to bottom, from what changes most often to what can't be undone
+const sections: Section[] = [
+  {
+    title: 'Profile',
+    description: 'The name alcove greets you by.',
+    form: (user) => <NameForm user={user} />,
+  },
+  {
+    title: 'Places',
+    description:
+      'Your homes, their rooms, bookcases and shelves. Every book can be put in one of them.',
+    form: () => <PlacesSettings />,
+  },
+  {
+    title: 'Email',
+    description: 'Where you log in. We’ll ask for your password to change it.',
+    form: (user) => <EmailForm user={user} />,
+  },
+  {
+    title: 'Password',
+    description: 'Changing it signs you out everywhere else.',
+    form: () => <PasswordForm />,
+  },
+  {
+    title: 'Delete account',
+    description:
+      'Removes your account and your whole library. This can’t be undone.',
+    tone: 'danger',
+    form: () => <DeleteAccount />,
+  },
+];
 
 export function SettingsPage() {
   const { user } = useAuth();
@@ -15,56 +56,33 @@ export function SettingsPage() {
   if (!user) return null;
 
   return (
-    <main className='bg-paper min-h-screen text-ink'>
-      <SiteHeader>
-        <ButtonLink to='/library' variant='pill'>
-          Your library
-        </ButtonLink>
-      </SiteHeader>
-
-      <div className='mx-auto w-full max-w-3xl px-6 pb-24 pt-4 sm:px-10 sm:pt-10'>
-        <BackLink to='/library' />
-        <Eyebrow rise={0}>Settings</Eyebrow>
-        <PageTitle rise={80} className='mt-3 sm:mt-4'>
-          Your account
-        </PageTitle>
-        <Lead rise={160} className='mt-4 mb-10 sm:mt-5 sm:mb-14'>
+    <InnerPage>
+      <Eyebrow rise={0}>Settings</Eyebrow>
+      <PageTitle rise={80} className='mt-3 sm:mt-4'>
+        Your account
+      </PageTitle>
+      <div
+        className='mt-4 mb-10 flex animate-rise flex-wrap items-center gap-x-5 gap-y-3 sm:mt-5 sm:mb-14'
+        style={{ animationDelay: '160ms' }}
+      >
+        <Lead>
           Signed in as <span className='text-ink'>{user.email}</span>
         </Lead>
-
-        <SettingsSection
-          title='Profile'
-          description='The name alcove greets you by.'
-          delay={240}
-        >
-          <NameForm user={user} />
-        </SettingsSection>
-
-        <SettingsSection
-          title='Email'
-          description='Where you log in. We’ll ask for your password to change it.'
-          delay={320}
-        >
-          <EmailForm user={user} />
-        </SettingsSection>
-
-        <SettingsSection
-          title='Password'
-          description='Changing it signs you out everywhere else.'
-          delay={400}
-        >
-          <PasswordForm />
-        </SettingsSection>
-
-        <SettingsSection
-          title='Delete account'
-          description='Removes your account and your whole library. This can’t be undone.'
-          tone='danger'
-          delay={480}
-        >
-          <DeleteAccount />
-        </SettingsSection>
+        <LogoutButton />
       </div>
-    </main>
+
+      {sections.map((section, i) => (
+        <SettingsSection
+          key={section.title}
+          title={section.title}
+          description={section.description}
+          tone={section.tone}
+          // Each one rises in a beat after the one above
+          delay={240 + i * 80}
+        >
+          {section.form(user)}
+        </SettingsSection>
+      ))}
+    </InnerPage>
   );
 }

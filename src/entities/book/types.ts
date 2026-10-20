@@ -1,36 +1,84 @@
-export type Binding = 'hardcover' | 'paperback';
+import type { PlaceRef } from '@/entities/place/types';
 
-// A copy of a book on someone's shelf
+// A physical copy on the reader's shelves. Mirrors toPublicBook on the server.
 export type Book = {
+  id: string;
   title: string;
-  author: string;
-  cover: string;
-  isbn: string;
-  genre: string;
-  blurb: string;
-  price: string;
-  binding: Binding;
-  // Cover colours, used for the spine, the back and the fallback cover
-  color: string;
-  ink: string;
-  type: 'sans' | 'serif';
-  // 0 is fresh from the shop, 1 is read to pieces
-  wear: number;
+  subtitle?: string;
+  authors: string[];
+  isbn?: string;
+  publisher?: string;
+  publishedYear?: number;
+  pages?: number;
+  language?: string;
+  genres?: string[];
+  cover?: BookCover;
+  openLibrary?: { work?: string; edition?: string };
+  copy?: CopyDetails;
+  createdAt: string;
+  updatedAt: string;
 };
 
-type Vec3 = [number, number, number];
-
-// Where a book hangs in a 3D scene
-export type SceneSlot = {
-  position: Vec3;
-  // On phones, as a fraction of the half-viewport. Books without one are
-  // left out of the narrow layout to keep the text clear.
-  mobile?: Vec3;
-  rotation: Vec3;
-  width: number;
-  thickness: number;
-  // Entrance order, in seconds
-  delay: number;
+export type BookCover = {
+  url: string;
+  // From the catalogue, or a photo the reader took
+  source: 'openlibrary' | 'upload';
 };
 
-export type ShowcaseBook = Book & SceneSlot;
+// On the reader's shelf, lent to someone, or someone else's book on loan
+export type CopyStatus = 'shelf' | 'lent' | 'borrowed';
+export type CopyCondition = 'new' | 'good' | 'worn' | 'battered';
+export type ReadingState = 'read' | 'reading' | 'unread';
+
+// The reader's own copy. Mirrors CopyDetails on the server; dates are
+// calendar days, YYYY-MM-DD.
+export type CopyDetails = {
+  place?: PlaceRef;
+  // Free text from before places existed
+  location?: string;
+  status: CopyStatus;
+  // Whether the reader has read it yet
+  reading?: ReadingState;
+  // Who it's lent to, or borrowed from
+  person?: string;
+  since?: string;
+  due?: string;
+  condition?: CopyCondition;
+  // What the reader thought of it, in one piece
+  review?: string;
+  // Things worth saying about it, one at a time
+  notes?: string[];
+  quotes?: string[];
+  // e.g. { label: 'Spotify playlist', url: 'https://open.spotify.com/…' }
+  links?: { label?: string; url: string }[];
+};
+
+// What's sent to create a book
+export type BookInput = Omit<Book, 'id' | 'createdAt' | 'updatedAt'> & {
+  // Add it even though the same book is already on the shelves
+  anotherCopy?: boolean;
+};
+
+// From the catalogue: a book in general, across all its editions
+export type CatalogueWork = {
+  workKey: string;
+  title: string;
+  subtitle?: string;
+  authors: string[];
+  firstPublishYear?: number;
+  coverUrl?: string;
+  editionCount: number;
+};
+
+// From the catalogue: one specific printing
+export type CatalogueEdition = {
+  editionKey: string;
+  title: string;
+  subtitle?: string;
+  isbn?: string;
+  publisher?: string;
+  publishedYear?: number;
+  pages?: number;
+  language?: string;
+  coverUrl?: string;
+};

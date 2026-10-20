@@ -1,4 +1,4 @@
-import type { ShowcaseBook } from '@/entities/book/types';
+import type { ShowcaseBook } from '@/entities/book/demo';
 
 // Demo books for marketing pages: the ten floating around the landing page,
 // and where each one hangs.

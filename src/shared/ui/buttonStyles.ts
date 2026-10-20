@@ -27,3 +27,12 @@ export const iconButtonClass = (className?: string) =>
     'group grid size-9 cursor-pointer place-items-center rounded-full border border-line bg-surface/85 backdrop-blur-sm transition-colors duration-500 ease-soft hover:border-ink sm:size-10',
     className,
   );
+
+// One pill, chosen or not; for <Choices> and pill toggles built elsewhere
+export const choiceClass = (chosen: boolean) =>
+  cn(
+    'cursor-pointer rounded-full border px-4 py-2 text-sm transition-colors duration-500 ease-soft',
+    chosen
+      ? 'border-button bg-button text-button-text'
+      : 'border-line bg-surface/70 text-ink-soft hover:border-ink hover:text-ink',
+  );

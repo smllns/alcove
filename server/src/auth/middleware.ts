@@ -1,4 +1,4 @@
-import type { RequestHandler } from 'express';
+import type { Request, RequestHandler } from 'express';
 import { HttpError } from '../lib/errors.js';
 import { readSession, SESSION_COOKIE } from './sessions.js';
 import { findUserById } from './users.js';
@@ -27,6 +27,9 @@ export const loadUser: RequestHandler = async (req, res, next) => {
   }
   next();
 };
+
+// The signed-in user, in a route mounted behind requireUser
+export const currentUser = (req: Request) => req.user as UserDoc;
 
 export const requireUser: RequestHandler = (req, _res, next) => {
   if (!req.user)

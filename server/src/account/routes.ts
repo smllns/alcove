@@ -1,11 +1,15 @@
-import { Router, type Request } from 'express';
+import { Router } from 'express';
+import { currentUser } from '../auth/middleware.js';
 import { endAllSessions, endOtherSessions } from '../auth/sessions.js';
 import { deleteUser, toPublicUser, updateUser } from '../auth/users.js';
+import { deleteAllBooks } from '../books/repository.js';
 import type { UserDoc } from '../db.js';
 import { HttpError } from '../lib/errors.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
 import { passwordAttempts } from '../lib/rateLimit.js';
 import { parseBody } from '../lib/validation.js';
+import { deletePlaces } from '../places/repository.js';
+import { deleteAllCovers } from '../uploads/storage.js';
 import {
   deleteSchema,
   emailSchema,
@@ -16,8 +20,6 @@ import {
 // Everything a signed-in reader can change about their own account.
 // Mounted behind requireUser, so req.user is always set.
 export const accountRouter = Router();
-
-const currentUser = (req: Request) => req.user as UserDoc;
 
 // Sensitive changes need the password again, even with a valid session
 async function confirmPassword(user: UserDoc, password: string, field: string) {
@@ -62,6 +64,12 @@ accountRouter.delete('/', passwordAttempts, async (req, res) => {
   const me = currentUser(req);
   await confirmPassword(me, password, 'password');
   await endAllSessions(res, me._id);
+  // Their books and photos go with them
+  await Promise.all([
+    deleteAllBooks(me._id),
+    deletePlaces(me._id),
+    deleteAllCovers(me._id).catch(() => {}),
+  ]);
   await deleteUser(me._id);
   res.status(204).end();
 });

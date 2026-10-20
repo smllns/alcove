@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Sparkles } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { ShowcaseBook } from '@/entities/book/types';
+import type { ShowcaseBook } from '@/entities/book/demo';
 import { prefersReducedMotion } from '@/shared/lib/motion';
 import type { Theme } from '@/shared/theme';
 import { FloatingBook } from './FloatingBook';

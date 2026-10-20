@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from './useAuth';
 
@@ -14,10 +15,15 @@ export function RequireAuth() {
   return <Outlet />;
 }
 
-// Guests only; someone already signed in goes straight to their library
+// Guests only; someone already signed in goes straight to their library.
+// A guest who signs in here is left to the form, which knows where they're
+// headed (a new reader to the welcome page, not the library).
 export function GuestOnly() {
   const { status } = useAuth();
+  const [wasGuest, setWasGuest] = useState(false);
+  if (status === 'guest' && !wasGuest) setWasGuest(true);
   if (status === 'loading') return null;
-  if (status === 'signed-in') return <Navigate to='/library' replace />;
+  if (status === 'signed-in' && !wasGuest)
+    return <Navigate to='/library' replace />;
   return <Outlet />;
 }

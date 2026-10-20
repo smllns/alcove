@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { HttpError } from './errors.js';
 
 // Turns a failed zod parse into a 400 with the first problem per field
@@ -25,3 +25,17 @@ export function parseBody<T extends z.ZodType>(
   if (!parsed.success) throw validationError(parsed.error);
   return parsed.data;
 }
+
+// Left out, sent empty, or sent as null (the catalogue's way of saying
+// "none"): all mean the same thing, nothing
+export const maybe = <T extends z.ZodType>(schema: T) =>
+  z.preprocess(
+    (value) => (value === null || value === '' ? undefined : value),
+    schema.optional(),
+  );
+
+// Text that may be left out; empty counts as left out
+export const optionalText = (max: number) =>
+  maybe(
+    z.string().trim().max(max, `Keep it under ${max} characters.`),
+  ).transform((value) => value || undefined);
