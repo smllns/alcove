@@ -5,7 +5,7 @@ import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { Button } from '@/shared/ui/Button';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { SiteHeader } from '@/shared/ui/SiteHeader';
-import { Spinner } from '@/shared/ui/Spinner';
+import { Loading } from '@/shared/ui/Loading';
 
 const steps = [
   {
@@ -83,9 +83,7 @@ export function WelcomePage() {
             style={{ animationDelay: '320ms' }}
           >
             {places.isPending ? (
-              <div className='flex justify-center py-10 text-muted'>
-                <Spinner />
-              </div>
+              <Loading />
             ) : (
               <PlacesEditor
                 homes={places.data?.homes ?? []}

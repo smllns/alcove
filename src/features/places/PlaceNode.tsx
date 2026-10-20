@@ -4,6 +4,7 @@ import { labelClass } from '@/shared/ui/fieldStyles';
 import { AddButton, RemoveButton } from '@/shared/ui/ListControls';
 import { errorKey, levels, type EditNode } from './tree';
 import type { PlaceOps } from './usePlacesDraft';
+import { FormError } from '@/shared/ui/FormError';
 
 // The level's name, in a column of its own so the names line up
 const levelClass = cn('w-[4.5rem] shrink-0', labelClass);
@@ -119,7 +120,7 @@ function NameRow({
           label={`Remove ${label.toLowerCase()}`}
         />
       </div>
-      {error && <p className='mt-1 pl-21 text-xs text-danger'>{error}</p>}
+      <FormError message={error} small className='mt-1 pl-21' />
     </div>
   );
 }

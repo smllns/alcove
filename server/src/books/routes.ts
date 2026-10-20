@@ -47,9 +47,11 @@ const alreadyShelved = (book: { title: string; createdAt: Date }) => {
 booksRouter.get('/', async (req, res) => {
   const limit = Math.min(Math.max(Number(req.query.limit) || 48, 1), 100);
   const after = req.query.after ? objectId(req.query.after) : undefined;
+  const search =
+    typeof req.query.q === 'string' ? req.query.q.slice(0, 100) : undefined;
   const [page, total] = await Promise.all([
-    listBooks(me(req), { limit, after }),
-    countBooks(me(req)),
+    listBooks(me(req), { limit, after, search }),
+    countBooks(me(req), search),
   ]);
   res.json({
     books: page.items.map(toPublicBook),

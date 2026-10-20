@@ -3,7 +3,12 @@ import type {
   CatalogueEdition,
   CatalogueWork,
 } from '@/entities/book/types';
-import { emptyFields, type DraftExtras, type DraftFields } from './draft';
+import {
+  emptyFields,
+  withLanguage,
+  type DraftExtras,
+  type DraftFields,
+} from './draft';
 
 // Turning what the catalogue knows into a draft of the form
 
@@ -12,8 +17,10 @@ const text = (value: string | number | null | undefined) =>
   value === undefined || value === null ? '' : String(value);
 
 // The fields that belong to one printing, for switching editions. With
-// none chosen they empty, all but the year, which the work still knows.
-export const editionFields = (
+// none chosen they empty, all but the year, which the work still knows,
+// and the language, which the reader may have set themselves.
+// An edition that doesn't say its language leaves the one chosen.
+const editionFields = (
   edition: CatalogueEdition | null,
 ): Partial<DraftFields> =>
   edition
@@ -22,8 +29,21 @@ export const editionFields = (
         publisher: text(edition.publisher),
         publishedYear: text(edition.publishedYear),
         pages: text(edition.pages),
+        format: edition.format ?? '',
+        ...(edition.language && { language: edition.language }),
       }
-    : { isbn: '', publisher: '', pages: '' };
+    : { isbn: '', publisher: '', pages: '', format: '' };
+
+// The draft with a different edition chosen (or none): its printing's
+// details, and its language carrying the original along
+export function withEdition(
+  fields: DraftFields,
+  edition: CatalogueEdition | null,
+): DraftFields {
+  const { language, ...rest } = editionFields(edition);
+  const next = { ...fields, ...rest };
+  return language ? withLanguage(next, language) : next;
+}
 
 export const catalogueCover = (
   url: string | undefined,
@@ -38,13 +58,11 @@ export function extrasForEdition(
   if (!edition) {
     return {
       ...extras,
-      language: undefined,
       openLibrary: { ...extras.openLibrary, edition: undefined },
     };
   }
   return {
     ...extras,
-    language: edition.language,
     openLibrary: { ...extras.openLibrary, edition: edition.editionKey },
     // A photo the reader uploaded stays; otherwise follow the edition
     cover:
@@ -74,17 +92,18 @@ export function draftFromCatalogue(
   work: CatalogueWork,
   edition?: CatalogueEdition,
 ) {
-  const fields: DraftFields = {
-    ...emptyFields,
-    title: work.title,
-    subtitle: text(work.subtitle),
-    authors: work.authors.join(', '),
-    publishedYear: text(work.firstPublishYear),
-    ...(edition && editionFields(edition)),
-  };
+  const fields = withEdition(
+    {
+      ...emptyFields,
+      title: work.title,
+      subtitle: text(work.subtitle),
+      authors: work.authors.join(', '),
+      publishedYear: text(work.firstPublishYear),
+    },
+    edition ?? null,
+  );
   const extras: DraftExtras = {
     cover: catalogueCover(edition?.coverUrl ?? work.coverUrl),
-    language: edition?.language,
     openLibrary: { work: work.workKey, edition: edition?.editionKey },
   };
   return { fields, extras };

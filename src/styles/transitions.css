@@ -45,3 +45,18 @@
     animation: none !important;
   }
 }
+
+/* shelf: the books on a page rearranging. Each card carries its own
+   --shelf-name, so it moves from its old place to its new one rather than
+   the page cross-fading as a whole. */
+:root[data-transition='shelf'] .shelf-item {
+  view-transition-name: var(--shelf-name);
+}
+:root[data-transition='shelf']::view-transition-group(*) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-transition='shelf']::view-transition-old(*),
+:root[data-transition='shelf']::view-transition-new(*) {
+  animation-duration: 0.45s;
+}

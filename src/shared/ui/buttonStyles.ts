@@ -36,3 +36,12 @@ export const choiceClass = (chosen: boolean) =>
       ? 'border-button bg-button text-button-text'
       : 'border-line bg-surface/70 text-ink-soft hover:border-ink hover:text-ink',
   );
+
+// A quiet round button that only shows a soft pill on hover, or when it's
+// the one chosen: the tabs, the view and zoom choices, a calendar's arrows
+export const softClass = (on = false, className?: string) =>
+  cn(
+    'cursor-pointer rounded-full transition-colors duration-500 ease-soft',
+    on ? 'bg-ink/7 text-ink' : 'text-muted hover:bg-ink/5 hover:text-ink',
+    className,
+  );

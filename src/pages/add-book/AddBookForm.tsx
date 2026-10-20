@@ -11,15 +11,15 @@ import { Notice } from '@/shared/ui/Notice';
 import { BookStep } from './BookStep';
 import { CopyStep } from './CopyStep';
 import { CoverPicker } from './CoverPicker';
-import { coverChoices, editionFields, extrasForEdition } from './catalogue';
+import { coverChoices, extrasForEdition, withEdition } from './catalogue';
 import {
   bookFieldNames,
   emptyFields,
-  toBookInput,
   type DraftExtras,
   type DraftFields,
 } from './draft';
 import { emptyLists, tidyLists, type DraftLists } from './entries';
+import { toBookInput } from './toBookInput';
 
 export type DraftForm = ReturnType<typeof useForm<DraftFields>>;
 
@@ -102,7 +102,7 @@ export function AddBookForm({
   };
 
   const chooseEdition = (edition: CatalogueEdition | null) => {
-    form.setValues((v) => ({ ...v, ...editionFields(edition) }));
+    form.setValues((v) => withEdition(v, edition));
     setExtras((x) => extrasForEdition(x, edition));
   };
 
@@ -146,6 +146,7 @@ export function AddBookForm({
         cover={extras.cover}
         options={coverChoices(initialExtras.cover, editions)}
         onChange={(cover) => setExtras((x) => ({ ...x, cover }))}
+        choosing={step === 'book'}
       />
 
       <div className='min-w-0'>

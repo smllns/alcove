@@ -18,15 +18,20 @@ import {
 
 export const bookKeys = {
   all: ['books'] as const,
+  // Every list of the reader's books: all of them, or a search's results
+  shelves: ['books', 'shelf'] as const,
+  shelf: (search: string) => ['books', 'shelf', search] as const,
   search: (query: string) => ['catalogue', 'search', query] as const,
   editions: (workKey: string) => ['catalogue', 'editions', workKey] as const,
 };
 
-// The reader's books, newest first, a page at a time
-export const useBooks = () =>
+// The reader's books (or those matching `search`), newest first, a page at
+// a time. A new search keeps the last results up until its own arrive.
+export const useBooks = (search = '') =>
   useInfiniteQuery({
-    queryKey: bookKeys.all,
-    queryFn: ({ pageParam }) => fetchBooks(pageParam),
+    queryKey: bookKeys.shelf(search),
+    queryFn: ({ pageParam }) => fetchBooks(pageParam, search),
+    placeholderData: search ? keepPreviousData : undefined,
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,
   });
@@ -44,9 +49,10 @@ export function useDeleteBook() {
   return useMutation({
     mutationFn: deleteBook,
     onSuccess: (_, id) => {
-      // Off the shelf straight away, before the refetch comes back
-      client.setQueryData<InfiniteData<BooksPage>>(
-        bookKeys.all,
+      // Off the shelf (and out of any search) straight away, before the
+      // refetch comes back
+      client.setQueriesData<InfiniteData<BooksPage>>(
+        { queryKey: bookKeys.shelves },
         (data) =>
           data && {
             ...data,

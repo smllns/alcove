@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/shared/lib/cn';
 import { sections, type SectionKey } from './sections';
+import { floatingClass } from '@/shared/ui/surfaces';
+import { softClass } from '@/shared/ui/buttonStyles';
 
 // The parts of the library: a small capsule floating over the shelves,
 // which stays in view while the books scroll by underneath. Switching
@@ -39,7 +41,10 @@ export function LibraryNav({
     >
       <ul
         ref={list}
-        className='pointer-events-auto relative flex max-w-full animate-rise overflow-x-auto rounded-full border border-line/60 bg-surface/85 p-1 shadow-[0_18px_40px_-22px_rgba(40,28,14,0.5),0_2px_6px_-2px_rgba(40,28,14,0.12)] backdrop-blur-xl ]scrollbar-none sm:gap-1 sm:p-1.5'
+        className={cn(
+          'pointer-events-auto relative flex max-w-full animate-rise overflow-x-auto rounded-full p-1 scrollbar-none sm:gap-1 sm:p-1.5',
+          floatingClass,
+        )}
       >
         {sections.map((section) => {
           const on = section.key === current;
@@ -49,11 +54,9 @@ export function LibraryNav({
               <Link
                 to={section.path}
                 aria-current={on ? 'page' : undefined}
-                className={cn(
-                  'flex items-baseline gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 font-serif text-[15px] tracking-[-0.01em] transition-colors duration-500 ease-soft sm:gap-2 sm:px-5 sm:text-[17px]',
-                  on
-                    ? 'bg-ink/[0.07] text-ink'
-                    : 'text-muted hover:bg-ink/4 hover:text-ink',
+                className={softClass(
+                  on,
+                  'flex items-baseline gap-1.5 whitespace-nowrap px-2.5 py-2 font-serif text-[15px] tracking-[-0.01em] sm:gap-2 sm:px-5 sm:text-[17px]',
                 )}
               >
                 {section.label}

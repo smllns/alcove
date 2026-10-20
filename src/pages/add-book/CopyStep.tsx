@@ -4,7 +4,9 @@ import type { CopyCondition, ReadingState } from '@/entities/book/types';
 import { PlacePicker } from '@/features/places';
 import { Button } from '@/shared/ui/Button';
 import { Choices } from '@/shared/ui/Choices';
+import { StarRating } from '@/shared/ui/StarRating';
 import { TextArea } from '@/shared/ui/TextArea';
+import { AcquiredFields } from './AcquiredFields';
 import type { DraftForm } from './AddBookForm';
 import { placeOf, withPlace } from './draft';
 import type { DraftLists } from './entries';
@@ -61,10 +63,20 @@ export function CopyStep({
         clearable
       />
 
+      <StarRating
+        label='Your rating'
+        value={Number(form.values['copy.rating']) || 0}
+        onChange={(rating) =>
+          form.setValue('copy.rating', rating ? String(rating) : '')
+        }
+      />
+
       <PlacePicker
         value={placeOf(form.values)}
         onChange={(place) => form.setValues((v) => withPlace(v, place))}
       />
+
+      <AcquiredFields form={form} />
 
       <LoanFields form={form} />
 

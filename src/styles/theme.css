@@ -68,6 +68,15 @@
       transform: translateY(14px);
     }
   }
+
+  /* animate-pop: a menu or calendar opening, quick and small */
+  --animate-pop: pop 0.22s var(--ease-soft) both;
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
 }
 
 /* Typewriter caret */

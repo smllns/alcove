@@ -17,7 +17,8 @@ export type SessionDoc = {
   expiresAt: Date;
 };
 
-export type CoverSource = 'openlibrary' | 'upload';
+export const coverSources = ['openlibrary', 'upload'] as const;
+export type CoverSource = (typeof coverSources)[number];
 
 // Where a reader keeps books, named however they like: homes, the rooms in
 // them, the bookcases (or chests, or boxes) in those, and their shelves.
@@ -43,9 +44,16 @@ export type PlaceRef = {
 };
 
 // On the reader's shelf, lent to someone, or someone else's book on loan
-export type CopyStatus = 'shelf' | 'lent' | 'borrowed';
-export type CopyCondition = 'new' | 'good' | 'worn' | 'battered';
-export type ReadingState = 'read' | 'reading' | 'unread';
+export const copyStatuses = ['shelf', 'lent', 'borrowed'] as const;
+export type CopyStatus = (typeof copyStatuses)[number];
+export const copyConditions = ['new', 'good', 'worn', 'battered'] as const;
+export type CopyCondition = (typeof copyConditions)[number];
+export const readingStates = ['read', 'reading', 'unread'] as const;
+export type ReadingState = (typeof readingStates)[number];
+
+// How the book is bound: in boards, in paper, or pocket-sized
+export const bookFormats = ['hardcover', 'paperback', 'pocket'] as const;
+export type BookFormat = (typeof bookFormats)[number];
 
 // The reader's own copy: where it is, who has it, what they make of it.
 // Dates are calendar days (YYYY-MM-DD), not moments.
@@ -56,6 +64,10 @@ export type CopyDetails = {
   status: CopyStatus;
   // Whether the reader has read it yet
   reading?: ReadingState;
+  // Stars out of five, in halves
+  rating?: number;
+  // How it came to the reader: 'bought', 'gift', … or their own words
+  acquired?: { how?: string; from?: string; date?: string };
   // Who it's lent to, or borrowed from
   person?: string;
   since?: string;
@@ -82,6 +94,11 @@ export type BookDoc = {
   publishedYear?: number;
   pages?: number;
   language?: string;
+  originalLanguage?: string;
+  originalTitle?: string;
+  translators?: string[];
+  series?: { name: string; number?: number };
+  format?: BookFormat;
   genres?: string[];
   cover?: { url: string; source: CoverSource };
   // Where the details came from, for refreshing them later

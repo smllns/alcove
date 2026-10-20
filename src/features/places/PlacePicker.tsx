@@ -7,7 +7,7 @@ import { Collapse } from '@/shared/ui/Collapse';
 import { labelClass } from '@/shared/ui/fieldStyles';
 import { FormError } from '@/shared/ui/FormError';
 import { RemoveButton } from '@/shared/ui/ListControls';
-import { SelectField } from '@/shared/ui/SelectField';
+import { Select } from '@/shared/ui/Select';
 import { TextField } from '@/shared/ui/TextField';
 import { addChild, fromHomes, levels, pathTo, toHomes } from './tree';
 
@@ -23,6 +23,7 @@ const order = ['home', 'room', 'unit', 'shelf'] as const;
 type Level = (typeof order)[number];
 
 const NEW = '__new';
+const NONE = '__none';
 const TEMP_ID = 'new-picked';
 
 // The choices at each level, given what's chosen above it
@@ -99,28 +100,31 @@ export function PlacePicker({
           open ? 'opacity-100' : 'opacity-0',
         )}
       >
-        <SelectField
+        <Select
           label={label}
           value={creating === level ? NEW : value[level]}
           disabled={places.isPending}
-          onChange={(e) => {
-            if (e.target.value === NEW) {
+          placeholder={places.isPending ? 'Loading…' : 'Not set'}
+          options={[
+            ...(value[level]
+              ? [{ value: NONE, label: 'Not set', muted: true }]
+              : []),
+            ...options[level].map((node) => ({
+              value: node.id,
+              label: node.name,
+            })),
+            { value: NEW, label: `+ New ${label.toLowerCase()}…`, muted: true },
+          ]}
+          onChange={(picked) => {
+            if (picked === NEW) {
               setCreating(level);
               setNewName('');
             } else {
               setCreating(null);
-              choose(level, e.target.value);
+              choose(level, picked === NONE ? '' : picked);
             }
           }}
-        >
-          <option value=''>{places.isPending ? 'Loading…' : 'Not set'}</option>
-          {options[level].map((node) => (
-            <option key={node.id} value={node.id}>
-              {node.name}
-            </option>
-          ))}
-          <option value={NEW}>+ New {label.toLowerCase()}…</option>
-        </SelectField>
+        />
       </div>
     );
   };

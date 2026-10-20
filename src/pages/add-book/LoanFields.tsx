@@ -1,6 +1,7 @@
 import type { CopyStatus } from '@/entities/book/types';
 import { Choices } from '@/shared/ui/Choices';
 import { Collapse } from '@/shared/ui/Collapse';
+import { DateField } from '@/shared/ui/DateField';
 import { TextField } from '@/shared/ui/TextField';
 import type { DraftForm } from './AddBookForm';
 
@@ -35,17 +36,15 @@ export function LoanFields({ form }: { form: DraftForm }) {
             placeholder={lending ? 'Who has it now' : 'Whose book it is'}
             {...form.field('copy.person')}
           />
-          <TextField
-            type='date'
+          <DateField
             label={lending ? 'Lent on' : 'Borrowed on'}
             hint='If you remember.'
-            {...form.field('copy.since')}
+            {...form.choice('copy.since')}
           />
-          <TextField
-            type='date'
+          <DateField
             label={lending ? 'Due back' : 'Give back by'}
             hint='If you agreed on a day.'
-            {...form.field('copy.due')}
+            {...form.choice('copy.due')}
           />
         </div>
       </Collapse>

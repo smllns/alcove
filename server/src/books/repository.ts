@@ -1,6 +1,7 @@
 import { ObjectId, type Filter } from 'mongodb';
 import { books, type BookDoc } from '../db.js';
 import type { BookInput } from './schemas.js';
+import { searchFilter } from './search.js';
 
 // What the client sees of a book
 export const toPublicBook = ({ _id, userId: _userId, ...book }: BookDoc) => ({
@@ -23,14 +24,27 @@ export async function addBook(userId: ObjectId, input: BookInput) {
   return book;
 }
 
-// One page of a reader's books, newest first. Pass the last id of the
-// previous page as `after` to get the next.
+// A reader's books, or those matching `search`
+const shelf = (userId: ObjectId, search?: string): Filter<BookDoc> => ({
+  userId,
+  ...searchFilter(search),
+});
+
+// One page of a reader's books (or of those matching `search`), newest
+// first. Pass the last id of the previous page as `after` to get the next.
 export async function listBooks(
   userId: ObjectId,
-  { limit, after }: { limit: number; after?: ObjectId },
+  {
+    limit,
+    after,
+    search,
+  }: { limit: number; after?: ObjectId; search?: string },
 ) {
   const page = await books()
-    .find({ userId, ...(after && { _id: { $lt: after } }) })
+    .find({
+      ...shelf(userId, search),
+      ...(after && { _id: { $lt: after } }),
+    })
     .sort({ _id: -1 })
     .limit(limit + 1)
     .toArray();
@@ -79,5 +93,5 @@ export const uploadedCoversInUse = async (userId: ObjectId) =>
 export const deleteAllBooks = (userId: ObjectId) =>
   books().deleteMany({ userId });
 
-export const countBooks = (userId: ObjectId) =>
-  books().countDocuments({ userId });
+export const countBooks = (userId: ObjectId, search?: string) =>
+  books().countDocuments(shelf(userId, search));

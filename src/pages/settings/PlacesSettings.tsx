@@ -1,23 +1,15 @@
 import { usePlaces } from '@/entities/place/queries';
 import { PlacesEditor } from '@/features/places';
-import { Spinner } from '@/shared/ui/Spinner';
+import { FormError } from '@/shared/ui/FormError';
+import { Loading } from '@/shared/ui/Loading';
 
 export function PlacesSettings() {
   const places = usePlaces();
-  if (places.isPending) {
+  if (places.isPending) return <Loading className='justify-start py-4' />;
+  if (places.isError)
     return (
-      <div className='py-4 text-muted'>
-        <Spinner />
-      </div>
+      <FormError message={`Your places didn’t load. ${places.error.message}`} />
     );
-  }
-  if (places.isError) {
-    return (
-      <p className='text-sm text-danger'>
-        Your places didn’t load. {places.error.message}
-      </p>
-    );
-  }
   return (
     <PlacesEditor
       homes={places.data.homes}

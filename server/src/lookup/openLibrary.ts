@@ -1,5 +1,7 @@
 import { config } from '../config.js';
+import type { BookFormat } from '../db.js';
 import { HttpError } from '../lib/errors.js';
+import { bookFormat, isDigital } from './format.js';
 import { throttle } from './throttle.js';
 
 // Open Library (openlibrary.org): an open catalogue of books from the
@@ -35,6 +37,7 @@ export type EditionResult = {
   publishedYear?: number;
   pages?: number;
   language?: string;
+  format?: BookFormat;
   coverUrl?: string;
 };
 
@@ -150,6 +153,7 @@ type EditionDoc = {
   number_of_pages?: number;
   covers?: number[];
   languages?: { key: string }[];
+  physical_format?: string;
 };
 
 const toEdition = (doc: EditionDoc): EditionResult => ({
@@ -161,6 +165,7 @@ const toEdition = (doc: EditionDoc): EditionResult => ({
   publishedYear: yearOf(doc.publish_date),
   pages: doc.number_of_pages,
   language: doc.languages?.[0]?.key.replace('/languages/', ''),
+  format: bookFormat(doc.physical_format),
   coverUrl: coverUrl(doc.covers?.[0]),
 });
 
@@ -175,7 +180,9 @@ export async function workEditions(workKey: string): Promise<EditionResult[]> {
   const data = await get<{ entries: EditionDoc[] }>(
     `/works/${workKey}/editions.json?limit=60`,
   );
+  // Ours is a library of physical books, so e-books and audiobooks go
   return data.entries
+    .filter((doc) => !isDigital(doc.physical_format))
     .map(toEdition)
     .sort(
       (a, b) =>

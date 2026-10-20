@@ -6,6 +6,7 @@ import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 import { RemoveButton } from '@/shared/ui/ListControls';
 import { Spinner } from '@/shared/ui/Spinner';
 import { SearchResult } from './SearchResult';
+import { FormError } from '@/shared/ui/FormError';
 
 type CatalogueSearchProps = {
   onPick: (work: CatalogueWork, isbnEdition?: CatalogueEdition) => void;
@@ -45,7 +46,7 @@ export function CatalogueSearch({ onPick, onManual }: CatalogueSearchProps) {
 
       <div className='mt-6 min-h-40'>
         {search.isError ? (
-          <p className='text-sm text-danger'>{search.error.message}</p>
+          <FormError message={search.error.message} />
         ) : settled.length < 2 ? (
           <p className='text-sm text-muted'>
             Start typing and pick your book from the list.

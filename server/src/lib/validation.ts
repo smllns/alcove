@@ -39,3 +39,25 @@ export const optionalText = (max: number) =>
   maybe(
     z.string().trim().max(max, `Keep it under ${max} characters.`),
   ).transform((value) => value || undefined);
+
+// A list that may be missing or null, without its blank entries
+export const list = <T extends z.ZodType>(
+  item: T,
+  max: number,
+  tooMany: string,
+) =>
+  z.preprocess(
+    (value) =>
+      Array.isArray(value)
+        ? value.filter(
+            (entry) =>
+              entry != null && (typeof entry !== 'string' || entry.trim()),
+          )
+        : (value ?? []),
+    z.array(item).max(max, tooMany),
+  );
+
+// A calendar day, YYYY-MM-DD
+export const day = maybe(
+  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Check the date.'),
+);

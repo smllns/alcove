@@ -1,12 +1,11 @@
 import type {
   BookCover,
-  BookInput,
+  BookFormat,
   CopyCondition,
   CopyStatus,
   ReadingState,
 } from '@/entities/book/types';
 import type { PlaceChoice } from '@/features/places';
-import { tidyLists, type DraftLists } from './entries';
 
 // The form's text fields. Everything is a string while being edited.
 export type DraftFields = {
@@ -17,6 +16,15 @@ export type DraftFields = {
   publisher: string;
   publishedYear: string;
   pages: string;
+  format: BookFormat | '';
+  // Language codes, as Open Library writes them: eng, rus, fre…
+  language: string;
+  originalLanguage: string;
+  // Only for a translation
+  originalTitle: string;
+  translators: string;
+  'series.name': string;
+  'series.number': string;
   // The reader's copy. Named like the API's fields, so its errors land here.
   // The ids of the place, '' where not chosen
   'copy.place.home': string;
@@ -24,6 +32,13 @@ export type DraftFields = {
   'copy.place.unit': string;
   'copy.place.shelf': string;
   'copy.reading': ReadingState | '';
+  // Stars out of five in halves, as text: '3.5'
+  'copy.rating': string;
+  // One of the usual ways, or 'other' for the reader's own words
+  'copy.acquired.how': string;
+  'copy.acquired.other': string;
+  'copy.acquired.from': string;
+  'copy.acquired.date': string;
   // Nothing chosen means it's at home, same as 'shelf'
   'copy.status': CopyStatus | '';
   'copy.person': string;
@@ -37,7 +52,6 @@ export type DraftFields = {
 export type DraftExtras = {
   genres?: string[];
   cover?: BookCover;
-  language?: string;
   openLibrary?: { work?: string; edition?: string };
 };
 
@@ -49,11 +63,23 @@ export const emptyFields: DraftFields = {
   publisher: '',
   publishedYear: '',
   pages: '',
+  format: '',
+  language: '',
+  originalLanguage: '',
+  originalTitle: '',
+  translators: '',
+  'series.name': '',
+  'series.number': '',
   'copy.place.home': '',
   'copy.place.room': '',
   'copy.place.unit': '',
   'copy.place.shelf': '',
   'copy.reading': '',
+  'copy.rating': '',
+  'copy.acquired.how': '',
+  'copy.acquired.other': '',
+  'copy.acquired.from': '',
+  'copy.acquired.date': '',
   'copy.status': '',
   'copy.person': '',
   'copy.since': '',
@@ -89,56 +115,37 @@ export const bookFieldNames = [
   'publisher',
   'publishedYear',
   'pages',
+  'format',
+  'language',
+  'originalLanguage',
+  'originalTitle',
+  'translators',
+  'series.name',
+  'series.number',
 ] as const;
 
-const whole = (value: string) => {
-  const n = Number(value.trim());
-  return value.trim() && Number.isInteger(n) ? n : undefined;
-};
-
-const optional = (value: string) => value.trim() || undefined;
-
-export function toBookInput(
+// Sets the language, and the original along with it while the two were the
+// same (or the original was never set): most books are read in the
+// language they were written in, and a translation is the reader's to point
+// out by changing the original
+export function withLanguage(
   fields: DraftFields,
-  extras: DraftExtras,
-  lists: DraftLists,
-): BookInput {
-  const { quotes, notes, links } = tidyLists(lists);
-  const place = placeOf(fields);
+  language: string,
+): DraftFields {
+  const follows =
+    !fields.originalLanguage || fields.originalLanguage === fields.language;
   return {
-    title: fields.title.trim(),
-    subtitle: optional(fields.subtitle),
-    authors: fields.authors
-      .split(',')
-      .map((name) => name.trim())
-      .filter(Boolean),
-    isbn: optional(fields.isbn),
-    publisher: optional(fields.publisher),
-    publishedYear: whole(fields.publishedYear),
-    pages: whole(fields.pages),
-    ...extras,
-    copy: {
-      place: place.home
-        ? {
-            home: place.home,
-            room: optional(place.room),
-            unit: optional(place.unit),
-            shelf: optional(place.shelf),
-          }
-        : undefined,
-      reading: fields['copy.reading'] || undefined,
-      status: fields['copy.status'] || 'shelf',
-      person: optional(fields['copy.person']),
-      since: optional(fields['copy.since']),
-      due: optional(fields['copy.due']),
-      condition: fields['copy.condition'] || undefined,
-      review: optional(fields['copy.review']),
-      notes: notes.map((note) => note.text.trim()),
-      quotes: quotes.map((quote) => quote.text.trim()),
-      links: links.map((link) => ({
-        label: optional(link.label),
-        url: link.url.trim(),
-      })),
-    },
+    ...fields,
+    language,
+    ...(follows && { originalLanguage: language }),
   };
 }
+
+// Read in another language than it was written in, so it has a translator
+// and perhaps a different title
+export const isTranslation = (fields: DraftFields) =>
+  Boolean(
+    fields.language &&
+    fields.originalLanguage &&
+    fields.language !== fields.originalLanguage,
+  );

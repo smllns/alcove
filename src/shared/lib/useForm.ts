@@ -56,16 +56,27 @@ export function useForm<Values extends Record<string, string>>(
   const setValue = <K extends keyof Values>(name: K, value: Values[K]) =>
     setValues((v) => ({ ...v, [name]: value }));
 
+  const change = (name: keyof Values & string, value: string) => {
+    setValues((v) => ({ ...v, [name]: value }));
+    clearError(name);
+    setStatus((s) => (s === 'saved' ? 'idle' : s));
+  };
+
   // Props for one input: value, onChange, and its error cleared as you type
   const field = (name: keyof Values & string) => ({
     name,
     value: values[name],
     error: fieldErrors[name],
-    onChange: (e: { target: { value: string } }) => {
-      setValues((v) => ({ ...v, [name]: e.target.value }));
-      clearError(name);
-      setStatus((s) => (s === 'saved' ? 'idle' : s));
-    },
+    onChange: (e: { target: { value: string } }) =>
+      change(name, e.target.value),
+  });
+
+  // The same for a field that hands over its value directly (a calendar,
+  // a menu) rather than through an input's change event
+  const choice = (name: keyof Values & string) => ({
+    value: values[name],
+    error: fieldErrors[name],
+    onChange: (value: string) => change(name, value),
   });
 
   const onSubmit = async (e?: SubmitEvent) => {
@@ -102,6 +113,7 @@ export function useForm<Values extends Record<string, string>>(
     setValues,
     setValue,
     field,
+    choice,
     errors: fieldErrors,
     setErrors: setFieldErrors,
     clearError,

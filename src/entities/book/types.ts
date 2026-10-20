@@ -11,6 +11,11 @@ export type Book = {
   publishedYear?: number;
   pages?: number;
   language?: string;
+  originalLanguage?: string;
+  originalTitle?: string;
+  translators?: string[];
+  series?: { name: string; number?: number };
+  format?: BookFormat;
   genres?: string[];
   cover?: BookCover;
   openLibrary?: { work?: string; edition?: string };
@@ -30,6 +35,10 @@ export type CopyStatus = 'shelf' | 'lent' | 'borrowed';
 export type CopyCondition = 'new' | 'good' | 'worn' | 'battered';
 export type ReadingState = 'read' | 'reading' | 'unread';
 
+// How the book is bound: in boards, in paper, or pocket-sized. Mirrors the
+// server.
+export type BookFormat = 'hardcover' | 'paperback' | 'pocket';
+
 // The reader's own copy. Mirrors CopyDetails on the server; dates are
 // calendar days, YYYY-MM-DD.
 export type CopyDetails = {
@@ -39,6 +48,10 @@ export type CopyDetails = {
   status: CopyStatus;
   // Whether the reader has read it yet
   reading?: ReadingState;
+  // Stars out of five, in halves
+  rating?: number;
+  // How it came to the reader: 'bought', 'gift', … or their own words
+  acquired?: { how?: string; from?: string; date?: string };
   // Who it's lent to, or borrowed from
   person?: string;
   since?: string;
@@ -80,5 +93,6 @@ export type CatalogueEdition = {
   publishedYear?: number;
   pages?: number;
   language?: string;
+  format?: BookFormat;
   coverUrl?: string;
 };

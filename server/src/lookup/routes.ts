@@ -46,7 +46,7 @@ lookupRouter.get('/search', async (req, res) => {
   // An ISBN points at one exact edition; fetch it so the form can use it as is
   let isbnEdition = null;
   if (looksLikeIsbn(query)) {
-    isbnEdition = await cached(`isbn2:${cleanIsbn(query)}`, 30, () =>
+    isbnEdition = await cached(`isbn3:${cleanIsbn(query)}`, 30, () =>
       editionByIsbn(query),
     ).catch(() => null);
   }
@@ -57,7 +57,7 @@ lookupRouter.get('/works/:workKey/editions', async (req, res) => {
   const { workKey } = req.params;
   if (!WORK_KEY.test(workKey))
     throw new HttpError(400, 'bad_work', 'That isn’t a book we know.');
-  const editions = await cached(`editions2:${workKey}`, 7, () =>
+  const editions = await cached(`editions4:${workKey}`, 7, () =>
     workEditions(workKey),
   );
   res.json({ editions });

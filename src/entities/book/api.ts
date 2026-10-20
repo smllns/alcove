@@ -7,8 +7,13 @@ export type BooksPage = {
   total: number;
 };
 
-export const fetchBooks = (after?: string | null) =>
-  request<BooksPage>(`/books?limit=48${after ? `&after=${after}` : ''}`);
+// A page of the reader's books, or of those matching `search`
+export function fetchBooks(after: string | null, search = '') {
+  const params = new URLSearchParams({ limit: '48' });
+  if (after) params.set('after', after);
+  if (search) params.set('q', search);
+  return request<BooksPage>(`/books?${params}`);
+}
 
 export const addBook = async (input: BookInput) =>
   (await request<{ book: Book }>('/books', { method: 'POST', body: input }))

@@ -1,13 +1,15 @@
-import { useRef, useState } from 'react';
+import { bookFormats } from '@/entities/book/formats';
 import type { CatalogueEdition } from '@/entities/book/types';
-import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/Button';
-import { Collapse } from '@/shared/ui/Collapse';
-import { AddButton, RemoveButton } from '@/shared/ui/ListControls';
+import { Choices } from '@/shared/ui/Choices';
+import { RemoveButton } from '@/shared/ui/ListControls';
+import { Reveal } from '@/shared/ui/Reveal';
 import { TextField } from '@/shared/ui/TextField';
 import type { DraftForm } from './AddBookForm';
 import { EditionSelect } from './EditionSelect';
 import { GenrePicker } from './GenrePicker';
+import { LanguageFields } from './LanguageFields';
+import { SeriesFields } from './SeriesFields';
 
 type BookStepProps = {
   form: DraftForm;
@@ -29,24 +31,6 @@ export function BookStep({
   onGenresChange,
   onBack,
 }: BookStepProps) {
-  // Most books have none, so the field waits until there is one
-  const [showSubtitle, setShowSubtitle] = useState(
-    Boolean(form.values.subtitle),
-  );
-  const subtitleInput = useRef<HTMLInputElement>(null);
-
-  const openSubtitle = () => {
-    setShowSubtitle(true);
-    // Once it's no longer inert
-    requestAnimationFrame(() =>
-      subtitleInput.current?.focus({ preventScroll: true }),
-    );
-  };
-  const removeSubtitle = () => {
-    setShowSubtitle(false);
-    form.setValue('subtitle', '');
-  };
-
   return (
     <div className='flex flex-col gap-6'>
       {editions.length > 0 && (
@@ -58,28 +42,20 @@ export function BookStep({
       )}
       <TextField label='Title' required marked {...form.field('title')} />
 
-      {/* The link sits snug under the title; the field takes a full gap */}
-      <div
-        className={cn(
-          'transition-[margin] duration-700 ease-soft',
-          !showSubtitle && '-mt-3',
-        )}
+      <Reveal
+        addLabel='Add a subtitle'
+        initiallyOpen={Boolean(form.values.subtitle)}
+        onRemove={() => form.setValue('subtitle', '')}
       >
-        <Collapse open={!showSubtitle}>
-          <AddButton onClick={openSubtitle}>Add a subtitle</AddButton>
-        </Collapse>
-        <Collapse open={showSubtitle}>
+        {(remove) => (
           <TextField
-            ref={subtitleInput}
             label='Subtitle'
             hint='The line after the title, like “A Brief History of Humankind” for Sapiens.'
-            trailing={
-              <RemoveButton onClick={removeSubtitle} label='Remove subtitle' />
-            }
+            trailing={<RemoveButton onClick={remove} label='Remove subtitle' />}
             {...form.field('subtitle')}
           />
-        </Collapse>
-      </div>
+        )}
+      </Reveal>
 
       <TextField
         label='Authors'
@@ -88,6 +64,7 @@ export function BookStep({
         hint='Separate several with commas.'
         {...form.field('authors')}
       />
+      <SeriesFields form={form} />
       <div className='grid gap-6 sm:grid-cols-2'>
         <TextField label='ISBN' inputMode='numeric' {...form.field('isbn')} />
         <TextField label='Publisher' {...form.field('publisher')} />
@@ -98,6 +75,16 @@ export function BookStep({
         />
         <TextField label='Pages' inputMode='numeric' {...form.field('pages')} />
       </div>
+
+      <Choices
+        label='Format'
+        options={bookFormats}
+        value={form.values.format}
+        onChange={(format) => form.setValue('format', format)}
+        clearable
+      />
+
+      <LanguageFields form={form} />
 
       <GenrePicker value={genres} onChange={onGenresChange} />
 

@@ -1,0 +1,165 @@
+/* The universe view of the library: books as stars in a sky you can drag.
+   Layout and camera live in pages/library/universe; this is how it moves. */
+
+/* Dust: tiny specks in two layers, panned slower than the books for depth
+   (--dust-x/y come from the camera, see Universe.tsx), with a few brighter
+   ones glimmering. */
+.sky::before,
+.sky::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sky::before {
+  --speck: color-mix(in oklab, var(--ink) 24%, transparent);
+  /* Odd, unrelated sizes and offsets, so the layers never line up into a
+     visible grid */
+  background-image:
+    radial-gradient(circle, var(--speck) 1px, transparent 1.6px),
+    radial-gradient(circle, var(--speck) 0.7px, transparent 1.2px),
+    radial-gradient(circle, var(--speck) 0.8px, transparent 1.3px);
+  background-size:
+    173px 191px,
+    97px 83px,
+    131px 59px;
+  background-position:
+    var(--dust-x) var(--dust-y),
+    calc(var(--dust-x) * 0.6 + 37px) calc(var(--dust-y) * 0.6 + 11px),
+    calc(var(--dust-x) * 0.45 + 71px) calc(var(--dust-y) * 0.45 + 29px);
+}
+.sky::after {
+  --glint: color-mix(in oklab, var(--accent) 80%, transparent);
+  background-image:
+    radial-gradient(circle, var(--glint) 1.4px, transparent 2.4px),
+    radial-gradient(circle, var(--glint) 1.1px, transparent 2px);
+  background-size:
+    389px 311px,
+    257px 433px;
+  background-position:
+    calc(var(--dust-x) * 0.8 + 41px) calc(var(--dust-y) * 0.8 + 97px),
+    calc(var(--dust-x) * 0.5 + 170px) calc(var(--dust-y) * 0.5 + 23px);
+  animation: sky-glint 5s ease-in-out infinite;
+}
+@keyframes sky-glint {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Each book wanders slowly about its place… */
+@keyframes sky-drift {
+  /* Round a little loop through two points, rather than back and forth */
+  33% {
+    transform: translate(var(--drift-x), var(--drift-y)) rotate(var(--sway));
+  }
+  66% {
+    transform: translate(
+        calc(var(--drift-y) * -0.7),
+        calc(var(--drift-x) * 0.7)
+      )
+      rotate(calc(var(--sway) * -1));
+  }
+}
+.sky-drift {
+  animation: sky-drift var(--drift-time) ease-in-out var(--drift-delay) infinite;
+}
+
+/* …and glimmers now and then */
+@keyframes sky-twinkle {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.12) saturate(1.05);
+  }
+}
+.sky-twinkle {
+  animation: sky-twinkle 6s ease-in-out var(--drift-delay) infinite;
+}
+
+/* A hovered star grows a little and comes forward; the rest of the sky
+   dims */
+.sky .star {
+  transition: opacity 0.6s var(--ease-soft);
+}
+.star-body {
+  transform: rotate(var(--tilt));
+  transition: transform 0.5s var(--ease-soft);
+  /* A shadow that follows the shape the cover is cut to */
+  filter: drop-shadow(0 10px 12px rgb(40 28 14 / 0.3))
+    drop-shadow(0 2px 3px rgb(40 28 14 / 0.12));
+}
+/* On the dark sky even a black shadow hardly shows, so the books stand
+   out the other way: a thin lamplit rim round the edge and a soft warm
+   halo, over a deep shadow below */
+:root[data-theme='dark'] .star-body {
+  filter: drop-shadow(0 0 0.5px rgb(255 236 205 / 0.45))
+    drop-shadow(0 0 18px rgb(255 214 160 / 0.12))
+    drop-shadow(0 14px 18px rgb(0 0 0 / 0.7));
+}
+
+/* The shape a star takes (data-shape on the sky, --w the cover's width):
+   a circle from the middle of the cover, or the cover with its corners
+   rounded right off. Both open into the whole cover on hover; inset() at
+   every step, so the change is a smooth one. */
+.star-cover {
+  clip-path: inset(0 round 3px);
+  transition: clip-path 0.5s var(--ease-soft);
+}
+.sky[data-shape='circle'] .star-cover {
+  clip-path: inset(calc(var(--w) * 0.25) 0 round calc(var(--w) / 2));
+}
+.sky[data-shape='rounded'] .star-cover {
+  clip-path: inset(0 round calc(var(--w) * 0.26));
+}
+.sky .star:hover .star-cover {
+  clip-path: inset(0 round 3px);
+}
+/* Under the cover, clear of it even when it's grown, and the same size
+   on screen however far the sky is zoomed */
+.star-caption {
+  scale: calc(1 / var(--zoom));
+  transform-origin: top center;
+  opacity: 0;
+  translate: -50% 4px;
+  transition:
+    opacity 0.5s var(--ease-soft),
+    translate 0.5s var(--ease-soft);
+}
+.sky:has(.star:hover) .star:not(:hover) {
+  opacity: 0.4;
+}
+.sky .star:hover {
+  z-index: 1000;
+}
+.sky .star:hover .star-body {
+  transform: rotate(0deg) scale(1.25);
+}
+.sky .star:hover .star-caption {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+/* While dragging, nothing reacts to the pointer passing over it */
+.sky[data-dragging] .star {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-drift,
+  .sky-twinkle,
+  .sky::after {
+    animation: none;
+  }
+}
+
+/* While searching, the books that weren't found all but fade away. On the
+   inner layer, so the dimming around a hovered star still applies too. */
+.sky .star .sky-drift {
+  transition: opacity 0.6s var(--ease-soft);
+}
+.sky[data-searching] .star:not([data-lit]) .sky-drift {
+  opacity: 0.12;
+}

@@ -1,5 +1,7 @@
+import { formatLabel } from '@/entities/book/formats';
+import { languageName } from '@/entities/book/languages';
 import type { CatalogueEdition } from '@/entities/book/types';
-import { SelectField } from '@/shared/ui/SelectField';
+import { Select } from '@/shared/ui/Select';
 
 type EditionSelectProps = {
   editions: CatalogueEdition[];
@@ -8,25 +10,20 @@ type EditionSelectProps = {
   onChange: (edition: CatalogueEdition | null) => void;
 };
 
-const languageNames = new Intl.DisplayNames(['en'], { type: 'language' });
-const languageName = (code: string) => {
-  try {
-    // Open Library uses three-letter MARC codes; most match ISO 639-2
-    return languageNames.of(code) ?? code;
-  } catch {
-    return code;
-  }
-};
-
 const describe = (e: CatalogueEdition) =>
   [
     e.publisher ?? 'Unknown publisher',
+    e.format && formatLabel(e.format),
     e.publishedYear,
     e.pages && `${e.pages} pages`,
     e.language && e.language !== 'eng' && languageName(e.language),
   ]
     .filter(Boolean)
     .join(' · ');
+
+// None of these: the details are the reader's to type in
+const NOT_LISTED = 'not-listed';
+const notListed = 'Not listed — I’ll fill it in myself';
 
 // Which printing is on the shelf. Picking one fills in its ISBN, publisher,
 // year, page count and cover; "not listed" clears them for typing in.
@@ -36,21 +33,20 @@ export function EditionSelect({
   onChange,
 }: EditionSelectProps) {
   return (
-    <SelectField
+    <Select
       label={`Edition · ${editions.length} found`}
-      value={value ?? ''}
-      onChange={(e) =>
-        onChange(
-          editions.find((ed) => ed.editionKey === e.target.value) ?? null,
-        )
+      value={value ?? NOT_LISTED}
+      options={[
+        { value: NOT_LISTED, label: notListed, muted: true },
+        ...editions.map((edition) => ({
+          value: edition.editionKey,
+          label: describe(edition),
+        })),
+      ]}
+      onChange={(key) =>
+        onChange(editions.find((ed) => ed.editionKey === key) ?? null)
       }
-    >
-      <option value=''>Not listed — I’ll fill it in myself</option>
-      {editions.map((edition) => (
-        <option key={edition.editionKey} value={edition.editionKey}>
-          {describe(edition)}
-        </option>
-      ))}
-    </SelectField>
+      placeholder={notListed}
+    />
   );
 }
