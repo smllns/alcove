@@ -1,6 +1,7 @@
+import { counted } from '@/shared/lib/plural';
 import { cn } from '@/shared/lib/cn';
 import { Collapse } from '@/shared/ui/Collapse';
-import { labelClass } from '@/shared/ui/fieldStyles';
+import { labelClass, smallInputText } from '@/shared/ui/fieldStyles';
 import { AddButton, RemoveButton } from '@/shared/ui/ListControls';
 import { errorKey, levels, type EditNode } from './tree';
 import type { PlaceOps } from './usePlacesDraft';
@@ -112,7 +113,7 @@ function NameRow({
         />
         {count ? (
           <span className='shrink-0 text-xs text-faint'>
-            {count} {count === 1 ? 'book' : 'books'}
+            {counted(count, 'book')}
           </span>
         ) : null}
         <RemoveButton
@@ -158,7 +159,10 @@ function Shelves({
               title={error}
               autoFocus={shelf.id.startsWith('new-') && !shelf.name}
               size={Math.max(shelf.name.length, 2)}
-              className='bg-transparent py-1 text-sm text-ink outline-none placeholder:text-faint'
+              className={cn(
+                'bg-transparent py-1 text-ink outline-none placeholder:text-faint',
+                smallInputText,
+              )}
             />
             <RemoveButton
               onClick={() => ops.remove(shelfPath, shelf.id)}

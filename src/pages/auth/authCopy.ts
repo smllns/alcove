@@ -1,3 +1,4 @@
+import { paths } from '@/shared/config/paths';
 export type AuthMode = 'login' | 'register';
 
 // Everything that changes between log in and sign up. The title only swaps
@@ -11,7 +12,7 @@ export const authCopy = {
     switchPrompt: 'New to alcove?',
     switchLink: 'Start a library',
     headerSwitch: 'Sign up',
-    switchTo: '/register',
+    switchTo: paths.register,
   },
   register: {
     eyebrow: 'A library of your own',
@@ -21,6 +22,6 @@ export const authCopy = {
     switchPrompt: 'Already have an account?',
     switchLink: 'Log in',
     headerSwitch: 'Log in',
-    switchTo: '/login',
+    switchTo: paths.login,
   },
 } satisfies Record<AuthMode, Record<string, string>>;

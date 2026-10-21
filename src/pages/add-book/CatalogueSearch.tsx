@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import { useCatalogueSearch } from '@/entities/book/queries';
+import { useCatalogueSearch } from '@/entities/book/catalogueQueries';
 import type { CatalogueEdition, CatalogueWork } from '@/entities/book/types';
 import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 import { RemoveButton } from '@/shared/ui/ListControls';

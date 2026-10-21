@@ -6,7 +6,8 @@ const sizes = {
   // In a compact dropdown
   sm: {
     gap: 'gap-3',
-    cover: 'w-9 shadow-[0_6px_10px_-6px_rgba(40,28,14,0.5)]',
+    cover:
+      'w-9 shadow-[0_6px_10px_-6px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]',
     image: 'S',
     title: 'text-[15px] leading-snug',
     byline: 'mt-0.5 text-xs',
@@ -15,7 +16,8 @@ const sizes = {
   // In a list of books
   md: {
     gap: 'gap-4',
-    cover: 'w-12 shadow-[0_8px_14px_-8px_rgba(40,28,14,0.5)]',
+    cover:
+      'w-12 shadow-[0_8px_14px_-8px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]',
     image: 'M',
     title: 'text-[17px] leading-tight',
     byline: 'mt-1 text-sm',
@@ -25,7 +27,7 @@ const sizes = {
   lg: {
     gap: 'gap-4 sm:gap-6',
     cover:
-      'w-12 shadow-[0_8px_14px_-8px_rgba(40,28,14,0.5)] sm:w-20 sm:shadow-[0_14px_24px_-12px_rgba(40,28,14,0.5)]',
+      'w-12 shadow-[0_8px_14px_-8px_rgb(var(--shade)/calc(0.5*var(--shade-k)))] sm:w-20 sm:shadow-[0_14px_24px_-12px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]',
     image: 'L',
     title: 'text-[17px] leading-tight sm:text-2xl',
     byline: 'mt-1 text-sm sm:mt-1.5 sm:text-base',
@@ -38,6 +40,8 @@ type BookLineProps = {
   // The authors, as they should read
   byline: string;
   coverUrl?: string;
+  // The book's id, for its cover to fly to the book's page
+  bookId?: string;
   // Small facts after the byline (a year, a format, a rating), set apart
   // by dots; empty ones are left out
   details?: ReactNode[];
@@ -50,6 +54,7 @@ export function BookLine({
   title,
   byline,
   coverUrl,
+  bookId,
   details = [],
   size = 'md',
 }: BookLineProps) {
@@ -61,6 +66,7 @@ export function BookLine({
         title={title}
         author={byline}
         url={coverUrl}
+        bookId={bookId}
         size={look.image}
         // Picked up a little when the row around it (a `group`) is hovered
         className={cn(

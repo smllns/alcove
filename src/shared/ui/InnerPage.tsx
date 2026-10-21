@@ -3,8 +3,7 @@ import { cn } from '@/shared/lib/cn';
 import { BackLink } from './BackLink';
 import { ButtonLink } from './ButtonLink';
 import { SiteHeader } from './SiteHeader';
-
-const LIBRARY = '/library';
+import { paths } from '@/shared/config/paths';
 
 const widths = { md: 'max-w-3xl', lg: 'max-w-4xl' };
 
@@ -19,8 +18,8 @@ export function InnerPage({
 }) {
   return (
     <main className='bg-paper min-h-screen text-ink'>
-      <SiteHeader home={LIBRARY}>
-        <ButtonLink to={LIBRARY} variant='pill'>
+      <SiteHeader home={paths.library}>
+        <ButtonLink to={paths.library} variant='pill'>
           Your library
         </ButtonLink>
       </SiteHeader>
@@ -31,7 +30,7 @@ export function InnerPage({
           widths[width],
         )}
       >
-        <BackLink to={LIBRARY} />
+        <BackLink to={paths.library} />
         {children}
       </div>
     </main>

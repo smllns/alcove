@@ -16,7 +16,8 @@ type ConfirmDialogProps = {
 };
 
 // A modal question with a way out. Built on <dialog>, so focus stays inside
-// and Escape cancels; a click on the dimmed page around it cancels too.
+// and Escape cancels; a click on the dimmed page around it cancels too. It
+// comes and goes softly (.soft-dialog, index.css).
 export function ConfirmDialog({
   open,
   title,
@@ -52,7 +53,7 @@ export function ConfirmDialog({
       onClick={(e) => {
         if (e.target === e.currentTarget && !busy) onCancel();
       }}
-      className='m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface p-0 text-ink shadow-[0_30px_60px_-30px_rgba(40,28,14,0.55)] backdrop:bg-ink/30 backdrop:backdrop-blur-[2px] open:animate-rise'
+      className='m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface p-0 text-ink shadow-[0_30px_60px_-30px_rgba(40,28,14,0.55)] soft-dialog'
     >
       <div className='flex flex-col gap-4 p-6 sm:p-8'>
         <h2 className='font-serif text-2xl leading-tight tracking-[-0.01em]'>

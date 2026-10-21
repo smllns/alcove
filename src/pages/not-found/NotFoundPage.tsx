@@ -2,11 +2,12 @@ import { useAuth } from '@/features/auth';
 import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { SiteHeader } from '@/shared/ui/SiteHeader';
+import { paths } from '@/shared/config/paths';
 
 export function NotFoundPage() {
   // Signed in, the way back is to the library rather than the start page
   const { user } = useAuth();
-  const home = user ? '/library' : '/';
+  const home = user ? paths.library : paths.home;
   return (
     <main className='bg-paper flex min-h-screen flex-col text-ink'>
       <SiteHeader home={home} />

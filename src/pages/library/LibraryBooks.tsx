@@ -28,7 +28,6 @@ export function LibraryBooks({
   view,
   skyInset,
   skyLightsFinds = true,
-  skyFocus = null,
   viewEased = false,
   arrangement = usual,
 }: {
@@ -38,9 +37,8 @@ export function LibraryBooks({
   // How far down the controls over the sky reach
   skyInset: number;
   // Whether the sky lights up what a search finds (on a phone the finds
-  // are listed instead), and one book picked to fly over to
+  // are listed instead)
   skyLightsFinds?: boolean;
-  skyFocus?: string | null;
   // The view itself came in by a transition
   viewEased?: boolean;
   // How the grid and the list are ordered, and what fades back in them
@@ -49,15 +47,11 @@ export function LibraryBooks({
   const universe = view === 'universe';
   const { all, found, complete } = shelf;
 
-  // The stars to light up: one picked book, or everything a search found
+  // The stars to light up: everything a search found
   const lit = useMemo(
     () =>
-      skyFocus
-        ? new Set([skyFocus])
-        : search && skyLightsFinds
-          ? new Set(found.map((book) => book.id))
-          : null,
-    [skyFocus, search, skyLightsFinds, found],
+      search && skyLightsFinds ? new Set(found.map((book) => book.id)) : null,
+    [search, skyLightsFinds, found],
   );
   // What the grid and the list show, easing over from one search to the next
   const { order, reversed, fade } = arrangement;

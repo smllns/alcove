@@ -1,6 +1,6 @@
-import { Star } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { halves } from '@/shared/lib/halves';
+import { GoldStar } from './Stars';
 
 // A rating as it's shown beside a book: a star and the number out of
 // five, "★ 4½/5"
@@ -21,7 +21,7 @@ export function Rating({
         className,
       )}
     >
-      <Star aria-hidden className='size-[0.9em] fill-accent text-accent' />
+      <GoldStar size={14} strokeWidth={1.5} className='size-[0.95em]' />
       <span>
         {halves(value)}
         <span className='text-faint'>/5</span>

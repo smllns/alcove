@@ -7,6 +7,7 @@ import {
   looksLikeIsbn,
   WORK_KEY,
 } from '../lookup/openLibrary.js';
+import { DESCRIPTION_MAX } from '../lookup/description.js';
 import { copySchema } from './copy.js';
 
 // Covers may only come from the catalogue or our own upload storage
@@ -88,6 +89,16 @@ export const bookInputSchema = z.object({
     z.string().trim().max(40, 'Keep a genre under 40 characters.'),
     10,
     'Keep it to 10 genres.',
+  ),
+  description: optionalText(DESCRIPTION_MAX),
+  // Out of five, to one decimal place: 4.2
+  averageRating: maybe(
+    z
+      .number({ error: 'Out of 5, like 4.2.' })
+      .min(1, 'Out of 5, like 4.2.')
+      .max(5, 'Out of 5, like 4.2.'),
+  ).transform((value) =>
+    value === undefined ? undefined : Math.round(value * 10) / 10,
   ),
   cover: maybe(
     z.object({

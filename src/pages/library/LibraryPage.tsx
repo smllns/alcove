@@ -1,22 +1,19 @@
-import { Settings } from 'lucide-react';
-import { useState } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { useBottomEdge } from '@/shared/lib/useBottomEdge';
 import { useBooks } from '@/entities/book/queries';
 import { useCoverCopies } from '@/entities/book/useCoverCopies';
 import { useAuth } from '@/features/auth';
-import { iconButtonClass } from '@/shared/ui/buttonStyles';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
-import { SiteHeader } from '@/shared/ui/SiteHeader';
-import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { BackToTop } from '@/shared/ui/BackToTop';
-import { AddBookButton } from './AddBookButton';
+import {
+  LibraryHeader,
+  LibraryNav,
+  type SectionKey,
+} from '@/widgets/library-header';
 import { ComingSoon } from './ComingSoon';
 import { EmptyShelf } from './EmptyShelf';
 import { LibraryBooks } from './LibraryBooks';
-import { LibraryNav } from './LibraryNav';
-import type { SectionKey } from './sections';
 import { useShelf } from './useShelf';
 import { useBookView } from './views/views';
 import { needsEveryBook } from './views/order';
@@ -26,6 +23,7 @@ import { ViewStage } from './ViewStage';
 import { useShelfSearch } from './views/useShelfSearch';
 import { FormError } from '@/shared/ui/FormError';
 import { Loading } from '@/shared/ui/Loading';
+import { pageWidthClass } from '@/shared/ui/surfaces';
 
 // One page for every section, so the header and tabs stay put while the
 // section underneath changes
@@ -33,8 +31,6 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
   const { user } = useAuth();
   const books = useBooks();
   const search = useShelfSearch();
-  // A book picked from the search list, for the sky to fly to
-  const [picked, setPicked] = useState<string | null>(null);
   const phone = useMediaQuery('(max-width: 639px)');
   const { view, arrived, leaving, left, choose, chooseKind } = useBookView();
 
@@ -74,27 +70,16 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
         sky ? 'h-dvh overflow-hidden' : 'min-h-screen',
       )}
     >
-      <SiteHeader
-        home='/library'
+      <LibraryHeader
+        adding={tabbed}
         // Over the sky, and over it still as it goes
         className={sky || leaving === 'universe' ? 'relative z-10' : undefined}
-      >
-        <TransitionLink
-          to='/settings'
-          aria-label='Settings'
-          className={iconButtonClass()}
-        >
-          <Settings
-            size={16}
-            className='transition-transform duration-700 ease-soft group-hover:rotate-45'
-          />
-        </TransitionLink>
-        {tabbed && <AddBookButton />}
-      </SiteHeader>
+      />
 
       <div
         className={cn(
-          'mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 sm:px-10 lg:px-16',
+          'flex flex-1 flex-col',
+          pageWidthClass,
           // A little extra room below lifts the block to the optical centre
           tabbed ? 'pt-2 sm:pt-4' : 'justify-center pb-28',
           tabbed && !sky && 'pb-16',
@@ -119,8 +104,6 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
                   search={search}
                   shelf={shelf}
                   listFinds={listFinds}
-                  picked={picked}
-                  onPick={setPicked}
                   view={view}
                   onView={choose}
                   onViewKind={chooseKind}
@@ -141,7 +124,6 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
                       viewEased={arrived !== 'load'}
                       skyInset={skyInset}
                       skyLightsFinds={!listFinds}
-                      skyFocus={picked}
                     />
                   )}
                 </ViewStage>

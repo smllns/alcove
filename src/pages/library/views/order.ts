@@ -105,10 +105,10 @@ export const ordered = (books: Book[], order: ShelfOrder, reversed: boolean) =>
       : books
     : books.toSorted(compare[order](reversed));
 
-// Whether a book fades back. Fading what hasn't been read leaves the book
-// being read now bright: it's well on its way.
+// Whether a book fades back. One still being read hasn't been read yet,
+// so it fades with the unread.
 export const fadesBack = (book: Book, fade: ShelfFade) => {
   if (fade === 'none') return false;
   const read = book.copy?.reading === 'read';
-  return fade === 'read' ? read : !read && book.copy?.reading !== 'reading';
+  return fade === 'read' ? read : !read;
 };

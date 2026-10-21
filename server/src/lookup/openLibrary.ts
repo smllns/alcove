@@ -1,19 +1,15 @@
-import { config } from '../config.js';
 import type { BookFormat } from '../db.js';
 import { HttpError } from '../lib/errors.js';
+import { cleanDescription } from './description.js';
+import { genresOf } from './genres.js';
 import { bookFormat, isDigital } from './format.js';
+import { contact, HEADERS } from './agent.js';
 import { throttle } from './throttle.js';
 
 // Open Library (openlibrary.org): an open catalogue of books from the
 // Internet Archive. No key needed. They ask for a User-Agent naming the app
 // and a contact, and give requests that carry one 3 a second instead of 1.
 const BASE = 'https://openlibrary.org';
-const contact = config.OPENLIBRARY_CONTACT;
-const HEADERS = {
-  'User-Agent': contact
-    ? `alcove/1.0 (${contact})`
-    : 'alcove/1.0 (personal library app)',
-};
 const nextTurn = throttle(contact ? 3 : 1);
 
 // A book in general, across all its editions
@@ -41,7 +37,7 @@ export type EditionResult = {
   coverUrl?: string;
 };
 
-export const coverUrl = (id: number | undefined) =>
+const coverUrl = (id: number | undefined) =>
   id && id > 0 ? `https://covers.openlibrary.org/b/id/${id}-L.jpg` : undefined;
 
 const unavailable = () =>
@@ -193,4 +189,35 @@ export async function workEditions(workKey: string): Promise<EditionResult[]> {
 
 export async function editionByIsbn(isbn: string): Promise<EditionResult> {
   return toEdition(await get<EditionDoc>(`/isbn/${cleanIsbn(isbn)}.json`));
+}
+
+type WorkDoc = {
+  description?: string | { value?: string };
+  subjects?: string[];
+};
+
+// What the book is about, if the catalogue says, and the genres its
+// subjects point to
+export async function workDetails(workKey: string) {
+  const { description, subjects } = await get<WorkDoc>(
+    `/works/${workKey}.json`,
+  );
+  return {
+    description:
+      cleanDescription(
+        typeof description === 'string' ? description : description?.value,
+      ) ?? null,
+    genres: genresOf(subjects),
+  };
+}
+
+type RatingsDoc = { summary?: { average?: number | null; count?: number } };
+
+// How the catalogue's readers rate the book: the average out of five and
+// how many rated it; none when nobody has
+export async function workRatings(workKey: string) {
+  const { summary } = await get<RatingsDoc>(`/works/${workKey}/ratings.json`);
+  return summary?.average && summary.count
+    ? { average: Math.round(summary.average * 10) / 10, count: summary.count }
+    : null;
 }

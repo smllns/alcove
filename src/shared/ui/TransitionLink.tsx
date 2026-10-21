@@ -1,4 +1,6 @@
 import { Link, type LinkProps } from 'react-router';
+import { keyboardUp } from '@/shared/lib/keyboard';
+import { isPlainClick } from '@/shared/lib/plainClick';
 import {
   setPageTransition,
   usesCurtain,
@@ -28,17 +30,13 @@ export function TransitionLink({
       onClick={(e) => {
         onClick?.(e);
         if (e.defaultPrevented) return;
-        if (!curtain) {
+        // Left to the link itself, unless the keyboard needs putting away
+        // first (or the curtain drawn)
+        if (!curtain && !keyboardUp()) {
           setPageTransition(transition);
           return;
         }
-        const plainClick =
-          e.button === 0 &&
-          !e.metaKey &&
-          !e.ctrlKey &&
-          !e.shiftKey &&
-          !e.altKey;
-        if (!plainClick) return;
+        if (!isPlainClick(e)) return;
         e.preventDefault();
         navigate(to, transition, { replace });
       }}

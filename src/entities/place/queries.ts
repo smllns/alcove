@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchPlaces, savePlaces } from './api';
 import type { Places } from './types';
 
-export const placeKeys = { all: ['places'] as const };
+const placeKeys = { all: ['places'] as const };
 
 export const usePlaces = () =>
   useQuery({ queryKey: placeKeys.all, queryFn: fetchPlaces });

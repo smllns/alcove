@@ -1,5 +1,6 @@
 import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Lead } from '@/shared/ui/PageHeading';
+import { paths } from '@/shared/config/paths';
 
 export function EmptyShelf() {
   return (
@@ -16,7 +17,7 @@ export function EmptyShelf() {
         Your shelves are empty for now. Add the first book you can reach, and
         the rest will follow.
       </Lead>
-      <ButtonLink to='/library/add' arrow className='mt-8'>
+      <ButtonLink to={paths.addBook} arrow className='mt-8'>
         Add your first book
       </ButtonLink>
     </div>

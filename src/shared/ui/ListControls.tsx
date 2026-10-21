@@ -2,16 +2,18 @@ import type { ReactNode } from 'react';
 import { Plus, X } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
-// A quiet "+ Add something" for optional parts of the form
-export function AddButton({
-  onClick,
-  children,
-  className,
-}: {
+type QuietButtonProps = {
   onClick: () => void;
   children: ReactNode;
   className?: string;
-}) {
+};
+
+// Words that do something, without a button's weight: "Read more"
+export function QuietButton({
+  onClick,
+  children,
+  className,
+}: QuietButtonProps) {
   return (
     <button
       type='button'
@@ -21,9 +23,18 @@ export function AddButton({
         className,
       )}
     >
-      <Plus size={14} />
       {children}
     </button>
+  );
+}
+
+// A quiet "+ Add something" for optional parts of the form
+export function AddButton({ children, ...props }: QuietButtonProps) {
+  return (
+    <QuietButton {...props}>
+      <Plus size={14} />
+      {children}
+    </QuietButton>
   );
 }
 

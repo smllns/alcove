@@ -3,7 +3,7 @@ import type { Book } from './types';
 // Text as search compares it: lower case and without accents, so "exupery"
 // finds Exupéry and "ежик" finds Ёжик. Й is a letter of its own, not an и
 // with a mark, so it's kept.
-export const searchable = (text: string) =>
+const searchable = (text: string) =>
   text
     .toLowerCase()
     .replace(/[^й]+/g, (part) => part.normalize('NFD').replace(/\p{M}/gu, ''));

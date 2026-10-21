@@ -13,7 +13,7 @@ export function Logo({
     <TransitionLink
       to={to}
       transition='back'
-      aria-label={to === '/' ? 'Alcove home' : 'All books'}
+      aria-label={to === '/' ? 'Alcove home' : 'My books'}
       className={cn(
         'text-glow font-serif text-xl tracking-[-0.04em] sm:text-2xl',
         className,

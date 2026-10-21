@@ -1,3 +1,4 @@
+import { counted } from '@/shared/lib/plural';
 import type { ReactNode, SubmitEvent } from 'react';
 import type { Home } from '@/entities/place/types';
 import { Button } from '@/shared/ui/Button';
@@ -55,7 +56,7 @@ export function PlacesEditor({
       <Collapse open={moving > 0}>
         <div className='mt-6'>
           <Notice
-            title={`${moving} ${moving === 1 ? 'book is' : 'books are'} in places you removed.`}
+            title={`${counted(moving, 'book is', 'books are')} in places you removed.`}
             action='Save anyway'
             onAction={() => places.submit(true)}
           >

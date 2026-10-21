@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate, type NavigateOptions, type To } from 'react-router';
 import { runCurtain } from './curtain';
+import { putKeyboardAway } from './keyboard';
 import {
   usesCurtain,
   setPageTransition,
@@ -18,8 +19,12 @@ export function useTransitionNavigate() {
     ) => {
       if (usesCurtain(transition))
         return runCurtain(() => navigate(to, options));
-      setPageTransition(transition);
-      return navigate(to, { ...options, viewTransition: true });
+      // The keyboard down first: going down mid-change, it would cut the
+      // animation short
+      return putKeyboardAway().then(() => {
+        setPageTransition(transition);
+        return navigate(to, { ...options, viewTransition: true });
+      });
     },
     [navigate],
   );

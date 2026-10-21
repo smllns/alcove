@@ -20,6 +20,11 @@ export type Book = {
   series?: { name: string; number?: number };
   format?: BookFormat;
   genres?: string[];
+  // What it's about, from the catalogue or in the reader's own words
+  description?: string;
+  // How readers rate it elsewhere, out of five, as the reader put it: only
+  // for a book the catalogue has no ratings for (those are asked afresh)
+  averageRating?: number;
   cover?: BookCover;
   openLibrary?: { work?: string; edition?: string };
   copy?: CopyDetails;
@@ -106,3 +111,7 @@ export type CatalogueEdition = {
   format?: BookFormat;
   coverUrl?: string;
 };
+
+// How the catalogue's readers rate a book: the average out of five, and
+// how many of them rated it
+export type CatalogueRatings = { average: number; count: number };

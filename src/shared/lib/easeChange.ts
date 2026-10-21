@@ -21,7 +21,9 @@ export function easeChange(
   setPageTransition(kind);
   easing = true;
   const transition = document.startViewTransition(() => flushSync(update));
-  void transition.finished.finally(() => {
-    easing = false;
-  });
+  void transition.finished
+    .catch(() => {})
+    .finally(() => {
+      easing = false;
+    });
 }

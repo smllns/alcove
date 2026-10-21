@@ -20,19 +20,22 @@ export function circularReveal(origin: HTMLElement, update: () => void) {
 
   setPageTransition('theme');
   const transition = document.startViewTransition(() => flushSync(update));
-  transition.ready.then(() => {
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${radius}px at ${x}px ${y}px)`,
-        ],
-      },
-      {
-        duration: 900,
-        easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
-        pseudoElement: '::view-transition-new(root)',
-      },
-    );
-  });
+  transition.ready
+    .then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${radius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 900,
+          easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+          pseudoElement: '::view-transition-new(root)',
+        },
+      );
+    })
+    // Given up on by the browser: the new theme simply shows
+    .catch(() => {});
 }

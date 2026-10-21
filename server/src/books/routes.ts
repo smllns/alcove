@@ -6,7 +6,7 @@ import { parseBody } from '../lib/validation.js';
 import { getPlaces, resolvePlace } from '../places/repository.js';
 import { storedCoverSources } from '../db.js';
 import { copyCatalogueCovers } from '../uploads/mirror.js';
-import { deleteCover } from '../uploads/storage.js';
+import { deleteCover, discardCover } from '../uploads/storage.js';
 import {
   addBook,
   countBooks,
@@ -15,8 +15,9 @@ import {
   findSameBook,
   listBooks,
   toPublicBook,
+  updateBook,
 } from './repository.js';
-import { addBookSchema } from './schemas.js';
+import { addBookSchema, bookInputSchema, type BookInput } from './schemas.js';
 
 // A reader's own books. Mounted behind requireUser.
 export const booksRouter = Router();
@@ -60,12 +61,18 @@ booksRouter.get('/', async (req, res) => {
   });
 });
 
-booksRouter.post('/', async (req, res) => {
-  const { anotherCopy, ...input } = parseBody(addBookSchema, req.body);
-  // Only places the reader actually has; anything stale is trimmed away
-  if (input.copy?.place) {
+// Only places the reader actually has; anything stale is trimmed away
+async function placed<T extends BookInput>(req: Request, input: T) {
+  if (input.copy?.place)
     input.copy.place = resolvePlace(await getPlaces(me(req)), input.copy.place);
-  }
+  return input;
+}
+
+booksRouter.post('/', async (req, res) => {
+  const { anotherCopy, ...input } = await placed(
+    req,
+    parseBody(addBookSchema, req.body),
+  );
   if (!anotherCopy) {
     const same = await findSameBook(me(req), input);
     if (same) throw alreadyShelved(same);
@@ -83,6 +90,17 @@ booksRouter.post('/covers/copy', async (req, res) => {
 booksRouter.get('/:id', async (req, res) => {
   const book = await findBook(me(req), objectId(req.params.id));
   if (!book) throw notOnShelves();
+  res.json({ book: toPublicBook(book) });
+});
+
+booksRouter.put('/:id', async (req, res) => {
+  const input = await placed(req, parseBody(bookInputSchema, req.body));
+  const updated = await updateBook(me(req), objectId(req.params.id), input);
+  if (!updated) throw notOnShelves();
+  const { book, old } = updated;
+  // A cover of ours it no longer shows, unless another book still does
+  if (old.cover && old.cover.url !== book.cover?.url)
+    await discardCover(me(req), old.cover.url).catch(() => {});
   res.json({ book: toPublicBook(book) });
 });
 

@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
+import { smallInputText } from '@/shared/ui/fieldStyles';
 import { RemoveButton } from '@/shared/ui/ListControls';
 import { floatingClass } from '@/shared/ui/surfaces';
 
@@ -33,7 +34,10 @@ export function BookSearch({
         onKeyDown={(e) => e.key === 'Escape' && onChange('')}
         placeholder='Search your books'
         aria-label='Search your books'
-        className='min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint'
+        className={cn(
+          'min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-faint',
+          smallInputText,
+        )}
       />
       {value && found !== undefined && (
         <span className='shrink-0 text-xs tabular-nums text-faint'>

@@ -1,8 +1,8 @@
 import { useId, useState, type KeyboardEvent, type MouseEvent } from 'react';
-import { Star } from 'lucide-react';
 import { labelClass } from './fieldStyles';
 import { halves } from '@/shared/lib/halves';
-import { RemoveButton } from './ListControls';
+import { RemoveAction } from './HoverAction';
+import { Stars } from './Stars';
 
 type StarRatingProps = {
   label: string;
@@ -57,7 +57,7 @@ export function StarRating({ label, value, onChange }: StarRatingProps) {
       <span id={labelId} className={labelClass}>
         {label}
       </span>
-      <div className='flex items-center gap-3'>
+      <div className='group flex items-center gap-3'>
         <div
           role='slider'
           tabIndex={0}
@@ -77,31 +77,14 @@ export function StarRating({ label, value, onChange }: StarRatingProps) {
           onKeyDown={onKeyDown}
           className='flex cursor-pointer rounded-md outline-offset-4 focus-visible:outline-2 focus-visible:outline-ink'
         >
-          {Array.from({ length: STARS }, (_, i) => {
-            const fill = Math.min(Math.max(shown - i, 0), 1);
-            return (
-              <span key={i} className='relative block px-0.5'>
-                <Star size={28} strokeWidth={1.25} className='text-line' />
-                <span
-                  className='absolute inset-y-0 left-0.5 overflow-hidden transition-[width] duration-200 ease-soft'
-                  style={{ width: `${fill * 28}px` }}
-                >
-                  <Star
-                    size={28}
-                    strokeWidth={1.25}
-                    className='fill-accent text-accent'
-                  />
-                </span>
-              </span>
-            );
-          })}
+          <Stars value={shown} />
         </div>
         {value > 0 && (
           <>
             <span className='font-serif text-lg text-ink-soft tabular-nums'>
               {halves(value)}
             </span>
-            <RemoveButton onClick={() => onChange(0)} label='Clear rating' />
+            <RemoveAction label='Clear rating' onClick={() => onChange(0)} />
           </>
         )}
       </div>

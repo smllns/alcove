@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from './useAuth';
+import { paths } from '@/shared/config/paths';
 
 // Route wrappers. While the session check is in flight they render nothing,
 // so a signed-in reader never sees the login form flash.
@@ -11,7 +12,9 @@ export function RequireAuth() {
   const location = useLocation();
   if (status === 'loading') return null;
   if (status === 'guest')
-    return <Navigate to='/login' replace state={{ from: location.pathname }} />;
+    return (
+      <Navigate to={paths.login} replace state={{ from: location.pathname }} />
+    );
   return <Outlet />;
 }
 
@@ -24,6 +27,6 @@ export function GuestOnly() {
   if (status === 'guest' && !wasGuest) setWasGuest(true);
   if (status === 'loading') return null;
   if (status === 'signed-in' && !wasGuest)
-    return <Navigate to='/library' replace />;
+    return <Navigate to={paths.library} replace />;
   return <Outlet />;
 }

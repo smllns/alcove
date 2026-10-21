@@ -16,11 +16,7 @@ export function shelfItem(
   { rise, step, faded }: { rise: boolean; step: number; faded?: boolean },
 ): { className: string; style: CSSProperties } {
   return {
-    className: cn(
-      'shelf-item transition-opacity duration-500 ease-soft',
-      rise && 'animate-rise',
-      faded && 'shelf-faded',
-    ),
+    className: cn('shelf-item', rise && 'animate-rise', faded && 'shelf-faded'),
     style: {
       ...(index < NAMED && {
         '--shelf-name': `book-${id}`,

@@ -64,7 +64,7 @@ export async function deleteCover(url: string) {
 }
 
 // Whether `url` is one of this reader's own uploads
-export function isOwnCover(userId: ObjectId, url: string) {
+function isOwnCover(userId: ObjectId, url: string) {
   try {
     const { protocol, hostname, pathname } = new URL(url);
     return (

@@ -50,6 +50,7 @@ export const SkyStar = memo(function SkyStar({
             title={book.title}
             author={author}
             url={book.cover?.url}
+            bookId={book.id}
             // The same picture as in the grid and the list
             size='L'
             className='star-cover sky-twinkle'

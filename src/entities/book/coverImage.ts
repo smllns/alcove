@@ -24,3 +24,7 @@ export function clothFor(title: string) {
   for (const char of title) hash = (hash * 31 + char.charCodeAt(0)) | 0;
   return cloths[Math.abs(hash) % cloths.length];
 }
+
+// The shadow under a cover shown large, as if held up off the page
+export const liftedCover =
+  'shadow-[0_30px_50px_-24px_rgb(var(--shade)/calc(0.55*var(--shade-k))),0_3px_8px_rgb(var(--shade)/calc(0.15*var(--shade-k)))]';

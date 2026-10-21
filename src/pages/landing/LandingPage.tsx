@@ -9,6 +9,7 @@ import { LandingFooter } from './LandingFooter';
 import { LandingHero } from './LandingHero';
 import { Preloader } from './preloader/Preloader';
 import { useLandingIntro } from './useLandingIntro';
+import { paths } from '@/shared/config/paths';
 
 const covers = showcaseBooks.map((book) => book.cover);
 
@@ -57,11 +58,11 @@ export function LandingPage() {
       >
         <SiteHeader className='site-header'>
           {status === 'signed-in' ? (
-            <ButtonLink to='/library' variant='pill' arrow>
+            <ButtonLink to={paths.library} variant='pill' arrow>
               Your library
             </ButtonLink>
           ) : (
-            <ButtonLink to='/login' variant='pill' arrow>
+            <ButtonLink to={paths.login} variant='pill' arrow>
               Log in
             </ButtonLink>
           )}

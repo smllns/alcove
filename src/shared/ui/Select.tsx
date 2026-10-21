@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { FieldNote } from './FieldNote';
-import { labelClass } from './fieldStyles';
+import { labelClass, smallInputText } from './fieldStyles';
 import { Popover } from './Popover';
 import { Option } from './SelectOption';
 import { jumpTo, type SelectOption } from './selectOptions';
@@ -169,7 +169,10 @@ export function Select<T extends string>({
               aria-label={`Search ${label.toLowerCase()}`}
               aria-controls={`${id}-list`}
               aria-activedescendant={`${id}-${active}`}
-              className='min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint'
+              className={cn(
+                'min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-faint',
+                smallInputText,
+              )}
             />
           </label>
         )}

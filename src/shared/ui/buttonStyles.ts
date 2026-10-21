@@ -28,13 +28,27 @@ export const iconButtonClass = (className?: string) =>
     className,
   );
 
+const choiceBase =
+  'cursor-pointer rounded-full border px-4 py-2 text-sm transition-colors duration-500 ease-soft';
+
 // One pill, chosen or not; for <Choices> and pill toggles built elsewhere
 export const choiceClass = (chosen: boolean) =>
   cn(
-    'cursor-pointer rounded-full border px-4 py-2 text-sm transition-colors duration-500 ease-soft',
+    choiceBase,
     chosen
       ? 'border-button bg-button text-button-text'
       : 'border-line bg-surface/70 text-ink-soft hover:border-ink hover:text-ink',
+  );
+
+// The same in a colour of its own, set as --tone: filled with it once
+// chosen, and edged with it on hover
+export const toneChoiceClass = (chosen: boolean) =>
+  cn(
+    choiceBase,
+    'flex items-center gap-2',
+    chosen
+      ? 'border-(--tone) bg-(--tone) text-button-text'
+      : 'border-line bg-surface/70 text-ink-soft hover:border-(--tone) hover:text-ink',
   );
 
 // A quiet round button that only shows a soft pill on hover, or when it's

@@ -23,7 +23,7 @@ const listKeys = ['homes', ...childKeys] as const;
 
 let lastId = 0;
 // A temporary id; the server swaps it for a real one on saving
-export const newId = () => `new-${++lastId}`;
+const newId = () => `new-${++lastId}`;
 
 export const blank = (): EditNode => ({ id: newId(), name: '', children: [] });
 

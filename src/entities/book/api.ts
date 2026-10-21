@@ -1,5 +1,11 @@
 import { request, requestBlob } from '@/shared/api/http';
-import type { Book, BookInput, CatalogueEdition, CatalogueWork } from './types';
+import type {
+  Book,
+  BookInput,
+  CatalogueEdition,
+  CatalogueRatings,
+  CatalogueWork,
+} from './types';
 
 export type BooksPage = {
   books: Book[];
@@ -18,6 +24,18 @@ export const addBook = async (input: BookInput) =>
   (await request<{ book: Book }>('/books', { method: 'POST', body: input }))
     .book;
 
+export const fetchBook = async (id: string) =>
+  (await request<{ book: Book }>(`/books/${id}`)).book;
+
+// Everything about the book replaced by `input`
+export const updateBook = async (id: string, input: BookInput) =>
+  (
+    await request<{ book: Book }>(`/books/${id}`, {
+      method: 'PUT',
+      body: input,
+    })
+  ).book;
+
 export const deleteBook = (id: string) =>
   request<void>(`/books/${id}`, { method: 'DELETE' });
 
@@ -32,6 +50,27 @@ export const fetchEditions = async (workKey: string) =>
       `/lookup/works/${workKey}/editions`,
     )
   ).editions;
+
+// What the book is about, as the catalogue describes it (null if it
+// doesn't), and the genres its subjects point to
+export const fetchWorkDetails = (workKey: string) =>
+  request<{ description: string | null; genres: string[] }>(
+    `/lookup/works/${workKey}`,
+  );
+
+// How the catalogue's readers rate the book; null if none have
+export const fetchWorkRatings = async (workKey: string) =>
+  (
+    await request<{ ratings: CatalogueRatings | null }>(
+      `/lookup/works/${workKey}/ratings`,
+    )
+  ).ratings;
+
+// Lines from the book, gathered on Wikiquote, and the page they're from
+export const fetchBookQuotes = (title: string, author: string) =>
+  request<{ quotes: string[]; source: string | null }>(
+    `/lookup/quotes?${new URLSearchParams({ title, author })}`,
+  );
 
 // `image` is a data URL, already shrunk in the browser
 export const uploadCover = async (image: string) =>

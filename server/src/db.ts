@@ -110,6 +110,11 @@ export type BookDoc = {
   series?: { name: string; number?: number };
   format?: BookFormat;
   genres?: string[];
+  // What it's about, from the catalogue or in the reader's own words
+  description?: string;
+  // How readers rate it elsewhere, out of five, as the reader put it: only
+  // for a book the catalogue has no ratings for (those are asked afresh)
+  averageRating?: number;
   // `uncopied`: a catalogue cover we couldn't keep a copy of
   cover?: { url: string; source: CoverSource; uncopied?: boolean };
   // Where the details came from, for refreshing them later

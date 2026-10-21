@@ -8,23 +8,28 @@ const DRAG_AFTER = 5;
 // The sky's pointer and wheel handling, turned into pans and zooms: a drag
 // moves it, two fingers pinch it, a trackpad pinch (a wheel with ctrl held)
 // zooms it and a plain wheel or two-finger scroll moves it. `onGrab` is
-// told when a hand goes on it, to stop anything else moving it.
+// told when a hand goes on it, to stop anything else moving it; `onTap`,
+// of a press that let go without moving, and what it was on.
 export function useSkyGestures(
   sky: RefObject<HTMLDivElement | null>,
   {
     pan,
     zoomAt,
     onGrab,
+    onTap,
   }: {
     pan: (dx: number, dy: number) => void;
     zoomAt: (px: number, py: number, factor: number) => void;
     onGrab: () => void;
+    onTap?: (target: Element) => void;
   },
 ) {
   const [dragging, setDragging] = useState(false);
   const pointers = useRef(new Map<number, Point>());
   // Where a press began, to tell a drag from a click
   const start = useRef<Point | null>(null);
+  // What a single press is on, until it moves or another finger joins
+  const pressed = useRef<Element | null>(null);
 
   // Has to be a non-passive listener to keep the page itself from
   // scrolling or zooming
@@ -57,9 +62,21 @@ export function useSkyGestures(
     // Buttons over the sky (zoom, fit) work as buttons, not as a drag
     if (e.button !== 0 || (e.target as Element).closest('button')) return;
     onGrab();
-    e.currentTarget.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, local(e));
-    if (pointers.current.size === 1) start.current = local(e);
+    if (pointers.current.size === 1) {
+      start.current = local(e);
+      pressed.current = e.target as Element;
+    } else {
+      pressed.current = null;
+    }
+  };
+
+  // The sky takes hold of the pointer only once it's moving the sky, not
+  // as it's pressed: holding it takes the hover off the book under it,
+  // which would fall back to its starry shape just as it's clicked open
+  const hold = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -78,6 +95,7 @@ export function useSkyGestures(
       if (before > 0)
         zoomAt((now.x + other.x) / 2, (now.y + other.y) / 2, after / before);
       pan((now.x - previous.x) / 2, (now.y - previous.y) / 2);
+      hold(e);
       setDragging(true);
     } else if (others.length === 0) {
       const from = start.current;
@@ -85,7 +103,9 @@ export function useSkyGestures(
         dragging ||
         (from && Math.hypot(now.x - from.x, now.y - from.y) > DRAG_AFTER)
       ) {
+        hold(e);
         setDragging(true);
+        pressed.current = null;
         pan(now.x - previous.x, now.y - previous.y);
       }
     }
@@ -97,6 +117,9 @@ export function useSkyGestures(
     if (pointers.current.size > 0) return;
     setDragging(false);
     start.current = null;
+    const tapped = pressed.current;
+    pressed.current = null;
+    if (tapped && e.type === 'pointerup') onTap?.(tapped);
   };
 
   return {
@@ -106,6 +129,10 @@ export function useSkyGestures(
       onPointerMove,
       onPointerUp,
       onPointerCancel: onPointerUp,
+      // Let go of off the sky before it was held: nothing more to follow
+      onPointerLeave: (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!e.currentTarget.hasPointerCapture(e.pointerId)) onPointerUp(e);
+      },
     },
   };
 }

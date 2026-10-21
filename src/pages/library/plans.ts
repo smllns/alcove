@@ -1,4 +1,4 @@
-import type { SectionKey } from './sections';
+import type { SectionKey } from '@/widgets/library-header';
 
 // What each section still to be built will hold, shown in its place
 type Plan = {

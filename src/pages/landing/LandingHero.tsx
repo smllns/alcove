@@ -1,6 +1,7 @@
 import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Eyebrow } from '@/shared/ui/PageHeading';
 import './landing.css';
+import { paths } from '@/shared/config/paths';
 
 export function LandingHero() {
   return (
@@ -26,10 +27,10 @@ export function LandingHero() {
         </p>
 
         <div className='hero-actions mt-6 flex flex-col items-center justify-center gap-2 sm:mt-10 sm:flex-row sm:gap-3'>
-          <ButtonLink to='/register' arrow>
+          <ButtonLink to={paths.register} arrow>
             Build your library
           </ButtonLink>
-          <ButtonLink to='/login' variant='secondary'>
+          <ButtonLink to={paths.login} variant='secondary'>
             I already have an account
           </ButtonLink>
         </div>

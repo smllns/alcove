@@ -16,8 +16,6 @@ export function ShelfToolbar({
   search,
   shelf,
   listFinds,
-  picked,
-  onPick,
   view,
   onView,
   onViewKind,
@@ -27,11 +25,9 @@ export function ShelfToolbar({
   edge: Ref<HTMLDivElement>;
   search: ReturnType<typeof useShelfSearch>;
   shelf: Shelf;
-  // List what a search finds under the field, to pick one to fly to,
-  // rather than lighting the stars up (on a phone, behind the keyboard)
+  // List what a search finds under the field, to open one, rather than
+  // lighting the stars up (on a phone, behind the keyboard)
   listFinds: boolean;
-  picked: string | null;
-  onPick: (id: string | null) => void;
   view: BookView;
   onView: (view: BookView) => void;
   onViewKind: (kind: ViewKind) => void;
@@ -45,24 +41,15 @@ export function ShelfToolbar({
       <div className='relative w-full sm:w-auto'>
         <BookSearch
           value={search.text}
-          onChange={(text) => {
-            onPick(null);
-            search.setText(text);
-          }}
+          onChange={search.setText}
           found={search.query ? shelf.found.length : undefined}
           className='w-full sm:w-60'
         />
-        {listFinds && search.query && !picked && (
+        {listFinds && search.query && (
           <SearchResults
             books={shelf.found}
             search={search.query}
             loading={!shelf.complete}
-            onPick={(book) => {
-              onPick(book.id);
-              // Down goes the keyboard, so the sky can be seen
-              if (document.activeElement instanceof HTMLElement)
-                document.activeElement.blur();
-            }}
           />
         )}
       </div>

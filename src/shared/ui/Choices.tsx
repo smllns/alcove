@@ -1,11 +1,12 @@
-import { useId } from 'react';
+import { useId, type CSSProperties } from 'react';
 import { cn } from '@/shared/lib/cn';
-import { choiceClass } from './buttonStyles';
+import { choiceClass, toneChoiceClass } from './buttonStyles';
 import { labelClass } from './fieldStyles';
 
 type ChoicesProps<T extends string> = {
   label: string;
-  options: { value: T; label: string }[];
+  // `tone`: a colour of its own, as a CSS colour
+  options: { value: T; label: string; tone?: string }[];
   value: T | '';
   onChange: (value: T | '') => void;
   // Picking the chosen one again clears it, for optional answers
@@ -31,9 +32,14 @@ export function Choices<T extends string>({
             <label
               key={option.value}
               className={cn(
-                choiceClass(chosen),
+                option.tone ? toneChoiceClass(chosen) : choiceClass(chosen),
                 'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink',
               )}
+              style={
+                option.tone
+                  ? ({ '--tone': option.tone } as CSSProperties)
+                  : undefined
+              }
             >
               <input
                 type='radio'
@@ -44,6 +50,15 @@ export function Choices<T extends string>({
                 onClick={() => clearable && chosen && onChange('')}
                 className='sr-only'
               />
+              {option.tone && (
+                <span
+                  aria-hidden
+                  className={cn(
+                    'size-2 rounded-full transition-colors duration-500 ease-soft',
+                    chosen ? 'bg-button-text/85' : 'bg-(--tone)',
+                  )}
+                />
+              )}
               {option.label}
             </label>
           );

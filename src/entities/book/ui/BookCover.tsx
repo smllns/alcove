@@ -8,6 +8,11 @@ type BookCoverProps = {
   url?: string;
   size?: CoverSize;
   className?: string;
+  // Whose cover it is, so it can fly to the same book's cover on another
+  // page (shared/lib/coverFlight)
+  bookId?: string;
+  // The cover on the book's own page, the one that flies home from it
+  home?: boolean;
 };
 
 // Pictures already loaded once on this visit: shown again at once, without
@@ -22,6 +27,8 @@ export function BookCover({
   url,
   size = 'M',
   className,
+  bookId,
+  home,
 }: BookCoverProps) {
   const src = url && sizedCover(url, size);
   const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(
@@ -31,6 +38,8 @@ export function BookCover({
 
   return (
     <div
+      data-cover-of={bookId}
+      data-cover-home={home || undefined}
       className={cn(
         // book-cover: what flies between the views of the library
         'book-cover @container relative aspect-2/3 overflow-hidden rounded-[3px] bg-line/40',

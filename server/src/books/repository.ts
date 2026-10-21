@@ -66,6 +66,28 @@ export function findSameBook(userId: ObjectId, input: BookInput) {
 export const findBook = (userId: ObjectId, id: ObjectId) =>
   books().findOne({ _id: id, userId });
 
+// The book as the reader now describes it, everything replaced but when
+// it was added. The cover it had stays as it was (a copy we keep, say)
+// when it's still the same picture. Null when it isn't theirs.
+export async function updateBook(
+  userId: ObjectId,
+  id: ObjectId,
+  input: BookInput,
+) {
+  const old = await findBook(userId, id);
+  if (!old) return null;
+  const book: BookDoc = {
+    _id: id,
+    userId,
+    ...input,
+    cover: input.cover?.url === old.cover?.url ? old.cover : input.cover,
+    createdAt: old.createdAt,
+    updatedAt: new Date(),
+  };
+  await books().replaceOne({ _id: id, userId }, book);
+  return { book, old };
+}
+
 export const deleteBook = (userId: ObjectId, id: ObjectId) =>
   books().findOneAndDelete({ _id: id, userId });
 

@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth';
 import { useForm } from '@/shared/lib/useForm';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import type { AuthMode } from './authCopy';
+import { paths } from '@/shared/config/paths';
 
 // One form for both modes, so the email you typed survives switching between
 // log in and sign up. On success, goes back to the page that sent the reader
@@ -23,7 +24,7 @@ export function useAuthForm(mode: AuthMode) {
       }
       const from = (location.state as { from?: string } | null)?.from;
       navigate(
-        from ?? (mode === 'register' ? '/welcome' : '/library'),
+        from ?? (mode === 'register' ? paths.welcome : paths.library),
         'forward',
         { replace: true },
       );

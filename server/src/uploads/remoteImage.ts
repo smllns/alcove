@@ -9,7 +9,7 @@ import { imageType } from './imageType.js';
 // few redirects at most, a size cap, and the bytes must be a real image.
 
 // Under Vercel's 4.5 MB response limit, with room to spare
-export const MAX_REMOTE_BYTES = 4 * 1024 * 1024;
+const MAX_REMOTE_BYTES = 4 * 1024 * 1024;
 const MAX_REDIRECTS = 3;
 
 const privateRanges = new BlockList();

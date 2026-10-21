@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 
 // Ref for an element, and whether it's within `margin` of the viewport.
-// Handy as a sentinel for loading more as you scroll.
-export function useInView<T extends Element>(margin = '600px') {
+// Handy as a sentinel for loading more as you scroll. `initially`: what
+// to assume before it's first looked at.
+export function useInView<T extends Element>(
+  margin = '600px',
+  initially = false,
+) {
   const ref = useRef<T>(null);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(initially);
 
   useEffect(() => {
     const el = ref.current;

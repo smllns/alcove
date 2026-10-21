@@ -31,13 +31,15 @@ const sizeOf = (el: HTMLElement): Size => ({
 // Where the sky is looked at from, and every way of moving it. Until the
 // reader moves it themselves, it keeps every book in view as more of them
 // load. Given `focus` (the part of the sky a search found), it glides
-// there, and back to the whole sky once the search is cleared.
+// there, and back to the whole sky once the search is cleared. `onTap`
+// is told what a press that didn't move the sky was on.
 export function useSkyCamera(
   sky: React.RefObject<HTMLDivElement | null>,
   { bounds, typicalWidth }: { bounds: Bounds; typicalWidth: number },
   focus: Bounds | null = null,
   // Where the free sky starts, below whatever floats over its top
   insetTop = 0,
+  onTap?: (target: Element) => void,
 ) {
   // The start: everything, unless that would make the books too small
   const readable = typicalWidth ? READABLE_WIDTH / typicalWidth : MIN_ZOOM;
@@ -116,7 +118,12 @@ export function useSkyCamera(
     },
     [stopGliding],
   );
-  const gestures = useSkyGestures(sky, { pan, zoomAt, onGrab: stopGliding });
+  const gestures = useSkyGestures(sky, {
+    pan,
+    zoomAt,
+    onGrab: stopGliding,
+    onTap,
+  });
 
   // Zooming around the middle, gliding, for the buttons and the keyboard
   const zoomBy = (factor: number) => {

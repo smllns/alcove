@@ -1,7 +1,7 @@
 import { cn } from '@/shared/lib/cn';
 import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
 import { plans } from './plans';
-import type { SectionKey } from './sections';
+import type { SectionKey } from '@/widgets/library-header';
 
 // A section that isn't built yet: what it's for, and a faint glimpse of it
 export function ComingSoon({

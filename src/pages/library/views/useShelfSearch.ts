@@ -20,3 +20,14 @@ export function useShelfSearch() {
 
   return { text, setText, query: text.trim() };
 }
+
+// Takes the search out of the address the reader will come back to, as
+// they open a book, so coming back shows the whole shelf again. Only the
+// browser's record of the page changes; the shelf on screen stays as it
+// is while it goes.
+export function forgetSearch() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has('q')) return;
+  url.searchParams.delete('q');
+  window.history.replaceState(window.history.state, '', url);
+}

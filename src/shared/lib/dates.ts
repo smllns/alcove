@@ -47,3 +47,13 @@ export const monthName = (date: Date) =>
   date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
 export const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Days from today to `day`: 0 for today, below 0 for a day gone by; null
+// for something that isn't a day
+export function daysFromToday(day: string) {
+  const date = fromDay(day);
+  const now = fromDay(today());
+  return date && now ? Math.round((+date - +now) / DAY_MS) : null;
+}

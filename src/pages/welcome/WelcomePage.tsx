@@ -1,3 +1,5 @@
+import { cn } from '@/shared/lib/cn';
+import { pageWidthClass } from '@/shared/ui/surfaces';
 import { usePlaces } from '@/entities/place/queries';
 import { useAuth } from '@/features/auth';
 import { PlacesEditor, PlacesExample } from '@/features/places';
@@ -6,6 +8,7 @@ import { Button } from '@/shared/ui/Button';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { SiteHeader } from '@/shared/ui/SiteHeader';
 import { Loading } from '@/shared/ui/Loading';
+import { paths } from '@/shared/config/paths';
 
 const steps = [
   {
@@ -29,13 +32,13 @@ export function WelcomePage() {
   const { user } = useAuth();
   const places = usePlaces();
   const navigate = useTransitionNavigate();
-  const toLibrary = () => navigate('/library', 'forward', { replace: true });
+  const toLibrary = () => navigate(paths.library, 'forward', { replace: true });
 
   return (
     <main className='bg-paper min-h-screen text-ink'>
-      <SiteHeader home='/library' />
+      <SiteHeader home={paths.library} />
 
-      <div className='mx-auto w-full max-w-7xl px-6 pb-24 pt-4 sm:px-10 sm:pt-8 lg:px-16'>
+      <div className={cn('pb-24 pt-4 sm:pt-8', pageWidthClass)}>
         <Eyebrow rise={0}>Welcome, {user?.name}</Eyebrow>
         <PageTitle rise={80} className='mt-3 sm:mt-4'>
           Where do your books live?

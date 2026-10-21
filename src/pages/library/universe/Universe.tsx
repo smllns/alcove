@@ -5,8 +5,11 @@ import { SkyControls } from './SkyControls';
 import { useSkyShape } from './shape';
 import { SkyStar } from './SkyStar';
 import { useSkyCamera } from './useSkyCamera';
+import { leaveForBook } from '../views/leaveForBook';
+import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { cn } from '@/shared/lib/cn';
 import { floatingClass } from '@/shared/ui/surfaces';
+import { paths } from '@/shared/config/paths';
 
 // How much slower the dust moves than the books, for a sense of depth
 const DUST_DEPTH = 0.35;
@@ -39,12 +42,24 @@ export function Universe({
     () => (lit ? layout.stars.filter((star) => lit.has(star.book.id)) : []),
     [layout, lit],
   );
+  const navigate = useTransitionNavigate();
+  // A book tapped (not dragged past) opens
+  const open = (target: Element) => {
+    const star = target
+      .closest<HTMLElement>('.star-body')
+      ?.closest<HTMLElement>('[data-star]');
+    const id = star?.dataset.star;
+    if (!id) return;
+    leaveForBook(id, star);
+    navigate(paths.book(id));
+  };
   const { camera, placed, dragging, fit, zoomIn, zoomOut, handlers } =
     useSkyCamera(
       sky,
       layout,
       litStars.length ? boundsOf(litStars) : null,
       insetTop,
+      open,
     );
 
   return (

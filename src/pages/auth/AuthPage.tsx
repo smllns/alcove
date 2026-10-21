@@ -7,13 +7,14 @@ import { Typewriter } from '@/shared/ui/Typewriter';
 import { authCopy, type AuthMode } from './authCopy';
 import { AuthForm } from './AuthForm';
 import { CoverFan } from './CoverFan';
+import { paths } from '@/shared/config/paths';
 
 // Log in and sign up are one screen that changes in place: the covers
 // reshuffle, the words retype themselves, and the form grows or loses a field.
 // Lines retype top to bottom, this far apart:
 const STAGGER = 90;
 export function AuthPage() {
-  const mode: AuthMode = useMatch('/register') ? 'register' : 'login';
+  const mode: AuthMode = useMatch(paths.register) ? 'register' : 'login';
   const copy = authCopy[mode];
 
   const rise = (delay: number) => ({ animationDelay: `${delay}ms` });
@@ -33,7 +34,7 @@ export function AuthPage() {
         </div>
 
         <section className='mx-auto w-full max-w-sm lg:mx-0'>
-          <BackLink to='/' />
+          <BackLink to={paths.home} />
 
           <Eyebrow rise={80}>
             <Typewriter text={copy.eyebrow} />

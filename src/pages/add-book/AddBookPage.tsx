@@ -2,10 +2,11 @@ import { useState } from 'react';
 import type { CatalogueEdition, CatalogueWork } from '@/entities/book/types';
 import { InnerPage } from '@/shared/ui/InnerPage';
 import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
-import { AddBookForm } from './AddBookForm';
+import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
+import { BookForm, emptyFields } from '@/widgets/book-form';
 import { CatalogueSearch } from './CatalogueSearch';
-import { emptyFields } from './draft';
 import { PickedBook } from './PickedBook';
+import { paths } from '@/shared/config/paths';
 
 type Step =
   | { kind: 'search' }
@@ -14,6 +15,7 @@ type Step =
 
 // Find the book in the catalogue (or type it in), check the details, add it
 export function AddBookPage() {
+  const navigate = useTransitionNavigate();
   const [step, setStep] = useState<Step>({ kind: 'search' });
   const back = () => setStep({ kind: 'search' });
 
@@ -47,10 +49,11 @@ export function AddBookPage() {
           />
         )}
         {step.kind === 'manual' && (
-          <AddBookForm
+          <BookForm
             fields={emptyFields}
             extras={{}}
             editions={[]}
+            onSaved={() => navigate(paths.library, 'forward')}
             onBack={back}
           />
         )}
