@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SceneSlot } from '@/entities/book/demo';
 import { prefersReducedMotion } from '@/shared/lib/motion';
+import { WALL_DEPTH } from './lighting';
 
 const damp = THREE.MathUtils.damp;
 
@@ -12,6 +13,9 @@ const INTRO_STAGGER = 1.8;
 const INTRO_EASE_IN = 3.5;
 const INTRO_SPEED = 1.3;
 const SPEED = 4;
+// How far back a book starts, and how far it keeps in front of the wall
+const ENTRANCE_DEPTH = -4;
+const WALL_CLEARANCE = 0.3;
 
 type MotionOptions = {
   slot: SceneSlot;
@@ -102,12 +106,16 @@ export function useBookMotion({
   return { body, cover };
 }
 
-// Where a book starts before its entrance: deep in the scene, tiny, mid-spin
-export function entrancePose(slot: SceneSlot, index: number) {
+// Where a book starts before its entrance: deep in the scene, tiny, mid-spin.
+// Never behind the wall that catches the shadows, though (`depth`: how deep
+// the book hangs): the wall would cover it, and a book flying in through
+// another's shadow would sit dark in it, then flash into the light
+export function entrancePose(slot: SceneSlot, index: number, depth: number) {
   const [rx, ry, rz] = slot.rotation;
   const spin = index % 2 === 0 ? 1 : -1;
+  const z = Math.max(ENTRANCE_DEPTH, WALL_DEPTH + WALL_CLEARANCE - depth);
   return {
-    position: [0, -0.6, -4] as [number, number, number],
+    position: [0, -0.6, z] as [number, number, number],
     rotation: [rx, ry + spin * Math.PI * 2, rz] as [number, number, number],
     scale: 0.001,
   };

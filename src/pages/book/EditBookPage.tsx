@@ -1,5 +1,6 @@
 import { useLayoutEffect } from 'react';
 import { useEditions } from '@/entities/book/catalogueQueries';
+import { scrollCarried } from '@/shared/lib/carryScroll';
 import { useGoBack } from '@/shared/lib/useGoBack';
 import { Loading } from '@/shared/ui/Loading';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
@@ -18,8 +19,9 @@ export function EditBookPage() {
   const editions = useEditions(book?.openLibrary?.work);
   // Always from the top: the book's page may have been left far down it,
   // and not every browser starts a new page at its top on its own
+  // (unless it's being carried there unseen)
   useLayoutEffect(() => {
-    window.scrollTo(0, 0);
+    if (!scrollCarried()) window.scrollTo(0, 0);
   }, []);
 
   return (

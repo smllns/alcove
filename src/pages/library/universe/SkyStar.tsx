@@ -45,7 +45,8 @@ export const SkyStar = memo(function SkyStar({
           } as CSSProperties
         }
       >
-        <div className='star-body'>
+        {/* Glimmering as a whole, shadow and all (universe.css) */}
+        <div className='star-body sky-twinkle'>
           <BookCover
             title={book.title}
             author={author}
@@ -53,7 +54,7 @@ export const SkyStar = memo(function SkyStar({
             bookId={book.id}
             // The same picture as in the grid and the list
             size='L'
-            className='star-cover sky-twinkle'
+            className='star-cover'
           />
         </div>
         {/* Clear of the grown cover (it reaches 19% of its width further

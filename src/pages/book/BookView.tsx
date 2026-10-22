@@ -10,6 +10,7 @@ import { BackLink } from '@/shared/ui/BackLink';
 import { Button } from '@/shared/ui/Button';
 import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Collapse } from '@/shared/ui/Collapse';
+import { RatingFigure } from '@/shared/ui/Rating';
 import { Stars } from '@/shared/ui/Stars';
 import { sheetClass } from '@/shared/ui/surfaces';
 import { AboutBook } from './AboutBook';
@@ -65,9 +66,7 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
                   className='-ml-0.5 mt-3 flex items-center gap-2'
                 >
                   <Stars value={rating} size={18} />
-                  <span className='font-serif text-lg text-ink-soft'>
-                    {halves(rating)}
-                  </span>
+                  <RatingFigure>{halves(rating)}</RatingFigure>
                 </span>
               ) : null}
             </div>

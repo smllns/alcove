@@ -1,16 +1,20 @@
 import { useRef, useState } from 'react';
-import { keepInPlace } from '@/shared/lib/keepInPlace';
+import { themeEase } from '@/shared/lib/easing';
+import { foldMotion } from '@/shared/lib/foldMotion';
 import { useEditCopy } from '@/entities/book/queries';
 import { useBookQuotes } from '@/entities/book/catalogueQueries';
 import type { Book } from '@/entities/book/types';
 import { Collapse, COLLAPSE_MS } from '@/shared/ui/Collapse';
 import { Fold } from '@/shared/ui/Fold';
 import { FormError } from '@/shared/ui/FormError';
-import { AddButton, QuietButton } from '@/shared/ui/ListControls';
+import { AddButton } from '@/shared/ui/ListControls';
+import { MoreToggle } from '@/shared/ui/MoreToggle';
 import { BookSection } from './BookSection';
 
 // Shown at first; the rest on asking
 const FIRST = 4;
+// As the list's own items open and close (Collapse)
+const easeSoft = themeEase('--ease-soft');
 
 // Lines from the book that others have kept (on Wikiquote), to keep among
 // the reader's own quotes with a click. One kept folds away and grows into
@@ -20,7 +24,7 @@ export function QuoteSuggestions({ book }: { book: Book }) {
   const found = useBookQuotes(book.title, book.authors[0]);
   const { save, pending, error } = useEditCopy(book);
   const [all, setAll] = useState(false);
-  const toggle = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLUListElement>(null);
   // Kept, and folding away before it moves over
   const [leaving, setLeaving] = useState<string | null>(null);
   const kept = (pending ?? book.copy)?.quotes ?? [];
@@ -41,7 +45,7 @@ export function QuoteSuggestions({ book }: { book: Book }) {
   return (
     <BookSection title='Lines from the book'>
       {/* Those past the first few open out when asked for */}
-      <ul>
+      <ul ref={list}>
         {offered.map((quote, i) => (
           <li key={quote}>
             <Collapse open={leaving !== quote && (all || i < FIRST)}>
@@ -63,17 +67,23 @@ export function QuoteSuggestions({ book }: { book: Book }) {
         ))}
       </ul>
       {offered.length > FIRST && (
-        <div ref={toggle} className='-mt-2'>
-          <QuietButton
-            onClick={() => {
-              // Folding back, the page goes along with it
-              if (all) keepInPlace(toggle.current, COLLAPSE_MS);
-              setAll(!all);
-            }}
-          >
-            {all ? 'Fewer' : `${offered.length - FIRST} more`}
-          </QuietButton>
-        </div>
+        <MoreToggle
+          open={all}
+          onClick={() => {
+            // The page holds still, unless the list would close up out
+            // of sight above
+            foldMotion({
+              at: list.current?.children[FIRST] ?? null,
+              closing: all,
+              ms: COLLAPSE_MS,
+              ease: easeSoft,
+            });
+            setAll(!all);
+          }}
+          className='-mt-2'
+        >
+          {all ? 'Fewer' : `${offered.length - FIRST} more`}
+        </MoreToggle>
       )}
       <FormError message={error} small className='mt-2' />
       {/* Credit, as Wikiquote's licence asks */}

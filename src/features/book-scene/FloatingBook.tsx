@@ -37,7 +37,9 @@ export function FloatingBook({
     hovered,
     introStart,
   });
-  const pose = settled ? restPose(book) : entrancePose(book, index);
+  const pose = settled
+    ? restPose(book)
+    : entrancePose(book, index, position[2]);
 
   const onOver = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();

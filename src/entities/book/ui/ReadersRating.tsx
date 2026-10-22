@@ -1,5 +1,6 @@
 import { counted } from '@/shared/lib/plural';
 import { labelClass } from '@/shared/ui/fieldStyles';
+import { RatingFigure } from '@/shared/ui/Rating';
 import { Stars } from '@/shared/ui/Stars';
 
 // How readers at large rate a book: small stars, the average out of five,
@@ -25,9 +26,7 @@ export function ReadersRating({
       {/* As tall as the reader's own stars, so the two can line up */}
       <div className='flex h-7 items-center gap-3'>
         <Stars value={average} size={18} />
-        <span className='font-serif text-lg text-ink-soft tabular-nums'>
-          {average.toFixed(1)}
-        </span>
+        <RatingFigure>{average.toFixed(1)}</RatingFigure>
         {count !== undefined && (
           <span className='text-sm text-muted'>{counted(count, 'rating')}</span>
         )}

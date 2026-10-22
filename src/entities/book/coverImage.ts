@@ -6,6 +6,13 @@ export const sizedCover = (url: string, size: CoverSize) =>
     ? url.replace(/-[SML]\.jpg$/, `-${size}.jpg`)
     : url;
 
+// Pictures already loaded once on this visit: shown again at once, without
+// fading in a second time (from one view of the library to another, or
+// from the shelves to a book's page, its light and all)
+const seen = new Set<string>();
+export const coverSeen = (src: string) => seen.has(src);
+export const markCoverSeen = (src: string) => void seen.add(src);
+
 // Warm, muted cloth colours for books without a picture, picked by title so a
 // book always gets the same one
 const cloths = [

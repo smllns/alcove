@@ -94,7 +94,8 @@ export function BookReview({
               )}
             >
               {/* Hovered, it lifts a little, and a pencil on its corner offers
-            to change it (as does a click on the words themselves) */}
+            to change it (as does a click on the words themselves, unless
+            they're long and fold, when a click opens them out) */}
               {!writing && (
                 <HoverAction
                   label='Edit review'

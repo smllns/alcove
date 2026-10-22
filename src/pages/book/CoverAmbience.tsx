@@ -1,68 +1,54 @@
-import { useEffect, useRef, useState } from 'react';
-import { clothFor, sizedCover } from '@/entities/book/coverImage';
+import { useState } from 'react';
+import {
+  clothFor,
+  coverSeen,
+  sizedCover,
+  type CoverSize,
+} from '@/entities/book/coverImage';
 import type { Book } from '@/entities/book/types';
+import { useCoverPicture } from '@/entities/book/useCoverPicture';
 import { cn } from '@/shared/lib/cn';
-import { reducedMotionNow } from '@/shared/lib/motion';
+import { useLightDrift } from './useLightDrift';
 
-// How much slower than the page the light drifts up, how far it goes at
-// most (in screens, so it never leaves an empty paper below it), and how
-// far it dims once a screen has been scrolled by
-const DRIFT = 0.3;
-const FURTHEST = 0.5;
-const DIMMED = 0.55;
+const sizes: CoverSize[] = ['L', 'M', 'S'];
 
 // The book's own colours, washed behind its page: its cover, blurred far
 // past recognition and faded into the paper, so every book's page takes on
 // a light of its own. It stays behind the page all the way down, drifting
-// a little slower than the page (and not at all for those who'd rather
-// things kept still), dimming somewhat once the top is left behind so the
-// reading stays easy. A book without a picture glows in its cloth.
+// and dimming as it scrolls (useLightDrift). A book without a picture (or
+// whose picture is missing) glows in its cloth. Its cover seen already (on
+// the shelves, say), the light is there from the first frame, so it comes
+// and goes with the page rather than after it.
 export function CoverAmbience({ book }: { book: Book }) {
-  const [loaded, setLoaded] = useState(false);
-  const light = useRef<HTMLDivElement>(null);
   const url = book.cover?.url;
-
-  // Straight onto the element, frame by frame, rather than re-rendering
-  useEffect(() => {
-    const el = light.current;
-    if (!el) return;
-    let frame = 0;
-    const follow = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const passed = Math.min(scrollY / innerHeight, 1);
-        el.style.opacity = String(1 - passed * (1 - DIMMED));
-        if (!reducedMotionNow())
-          el.style.transform = `translateY(${-Math.min(scrollY * DRIFT, innerHeight * FURTHEST)}px)`;
-      });
-    };
-    follow();
-    addEventListener('scroll', follow, { passive: true });
-    return () => {
-      removeEventListener('scroll', follow);
-      cancelAnimationFrame(frame);
-    };
-  }, []);
+  // Blurred this far, any size will do: whichever was seen already (the
+  // shelves and the sky show it large, a list small), or the large one the
+  // page itself shows
+  const [src] = useState(
+    () =>
+      url &&
+      (sizes.map((size) => sizedCover(url, size)).find(coverSeen) ??
+        sizedCover(url, 'L')),
+  );
+  const { known, load, picture } = useCoverPicture(src);
+  const light = useLightDrift<HTMLDivElement>();
 
   return (
     <div
       aria-hidden
       className='pointer-events-none fixed inset-0 -z-10 overflow-hidden'
-      // Strongest at the top, never quite gone further down
-      style={{
-        maskImage:
-          'linear-gradient(to bottom, black 25%, rgb(0 0 0 / 0.55) 75%, rgb(0 0 0 / 0.35))',
-      }}
     >
       <div ref={light} className='absolute inset-x-0 top-[-10%] h-[180%]'>
-        {url ? (
+        {src && load !== 'failed' ? (
           <img
-            src={sizedCover(url, 'M')}
+            src={src}
             alt=''
-            onLoad={() => setLoaded(true)}
+            {...picture}
             className={cn(
-              'absolute left-1/2 top-[-15%] h-[130%] w-[130%] max-w-none -translate-x-1/2 object-cover blur-[90px] saturate-150 transition-opacity duration-[1.5s] ease-soft dark:saturate-[1.6] dark:brightness-110',
-              loaded ? 'opacity-30' : 'opacity-0',
+              'absolute left-1/2 top-[-15%] h-[130%] w-[130%] max-w-none -translate-x-1/2 object-cover blur-[90px] saturate-150 dark:saturate-[1.6] dark:brightness-110',
+              // Only one coming in late fades in, evenly, not all at once
+              !known && 'transition-opacity duration-[1.5s] ease-in-out',
+              load === 'loaded' ? 'opacity-30' : 'opacity-0',
             )}
           />
         ) : (
@@ -74,6 +60,17 @@ export function CoverAmbience({ book }: { book: Book }) {
           />
         )}
       </div>
+      {/* Strongest at the top, never quite gone further down: the paper
+          laid back over it, more of it lower down. Not a mask, which
+          Safari leaves out of the picture it takes of the page as it
+          turns to the next, so the light blinks off */}
+      <div
+        className='absolute inset-0'
+        style={{
+          background:
+            'linear-gradient(to bottom, transparent 25%, color-mix(in oklab, var(--bg-mid) 45%, transparent) 75%, color-mix(in oklab, var(--bg-mid) 65%, transparent))',
+        }}
+      />
     </div>
   );
 }

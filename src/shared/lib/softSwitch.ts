@@ -6,30 +6,45 @@ import { setPageTransition } from './pageTransition';
 // transitions.css) softly: the old fades away as the new comes in, and the
 // part grows or shrinks to fit, rather than everything jumping at once.
 // Plainly, where the browser can't or the reader would rather not.
-export function softSwitch(change: () => void) {
+// `settle`: anything to put right once the change is on the page, before
+// it's shown, e.g. where the page is scrolled to
+export function softSwitch(change: () => void, settle?: () => void) {
+  const changed = () => {
+    flushSync(change);
+    settle?.();
+  };
   if (!document.startViewTransition || reducedMotionNow()) {
-    change();
+    changed();
     return;
   }
   setPageTransition('switch');
-  document.startViewTransition(() => flushSync(change));
+  document.startViewTransition(changed);
 }
 
-// Back up to the top of the page first, then the change, so it's seen
-export function softSwitchFromTop(change: () => void) {
-  if (scrollY < 4 || reducedMotionNow()) {
-    window.scrollTo(0, 0);
-    softSwitch(change);
+// Over to `top` of the page first, then the change, so it's seen
+export function softSwitchAt(
+  top: number,
+  change: () => void,
+  settle?: () => void,
+) {
+  if (Math.abs(scrollY - top) < 4 || reducedMotionNow()) {
+    window.scrollTo(0, top);
+    softSwitch(change, settle);
     return;
   }
-  let done = false;
-  const go = () => {
-    if (done) return;
-    done = true;
-    softSwitch(change);
+  window.scrollTo({ top, behavior: 'smooth' });
+  // The change comes the moment the page gets there, or stops short of it
+  // (at its end): watched frame by frame, as not every browser says when a
+  // scroll ends, and waiting it out would leave the page sitting still
+  const began = performance.now();
+  let last = scrollY;
+  let still = 0;
+  const watch = () => {
+    still = scrollY === last ? still + 1 : 0;
+    last = scrollY;
+    const arrived = Math.abs(scrollY - top) < 2 || still >= 3;
+    if (arrived || performance.now() - began > 1000) softSwitch(change, settle);
+    else requestAnimationFrame(watch);
   };
-  window.addEventListener('scrollend', go, { once: true });
-  // Not every browser says when a scroll ends
-  window.setTimeout(go, 700);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  requestAnimationFrame(watch);
 }

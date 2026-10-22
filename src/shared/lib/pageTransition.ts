@@ -1,3 +1,4 @@
+import { holdScrollForReturn } from './carryScroll';
 import { flyCoverHome } from './coverFlight';
 
 // How a page change animates.
@@ -46,5 +47,6 @@ export function returnOnHistoryBack() {
       .hasUAVisualTransition;
     setPageTransition(own ? 'none' : 'return');
     if (!own) flyCoverHome();
+    holdScrollForReturn();
   });
 }

@@ -37,7 +37,9 @@ export function StepHeading({
     );
 
   return (
-    <div ref={ref} className='mb-8'>
+    // Moving along softly as what's above changes with the step (on a
+    // phone, the cover choices; transitions.css)
+    <div ref={ref} className='step-tabs mb-8'>
       <p className={cn('mb-3', labelClass)}>What to change</p>
       <div
         role='tablist'

@@ -75,14 +75,12 @@ html:has([data-sky-page]) body {
   animation: sky-drift var(--drift-time) ease-in-out var(--drift-delay) infinite;
 }
 
-/* …and glimmers now and then */
+/* …and glimmers now and then. By its opacity, not a filter: a cover whose
+   picture keeps changing under its shadow (.star-body) has the shadow
+   drawn afresh every frame, which slows Chrome right down */
 @keyframes sky-twinkle {
-  0%,
-  100% {
-    filter: brightness(1);
-  }
   50% {
-    filter: brightness(1.12) saturate(1.05);
+    opacity: 0.85;
   }
 }
 .sky-twinkle {
@@ -132,7 +130,12 @@ html:has([data-sky-page]) body {
   clip-path: inset(0 round 3px);
 }
 /* Under the cover, clear of it even when it's grown, and the same size
-   on screen however far the sky is zoomed */
+   on screen however far the sky is zoomed. Without the frosting of a
+   raised card: it's nearly solid anyway, and the blur behind every hidden
+   caption would be drawn over again whenever the sky moves */
+.star-caption > * {
+  backdrop-filter: none;
+}
 .star-caption {
   scale: calc(1 / var(--zoom));
   transform-origin: top center;

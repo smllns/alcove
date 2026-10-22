@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate, type NavigateOptions, type To } from 'react-router';
+import { carryScroll } from './carryScroll';
 import { runCurtain } from './curtain';
 import { putKeyboardAway } from './keyboard';
 import {
@@ -23,7 +24,13 @@ export function useTransitionNavigate() {
       // animation short
       return putKeyboardAway().then(() => {
         setPageTransition(transition);
-        return navigate(to, { ...options, viewTransition: true });
+        // A new page, opening at its top without a jump (carryScroll)
+        const carry = transition === 'forward' && carryScroll();
+        return navigate(to, {
+          ...options,
+          viewTransition: true,
+          ...(carry && { preventScrollReset: true }),
+        });
       });
     },
     [navigate],

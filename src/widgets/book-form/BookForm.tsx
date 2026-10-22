@@ -1,7 +1,7 @@
 import { useRef, useState, type SubmitEvent } from 'react';
 import { useAddBook, useUpdateBook } from '@/entities/book/queries';
 import type { Book, CatalogueEdition } from '@/entities/book/types';
-import { softSwitch } from '@/shared/lib/softSwitch';
+import { softSwitch, softSwitchAt } from '@/shared/lib/softSwitch';
 import { useForm } from '@/shared/lib/useForm';
 import { BookStep } from './BookStep';
 import { CopyStep } from './CopyStep';
@@ -17,7 +17,7 @@ import { emptyLists, tidyLists, type DraftLists } from './entries';
 import { FormButtons } from './FormButtons';
 import { FormNotice } from './FormNotice';
 import { StepHeading, type Step } from './StepHeading';
-import { useStepScroll } from './useStepScroll';
+import { ROOM_ABOVE, useStepScroll } from './useStepScroll';
 import { toBookInput } from './toBookInput';
 
 export type DraftForm = ReturnType<typeof useForm<DraftFields>>;
@@ -93,6 +93,26 @@ export function BookForm({
   );
 
   const stepHeading = useStepScroll(step, Boolean(editing));
+  const formRef = useRef<HTMLFormElement>(null);
+  // Changing a book, over to the other step from the buttons below it: up
+  // to where that step starts first, the book's from its cover, the copy's
+  // from the tabs; and kept there as the step changes, though what's above
+  // may change with it (on a phone, the copy has no cover choices)
+  const switchFromBelow = (next: Step) => {
+    const startOf = () => {
+      const start = next === 'book' ? formRef.current : stepHeading.current;
+      if (!start) return 0;
+      return Math.max(
+        0,
+        scrollY + start.getBoundingClientRect().top - ROOM_ABOVE,
+      );
+    };
+    softSwitchAt(
+      startOf(),
+      () => setStep(next),
+      () => window.scrollTo(0, startOf()),
+    );
+  };
 
   // A problem on the other step sends the reader over to it
   const errorStep = stepOf(form.errors);
@@ -134,7 +154,9 @@ export function BookForm({
     void form.onSubmit();
   };
 
-  const saving = form.status === 'saving';
+  // Saved, the page is on its way out (onSaved): still busy till it's gone,
+  // rather than the spinner going first
+  const saving = form.status === 'saving' || form.status === 'saved';
   const footer = (
     <>
       <FormNotice
@@ -144,7 +166,7 @@ export function BookForm({
       />
       <FormButtons
         step={step}
-        onStep={setStep}
+        onStep={editing ? switchFromBelow : setStep}
         editing={Boolean(editing)}
         saving={saving}
         onBack={onBack}
@@ -154,6 +176,7 @@ export function BookForm({
 
   return (
     <form
+      ref={formRef}
       onSubmit={onSubmit}
       noValidate
       className='grid animate-rise gap-10 lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-16'

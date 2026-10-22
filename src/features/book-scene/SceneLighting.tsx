@@ -1,6 +1,6 @@
 import { Environment, Lightformer } from '@react-three/drei';
 import type { Theme } from '@/shared/theme';
-import { LIGHTING } from './lighting';
+import { LIGHTING, WALL_DEPTH } from './lighting';
 
 // Soft studio reflections, one key light that casts shadows, and an invisible
 // wall behind the books to catch them
@@ -54,7 +54,7 @@ export function SceneLighting({ theme }: { theme: Theme }) {
         shadow-camera-far={30}
       />
 
-      <mesh position={[0, 0, -2.4]} receiveShadow>
+      <mesh position={[0, 0, WALL_DEPTH]} receiveShadow>
         <planeGeometry args={[60, 40]} />
         <shadowMaterial
           transparent

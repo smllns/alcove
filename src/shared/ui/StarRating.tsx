@@ -2,6 +2,7 @@ import { useId, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { labelClass } from './fieldStyles';
 import { halves } from '@/shared/lib/halves';
 import { RemoveAction } from './HoverAction';
+import { RatingFigure } from './Rating';
 import { Stars } from './Stars';
 
 type StarRatingProps = {
@@ -81,9 +82,7 @@ export function StarRating({ label, value, onChange }: StarRatingProps) {
         </div>
         {value > 0 && (
           <>
-            <span className='font-serif text-lg text-ink-soft tabular-nums'>
-              {halves(value)}
-            </span>
+            <RatingFigure>{halves(value)}</RatingFigure>
             <RemoveAction label='Clear rating' onClick={() => onChange(0)} />
           </>
         )}

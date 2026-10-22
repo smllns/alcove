@@ -62,11 +62,12 @@
   }
 }
 
+/* Stepping back and dimming only: no blur, which has the whole screen
+   blurred afresh every frame and the page turn stutter */
 @keyframes page-sink {
   to {
     transform: scale(0.94) translateY(-2%);
     opacity: 0.35;
-    filter: blur(4px);
   }
 }
 
@@ -222,6 +223,25 @@
   animation: switch-out 0.2s ease-in both;
 }
 ::view-transition-new(soft-switch) {
+  animation: switch-in 0.45s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Around it, the cover choices a phone shows only for the book come and
+   go, and the tabs below them move along, rather than jumping */
+:root[data-transition='switch'] .cover-choices {
+  view-transition-name: cover-choices;
+}
+:root[data-transition='switch'] .step-tabs {
+  view-transition-name: step-tabs;
+}
+::view-transition-group(cover-choices),
+::view-transition-group(step-tabs) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(cover-choices):only-child {
+  animation: switch-out 0.2s ease-in both;
+}
+::view-transition-new(cover-choices):only-child {
   animation: switch-in 0.45s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes switch-out {

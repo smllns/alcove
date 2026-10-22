@@ -1,5 +1,9 @@
 import type { Theme } from '@/shared/theme';
 
+// How deep the invisible wall behind the books stands, catching their
+// shadows
+export const WALL_DEPTH = -2.4;
+
 // Daylight on paper, or a reading lamp in a dark room
 export const LIGHTING: Record<
   Theme,

@@ -74,7 +74,15 @@ export function CoverPicker({
         )}
       </div>
 
-      <div className={choosing ? 'contents' : 'hidden lg:contents'}>
+      {/* On a phone, only while choosing; coming and going softly as the
+          steps of a book being changed switch (.cover-choices,
+          transitions.css) */}
+      <div
+        className={cn(
+          'cover-choices w-full flex-col items-center lg:flex lg:items-stretch',
+          choosing ? 'flex' : 'hidden',
+        )}
+      >
         <div className='mt-5 flex max-w-full flex-wrap justify-center gap-2.5 lg:justify-start'>
           {options.map((url) => (
             <button

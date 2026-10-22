@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { clothFor, sizedCover, type CoverSize } from '../coverImage';
+import { useCoverPicture } from '../useCoverPicture';
 
 type BookCoverProps = {
   title: string;
@@ -15,10 +15,6 @@ type BookCoverProps = {
   home?: boolean;
 };
 
-// Pictures already loaded once on this visit: shown again at once, without
-// fading in a second time (from one view of the library to another, say)
-const seen = new Set<string>();
-
 // A cover at a fixed 2:3 shape. Fades in once loaded; books without a
 // picture (or whose picture fails) get a plain cloth binding with the title.
 export function BookCover({
@@ -31,10 +27,8 @@ export function BookCover({
   home,
 }: BookCoverProps) {
   const src = url && sizedCover(url, size);
-  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(
-    !src ? 'failed' : seen.has(src) ? 'loaded' : 'loading',
-  );
-  const showPicture = src && state !== 'failed';
+  const { load, picture } = useCoverPicture(src);
+  const showPicture = src && load !== 'failed';
 
   return (
     <div
@@ -52,19 +46,11 @@ export function BookCover({
           src={src}
           alt=''
           loading='lazy'
-          // One seen before is drawn with the rest of the page, not after
-          decoding={seen.has(src) ? 'sync' : 'async'}
           draggable={false}
-          onLoad={(e) => {
-            // Open Library answers a missing cover with a 1×1 pixel
-            const found = e.currentTarget.naturalWidth > 1;
-            if (found) seen.add(src);
-            setState(found ? 'loaded' : 'failed');
-          }}
-          onError={() => setState('failed')}
+          {...picture}
           className={cn(
             'size-full object-cover transition-opacity duration-700 ease-soft',
-            state === 'loaded' ? 'opacity-100' : 'opacity-0',
+            load === 'loaded' ? 'opacity-100' : 'opacity-0',
           )}
         />
       ) : (

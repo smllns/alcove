@@ -7,6 +7,7 @@ import { BookCover } from '@/entities/book/ui/BookCover';
 import { cn } from '@/shared/lib/cn';
 import { reducedMotionNow } from '@/shared/lib/motion';
 import { setPageTransition } from '@/shared/lib/pageTransition';
+import { useSwipeAway } from '@/shared/lib/useSwipeAway';
 import { IconButton } from '@/shared/ui/IconButton';
 import { floatingClass } from '@/shared/ui/surfaces';
 
@@ -14,7 +15,7 @@ import { floatingClass } from '@/shared/ui/surfaces';
 // the pointer every button otherwise shows, index.css). Hovered, it lifts
 // off the page with a deeper shadow and a magnifier in its corner;
 // clicked, it opens up to fill the screen, and goes back with the × (or
-// anywhere, or Escape).
+// anywhere, or Escape, or swiped off up or down, as photos are on a phone).
 export function CoverShowcase({
   book,
   className,
@@ -35,6 +36,8 @@ export function CoverShowcase({
     setPageTransition('zoom');
     document.startViewTransition(change);
   };
+
+  const { item, veil, handlers, dragged } = useSwipeAway(() => zoom(false));
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'Escape') zoom(false);
@@ -95,16 +98,23 @@ export function CoverShowcase({
       </button>
 
       {/* Over everything, outside the page's own layers. A click anywhere
-          puts it back; the × says so. */}
+          puts it back (not the end of a swipe that settled back); the ×
+          says so. */}
       {zoomed &&
         createPortal(
           <div
             role='dialog'
             aria-modal='true'
             aria-label={`The cover of “${book.title}”`}
-            onClick={() => zoom(false)}
-            className='fixed inset-0 z-50 grid cursor-zoom-out! place-items-center bg-[rgb(var(--glow)/0.9)] p-6 backdrop-blur-md'
+            onClick={() => dragged() || zoom(false)}
+            {...handlers}
+            className='fixed inset-0 z-50 grid cursor-zoom-out! touch-none place-items-center p-6'
           >
+            <div
+              ref={veil}
+              aria-hidden
+              className='absolute inset-0 bg-[rgb(var(--glow)/0.9)] backdrop-blur-md'
+            />
             <IconButton
               ref={close}
               aria-label='Close'
@@ -113,7 +123,9 @@ export function CoverShowcase({
             >
               <X size={18} />
             </IconButton>
-            <div className='w-[min(84vw,56vh)]'>{cover(true)}</div>
+            <div ref={item} className='w-[min(84vw,56vh)]'>
+              {cover(true)}
+            </div>
           </div>,
           document.body,
         )}

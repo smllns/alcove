@@ -1,11 +1,10 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { softSwitchFromTop } from '@/shared/lib/softSwitch';
 import { Button } from '@/shared/ui/Button';
 import type { Step } from './StepHeading';
 
 // The buttons under the form. Adding: on to the copy, then add it (or back
 // to the book). Changing a book: save, cancel, or over to the other step
-// from down here too, not just the top.
+// from down here too, not just the top (`onStep` takes the page there).
 export function FormButtons({
   step,
   onStep,
@@ -30,9 +29,7 @@ export function FormButtons({
         </Button>
         <Button
           variant='pill'
-          onClick={() =>
-            softSwitchFromTop(() => onStep(step === 'book' ? 'copy' : 'book'))
-          }
+          onClick={() => onStep(step === 'book' ? 'copy' : 'book')}
           className='sm:ml-auto'
         >
           {step === 'book' ? (
