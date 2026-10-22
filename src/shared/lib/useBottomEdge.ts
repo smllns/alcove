@@ -1,11 +1,9 @@
 import { useLayoutEffect, useState } from 'react';
-import { pageScrollY } from './carryScroll';
+import { pageScrollY } from './pageScroll';
 
 // How far down the page an element ends, in pixels, kept up to date as it
 // or the window changes size: from the page's top, so it reads the same
-// however far the page happens to be scrolled while it's measured (it may
-// still be on its way back up from the page before, or held where the page
-// before was while going back to it: carryScroll). For fitting things
+// however far the page happens to be scrolled while it's measured. For fitting things
 // into the room below, on a page that doesn't scroll.
 // Returns a ref to put on the element: it may appear later than the
 // component (once data has loaded, say), and is measured when it does;
@@ -19,7 +17,9 @@ export function useBottomEdge() {
     if (!element) return;
     const measure = () =>
       setBottom(
-        Math.round(element.getBoundingClientRect().bottom + pageScrollY()),
+        Math.round(
+          element.getBoundingClientRect().bottom + pageScrollY(element),
+        ),
       );
     measure();
     const observer = new ResizeObserver(measure);

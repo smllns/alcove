@@ -1,19 +1,17 @@
-import { Outlet, ScrollRestoration } from 'react-router';
-import { CarriedScroll, ReturnedScroll } from '@/shared/lib/carryScroll';
+import { Outlet } from 'react-router';
 import { GoldGradient } from '@/shared/ui/Stars';
+import { PageScroll } from './PageScroll';
 
-// Around every page: a new page opens at its top (from a page scrolled
-// down, without a jump: carryScroll), and going back returns to where the
-// reader was (without the window scrolling mid-way either). The gold every
-// star is painted with is here once for all of them.
+// Around every page: each scrolls in a box of its own, opening at its top
+// and found again where it was left going back (PageScroll). The gold
+// every star is painted with is here once for all of them.
 export function RootLayout() {
   return (
     <>
       <GoldGradient />
-      <CarriedScroll />
-      <Outlet />
-      <ScrollRestoration />
-      <ReturnedScroll />
+      <PageScroll>
+        <Outlet />
+      </PageScroll>
     </>
   );
 }

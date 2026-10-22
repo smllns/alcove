@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { pageScrollY } from '@/shared/lib/carryScroll';
+import { pageScroller } from '@/shared/lib/pageScroll';
 import { reducedMotionNow } from '@/shared/lib/motion';
 
 // How much slower than the page the light drifts up, how far it goes at
@@ -14,16 +14,16 @@ const DIMMED = 0.55;
 // things kept still) and dimming somewhat once the top is left behind.
 // Straight onto the element, frame by frame, rather than re-rendering; the
 // first time before the page is first drawn, so it opens already as it'll
-// be. Goes by how far the page itself is scrolled (carryScroll), so a
-// page just opened from one scrolled down isn't taken for one itself.
+// be. Goes by the page's own scroll (PageScroll).
 export function useLightDrift<T extends HTMLElement>() {
   const light = useRef<T>(null);
   useLayoutEffect(() => {
     const el = light.current;
     if (!el) return;
+    const box = pageScroller(el);
     let frame = 0;
     const place = () => {
-      const scrolled = pageScrollY();
+      const scrolled = box.scrollTop;
       const passed = Math.min(scrolled / innerHeight, 1);
       el.style.opacity = String(1 - passed * (1 - DIMMED));
       if (!reducedMotionNow())
@@ -34,9 +34,9 @@ export function useLightDrift<T extends HTMLElement>() {
       frame = requestAnimationFrame(place);
     };
     place();
-    addEventListener('scroll', follow, { passive: true });
+    box.addEventListener('scroll', follow, { passive: true });
     return () => {
-      removeEventListener('scroll', follow);
+      box.removeEventListener('scroll', follow);
       cancelAnimationFrame(frame);
     };
   }, []);

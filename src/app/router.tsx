@@ -24,6 +24,7 @@ export const router = createBrowserRouter([
           {
             // One screen for both: it stays mounted and changes in place
             element: <AuthPage />,
+            handle: { page: 'auth' },
             children: [{ path: paths.login }, { path: paths.register }],
           },
         ],
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
           ...sections.map((section) => ({
             path: section.path,
             element: <LibraryPage section={section.key} />,
+            handle: { page: 'library' },
           })),
           { path: paths.addBook, element: <AddBookPage /> },
           { path: paths.book(':id'), element: <BookPage /> },

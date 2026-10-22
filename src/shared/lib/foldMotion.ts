@@ -1,4 +1,5 @@
 import { reducedMotionNow } from './motion';
+import { pageScroller } from './pageScroll';
 
 // How far down the screen what folds back is brought, at most, when it
 // would otherwise close up out of sight above
@@ -27,11 +28,11 @@ export function foldMotion({
   frame?: (p: number) => void;
   done?: () => void;
 }) {
-  const root = document.documentElement;
-  const anchoring = root.style.overflowAnchor;
-  root.style.overflowAnchor = 'none';
+  const box = pageScroller(at);
+  const anchoring = box.style.overflowAnchor;
+  box.style.overflowAnchor = 'none';
 
-  const startY = scrollY;
+  const startY = box.scrollTop;
   const top = at?.getBoundingClientRect().top ?? 0;
   const limit = innerHeight * IN_VIEW;
   let rise = closing && at && top < limit ? top - limit : 0;
@@ -46,13 +47,13 @@ export function foldMotion({
     cancelAnimationFrame(id);
     removeEventListener('wheel', leave);
     removeEventListener('touchstart', leave);
-    root.style.overflowAnchor = anchoring;
+    box.style.overflowAnchor = anchoring;
   };
   const step = (now: number) => {
     const t = length ? Math.min(1, Math.max(0, (now - began) / length)) : 1;
     const p = ease(t);
     frame?.(p);
-    if (rise) window.scrollTo({ top: startY + rise * p, behavior: 'instant' });
+    if (rise) box.scrollTo({ top: startY + rise * p, behavior: 'instant' });
     if (t < 1) id = requestAnimationFrame(step);
     else {
       stop();

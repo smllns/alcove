@@ -1,5 +1,6 @@
 import { flushSync } from 'react-dom';
 import { reducedMotionNow } from './motion';
+import { pageScroller } from './pageScroll';
 import { setPageTransition } from './pageTransition';
 
 // Changes what a part of the page shows (`.soft-switch`, styles in
@@ -27,22 +28,23 @@ export function softSwitchAt(
   change: () => void,
   settle?: () => void,
 ) {
-  if (Math.abs(scrollY - top) < 4 || reducedMotionNow()) {
-    window.scrollTo(0, top);
+  const box = pageScroller();
+  if (Math.abs(box.scrollTop - top) < 4 || reducedMotionNow()) {
+    box.scrollTo({ top, behavior: 'instant' });
     softSwitch(change, settle);
     return;
   }
-  window.scrollTo({ top, behavior: 'smooth' });
+  box.scrollTo({ top, behavior: 'smooth' });
   // The change comes the moment the page gets there, or stops short of it
   // (at its end): watched frame by frame, as not every browser says when a
   // scroll ends, and waiting it out would leave the page sitting still
   const began = performance.now();
-  let last = scrollY;
+  let last = box.scrollTop;
   let still = 0;
   const watch = () => {
-    still = scrollY === last ? still + 1 : 0;
-    last = scrollY;
-    const arrived = Math.abs(scrollY - top) < 2 || still >= 3;
+    still = box.scrollTop === last ? still + 1 : 0;
+    last = box.scrollTop;
+    const arrived = Math.abs(box.scrollTop - top) < 2 || still >= 3;
     if (arrived || performance.now() - began > 1000) softSwitch(change, settle);
     else requestAnimationFrame(watch);
   };

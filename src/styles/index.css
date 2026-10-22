@@ -11,6 +11,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* The window itself never scrolls: each page scrolls in a box of its own
+   (app/PageScroll), which also keeps anything reaching past the screen's
+   sides (a tooltip waiting by a corner, a tilted note) from widening the
+   page. Nor does it bounce when pulled. */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 html {
   min-width: 320px;
   background: var(--bg-mid);
@@ -19,17 +30,6 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
-}
-
-/* Nothing reaching past the screen's sides (a tooltip waiting by a corner,
-   a tilted note) may widen the page: a phone would let it be scrolled
-   sideways, and cut short any page change animating as the page's width
-   shifts. On the app's own root, as the body's own overflow is handed on
-   to the window instead; clipped, not hidden, so sticky things still
-   stick. */
-#root {
-  overflow-x: clip;
 }
 
 button,

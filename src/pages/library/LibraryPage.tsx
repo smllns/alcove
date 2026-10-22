@@ -62,8 +62,6 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
 
   return (
     <main
-      // Holds the whole page still while the sky is shown (universe.css)
-      data-sky-page={sky || undefined}
       className={cn(
         'bg-paper flex flex-col overflow-x-clip text-ink',
         // The sky is a screen tall, and the page doesn't scroll past it

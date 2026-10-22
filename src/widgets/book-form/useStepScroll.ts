@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { pageScrollY, scrollPageTo } from '@/shared/lib/pageScroll';
 import type { Step } from './StepHeading';
 
 // How far below the top of the screen a step's start is brought, clear of
@@ -25,7 +26,8 @@ export function useStepScroll(step: Step, editing: boolean) {
     const inView =
       top !== undefined && top > 0 && top < innerHeight / (editing ? 1 : 3);
     if (top === undefined || inView) return;
-    window.scrollTo({ top: scrollY + top - ROOM_ABOVE, behavior: 'smooth' });
+    const el = heading.current;
+    scrollPageTo(pageScrollY(el) + top - ROOM_ABOVE, 'smooth', el);
   }, [step, editing]);
   return heading;
 }

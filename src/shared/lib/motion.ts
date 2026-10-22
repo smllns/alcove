@@ -1,3 +1,5 @@
+import { scrollPageTo } from './pageScroll';
+
 const reducedMotionQuery = '(prefers-reduced-motion: reduce)';
 
 // Read once at startup; for decisions made at module or mount time
@@ -14,7 +16,4 @@ export const wait = (ms: number) =>
 
 // Back up to the top of the page: gliding there, unless motion is reduced
 export const scrollToTop = () =>
-  window.scrollTo({
-    top: 0,
-    behavior: reducedMotionNow() ? 'auto' : 'smooth',
-  });
+  scrollPageTo(0, reducedMotionNow() ? 'instant' : 'smooth');

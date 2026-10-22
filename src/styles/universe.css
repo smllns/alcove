@@ -1,16 +1,6 @@
 /* The universe view of the library: books as stars in a sky you can drag.
    Layout and camera live in pages/library/universe; this is how it moves. */
 
-/* While the sky fills the screen, the page around it holds still: exactly
-   one screen tall (not the taller 100vh a phone's browser bars hide
-   behind), and no bounce when it's pulled; the sky itself is what moves */
-html:has([data-sky-page]),
-html:has([data-sky-page]) body {
-  min-height: 0;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
 /* Dust: tiny specks in two layers, panned slower than the books for depth
    (--dust-x/y come from the camera, see Universe.tsx), with a few brighter
    ones glimmering. */

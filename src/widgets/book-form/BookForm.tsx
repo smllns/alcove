@@ -1,6 +1,7 @@
 import { useRef, useState, type SubmitEvent } from 'react';
 import { useAddBook, useUpdateBook } from '@/entities/book/queries';
 import type { Book, CatalogueEdition } from '@/entities/book/types';
+import { pageScrollY, scrollPageTo } from '@/shared/lib/pageScroll';
 import { softSwitch, softSwitchAt } from '@/shared/lib/softSwitch';
 import { useForm } from '@/shared/lib/useForm';
 import { BookStep } from './BookStep';
@@ -104,13 +105,13 @@ export function BookForm({
       if (!start) return 0;
       return Math.max(
         0,
-        scrollY + start.getBoundingClientRect().top - ROOM_ABOVE,
+        pageScrollY(start) + start.getBoundingClientRect().top - ROOM_ABOVE,
       );
     };
     softSwitchAt(
       startOf(),
       () => setStep(next),
-      () => window.scrollTo(0, startOf()),
+      () => scrollPageTo(startOf()),
     );
   };
 

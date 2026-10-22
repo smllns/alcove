@@ -32,10 +32,8 @@ export function TransitionLink({
         if (e.defaultPrevented) return;
         if (!isPlainClick(e)) return;
         // Left to the link itself, unless the keyboard needs putting away
-        // first, the curtain drawn, or the page is scrolled down, to be
-        // carried over to the new one (useTransitionNavigate)
-        const carrying = transition === 'forward' && scrollY > 0;
-        if (!curtain && !keyboardUp() && !carrying) {
+        // first or the curtain drawn (useTransitionNavigate)
+        if (!curtain && !keyboardUp()) {
           setPageTransition(transition);
           return;
         }
