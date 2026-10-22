@@ -1,32 +1,54 @@
 import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router';
 
-// A page changing without the window scrolling mid-transition (Safari
-// draws the old page out of place for a frame if it does, which flashes).
-// Going forward from a page scrolled down, to a new one that opens at its
-// top, the window stays where it is and the new page is let down by as
-// much, so its top is what's in view. Going back to a page left scrolled
-// to elsewhere, the window stays where it is too, and the page is lifted
+// A page changing without the window scrolling at all until the
+// transition is over: Safari draws the old page out of place for a frame
+// if it does, which flashes, and on an iPhone, where scrolling can show or
+// hide the browser's bars and so resize the screen, may drop the
+// transition altogether. Going forward from a page scrolled down, to a
+// new one that opens at its top, the window stays where it is and the new
+// page is let down by as much, so its top is what's in view. Going back
+// to a page left scrolled to elsewhere, the router's own scroll there is
+// held back; the window stays where it is again, and the page is lifted
 // or let down by the difference, so it shows as it was left. Once the
 // transition is over, the two are undone together, which shows no change.
 
 // How far down the page was left, while it's being carried over
 let carried = 0;
-// How far down the page being gone back from was, as going back begins
+// Going back: how far down the page being left was, and where the router
+// would have had the window go for the page returned to
 let leaving: number | null = null;
+let wanted: number | null = null;
+// Lets the router scroll the window again
+let unhold: (() => void) | null = null;
 // How far the new page is let down meanwhile (lifted, if less than none)
 let letDown = 0;
 
 // Before going forward: whether there's a scroll to carry over (the
 // navigation then mustn't reset it itself: preventScrollReset)
 export function carryScroll() {
-  carried = Math.round(scrollY);
+  carried = scrollY;
   return carried > 0;
 }
 
-// As going back begins (popstate, before the router hears of it)
+// As going back begins (popstate, before the router hears of it): the
+// router's scroll to where the page returned to was left is only noted
 export function holdScrollForReturn() {
-  leaving = Math.round(scrollY);
+  unhold?.();
+  leaving = scrollY;
+  wanted = null;
+  const own = window.scrollTo;
+  const note = ((a?: ScrollToOptions | number, b?: number) => {
+    wanted = typeof a === 'object' ? (a.top ?? 0) : (b ?? 0);
+  }) as typeof window.scrollTo;
+  window.scrollTo = note;
+  // Should the page not change after all
+  const timer = window.setTimeout(() => unhold?.(), 1000);
+  unhold = () => {
+    window.clearTimeout(timer);
+    if (window.scrollTo === note) window.scrollTo = own;
+    unhold = null;
+  };
 }
 
 // Whether the page that's just opened is being carried, so isn't to be
@@ -65,50 +87,57 @@ function shiftPage(root: HTMLElement, by: number) {
   letDown = by;
 }
 
-// The window held `at` a scroll while the page shows as it would `shown`
-// one, until the transition is over; then the window scrolls to it for
-// real as the page is put back, which shows no change (nor undoes any
-// scrolling meanwhile). The room first, so a page that's no taller than
-// the screen (the sky) has somewhere to be held at; then, wherever the
-// window really got to, the page shown from there.
-function hold(at: number, shown: number, done?: () => void) {
-  const root = document.getElementById('root');
-  if (!root) return;
-  shiftPage(root, at - shown);
-  window.scrollTo({ top: at, behavior: 'instant' });
-  shiftPage(root, Math.round(scrollY) - shown);
+// Once the transition is over, the page put back as the window scrolls to
+// where it shows it, which shows no change (nor undoes any scrolling
+// meanwhile)
+function settleAfter(root: HTMLElement, done?: () => void) {
   afterTransition(() => {
     done?.();
-    const by = letDown;
+    // Where the page shows it, read before it's put back, as the page
+    // getting shorter then may cut the window's scroll short for a moment
+    const top = pageScrollY();
     shiftPage(root, 0);
-    window.scrollTo({ top: scrollY - by, behavior: 'instant' });
+    window.scrollTo({ top, behavior: 'instant' });
   });
 }
 
-// In the layout around every page, ahead of the page itself: lets the new
-// page down as it opens, and takes it back up to the top, out of sight,
-// once it's in. Ahead, so it's done before the new page's own first look
-// at itself, which would have the browser cut the scroll down to the
-// short page it would otherwise be for a moment.
+// In the layout around every page, ahead of the page itself, so it's done
+// before the new page's own first look at itself (which would have the
+// browser cut the scroll down to the short page it would otherwise be for
+// a moment): going forward, lets the new page down as it opens, and takes
+// it back up to the top, out of sight, once it's in; going back, lets it
+// down for now as though it opened at its top, until ReturnedScroll knows
+// better
 export function CarriedScroll() {
   const { key } = useLocation();
   useLayoutEffect(() => {
-    if (carried) hold(carried, 0, () => (carried = 0));
+    const root = document.getElementById('root');
+    if (!root) return;
+    if (carried) {
+      shiftPage(root, carried);
+      settleAfter(root, () => (carried = 0));
+    } else if (leaving !== null) shiftPage(root, leaving);
   }, [key]);
   return null;
 }
 
 // In the layout around every page, after ScrollRestoration: going back,
-// holds the window where it was, the page returned to shown as far down
-// as the router has just put it all the same
+// the page returned to shown as far down as the router would have had the
+// window go, the window itself still where it was. What follows the scroll
+// hears of the page's new place.
 export function ReturnedScroll() {
   const { key } = useLocation();
   useLayoutEffect(() => {
     if (leaving === null) return;
+    unhold?.();
     const from = leaving;
-    leaving = null;
-    const to = Math.round(scrollY);
-    if (to !== from) hold(from, to);
+    const to = wanted ?? from;
+    leaving = wanted = null;
+    const root = document.getElementById('root');
+    if (!root) return;
+    shiftPage(root, from - to);
+    if (from !== to) settleAfter(root);
+    window.dispatchEvent(new Event('scroll'));
   }, [key]);
   return null;
 }
