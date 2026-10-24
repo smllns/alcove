@@ -1,12 +1,5 @@
 import { z } from 'zod';
-import { maybe } from '../lib/validation.js';
-
-const name = (what: string) =>
-  z
-    .string()
-    .trim()
-    .min(1, `Give this ${what} a name.`)
-    .max(60, 'Keep it under 60 characters.');
+import { maybe, nameOf as name } from '../lib/validation.js';
 
 // Existing places keep their id; new ones come without (or with a temporary
 // one from the browser) and get a real one on saving

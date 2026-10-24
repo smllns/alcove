@@ -8,6 +8,7 @@ import { HttpError } from '../lib/errors.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
 import { passwordAttempts } from '../lib/rateLimit.js';
 import { parseBody } from '../lib/validation.js';
+import { deleteLists } from '../lists/repository.js';
 import { deletePlaces } from '../places/repository.js';
 import { deleteAllCovers } from '../uploads/storage.js';
 import {
@@ -68,6 +69,7 @@ accountRouter.delete('/', passwordAttempts, async (req, res) => {
   await Promise.all([
     deleteAllBooks(me._id),
     deletePlaces(me._id),
+    deleteLists(me._id),
     deleteAllCovers(me._id).catch(() => {}),
   ]);
   await deleteUser(me._id);

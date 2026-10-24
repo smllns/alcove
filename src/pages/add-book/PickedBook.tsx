@@ -8,6 +8,7 @@ import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { Spinner } from '@/shared/ui/Spinner';
 import { BookForm, draftFromCatalogue } from '@/widgets/book-form';
 import { paths } from '@/shared/config/paths';
+import { ShelvedByWriter } from './ShelvedByWriter';
 
 type PickedBookProps = {
   work: CatalogueWork;
@@ -18,7 +19,8 @@ type PickedBookProps = {
 
 // Fetches the editions of the chosen book, what it's about and its genres,
 // then opens the form on the best edition: the searched ISBN if there was
-// one, else the catalogue's first pick.
+// one, else the catalogue's first pick. Above it, what the reader has by
+// the same writer already.
 export function PickedBook({ work, isbnEdition, onBack }: PickedBookProps) {
   const navigate = useTransitionNavigate();
   const editions = useEditions(work.workKey);
@@ -44,12 +46,15 @@ export function PickedBook({ work, isbnEdition, onBack }: PickedBookProps) {
       : list;
 
   return (
-    <BookForm
-      fields={draft.fields}
-      extras={draft.extras}
-      editions={withIsbnEdition}
-      onSaved={() => navigate(paths.library, 'forward')}
-      onBack={onBack}
-    />
+    <>
+      <ShelvedByWriter writer={work.authors[0]} />
+      <BookForm
+        fields={draft.fields}
+        extras={draft.extras}
+        editions={withIsbnEdition}
+        onSaved={() => navigate(paths.library, 'forward')}
+        onBack={onBack}
+      />
+    </>
   );
 }

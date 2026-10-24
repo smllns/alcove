@@ -11,6 +11,7 @@ import { config } from './config.js';
 import { pingDb } from './db.js';
 import { errorHandler, HttpError, notFound } from './lib/errors.js';
 import { lookupRouter } from './lookup/routes.js';
+import { listsRouter } from './lists/routes.js';
 import { placesRouter } from './places/routes.js';
 import { uploadsRouter } from './uploads/routes.js';
 
@@ -55,6 +56,7 @@ export function createApp() {
   api.use('/account', requireUser, accountRouter);
   api.use('/books', requireUser, booksRouter);
   api.use('/lookup', requireUser, lookupRouter);
+  api.use('/lists', requireUser, listsRouter);
   api.use('/places', requireUser, placesRouter);
   api.use('/uploads', requireUser, uploadsRouter);
   api.use(notFound);

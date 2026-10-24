@@ -1,5 +1,6 @@
 import { ObjectId, type Filter } from 'mongodb';
 import { books, storedCoverSources, type BookDoc } from '../db.js';
+import { unaccented } from '../lib/text.js';
 import type { BookInput } from './schemas.js';
 
 // What the client sees of a book
@@ -61,6 +62,44 @@ export function findSameBook(userId: ObjectId, input: BookInput) {
     { userId, $or: matches },
     { sort: { _id: -1 }, collation: { locale: 'en', strength: 2 } },
   );
+}
+
+// Which of the catalogue's `works` are on the reader's shelves: the id of
+// the book for each work key that is
+export async function shelvedWorks(userId: ObjectId, works: string[]) {
+  const found = await books()
+    .find(
+      { userId, 'openLibrary.work': { $in: works } },
+      { projection: { _id: 1, 'openLibrary.work': 1 } },
+    )
+    .toArray();
+  return new Map(
+    found.map((book) => [book.openLibrary?.work, book._id.toHexString()]),
+  );
+}
+
+// A writer's name without case, accents, spaces or punctuation, so "J. R. R.
+// Tolkien" and "J.R.R. Tolkien" are the one writer. Must match how the
+// client tells writers apart (src/entities/book/authors.ts).
+const writerKey = (name: string) =>
+  unaccented(name).replace(/[^\p{L}\p{N}]/gu, '');
+
+// The reader's books by the same writer (their first author), newest
+// first: only names are read to find them, then the books themselves
+export async function booksByWriter(userId: ObjectId, name: string) {
+  const wanted = writerKey(name);
+  if (!wanted) return [];
+  const all = await books()
+    .find({ userId }, { projection: { authors: 1 } })
+    .toArray();
+  const ids = all
+    .filter((b) => writerKey(b.authors[0] ?? '') === wanted)
+    .map((b) => b._id);
+  if (!ids.length) return [];
+  return books()
+    .find({ _id: { $in: ids }, userId })
+    .sort({ _id: -1 })
+    .toArray();
 }
 
 export const findBook = (userId: ObjectId, id: ObjectId) =>

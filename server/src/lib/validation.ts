@@ -34,6 +34,19 @@ export const maybe = <T extends z.ZodType>(schema: T) =>
     schema.optional(),
   );
 
+// The name the reader gives something of theirs (a room, a list), its
+// spaces tidied: `what` it is, for asking for one
+export const nameOf = (what: string) =>
+  z
+    .string()
+    .transform((name) => name.trim().replace(/\s+/g, ' '))
+    .pipe(
+      z
+        .string()
+        .min(1, `Give this ${what} a name.`)
+        .max(60, 'Keep it under 60 characters.'),
+    );
+
 // Text that may be left out; empty counts as left out
 export const optionalText = (max: number) =>
   maybe(

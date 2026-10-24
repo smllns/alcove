@@ -7,6 +7,7 @@ import { useGoBack } from '@/shared/lib/useGoBack';
 import { cn } from '@/shared/lib/cn';
 import { useInView } from '@/shared/lib/useInView';
 import { BackLink } from '@/shared/ui/BackLink';
+import { BackToTop } from '@/shared/ui/BackToTop';
 import { Button } from '@/shared/ui/Button';
 import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Collapse } from '@/shared/ui/Collapse';
@@ -16,11 +17,14 @@ import { sheetClass } from '@/shared/ui/surfaces';
 import { AboutBook } from './AboutBook';
 import { BookHeading } from './BookHeading';
 import { BookLinks } from './BookLinks';
+import { BookLists } from './BookLists';
 import { CoverShowcase } from './CoverShowcase';
 import { BookPassages } from './BookPassages';
 import { EditionFacts } from './EditionFacts';
 import { PassageQuotes } from './PassageQuotes';
 import { QuoteSuggestions } from './QuoteSuggestions';
+import { SameAuthor } from './SameAuthor';
+import { ReadNext } from './ReadNext';
 import { YourCopy } from './YourCopy';
 import { paths } from '@/shared/config/paths';
 
@@ -33,6 +37,9 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
   const [reviewing, setReviewing] = useState(false);
   const toLibrary = useGoBack(paths.library);
   const [title, titleInView] = useInView<HTMLDivElement>('0px', true);
+  // The cover and what's under it, which a phone has at the top of the
+  // page: gone up out of sight, there's a way back up
+  const [top, setTop] = useState<HTMLDivElement | null>(null);
   const rating = book.copy?.rating;
 
   return (
@@ -40,7 +47,10 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
       {/* Stays in view as the page scrolls: under the tabs, or, on a wide
           screen where the tabs sit in the header row clear of it, up level
           with them */}
-      <div className='flex flex-col items-center gap-6 lg:sticky lg:top-28 lg:items-stretch lg:self-start xl:top-7'>
+      <div
+        ref={setTop}
+        className='flex flex-col items-center gap-6 lg:sticky lg:top-28 lg:items-stretch lg:self-start xl:top-7'
+      >
         {/* Above the cover on a wide screen, level with the top of the
             sheet beside it (BookFrame has it above everything otherwise) */}
         <div className='hidden lg:block'>
@@ -117,12 +127,21 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
           />
           <YourCopy book={book} />
           <EditionFacts book={book} />
-          {/* The lines kept and the links, then more lines to keep */}
+          {/* The lines kept, the links and the lists it's in; then the
+              writer's other books and what to read next; last, more lines
+              to keep */}
           <PassageQuotes book={book} />
           <BookLinks book={book} />
+          <BookLists book={book} />
+          <SameAuthor book={book} />
+          <ReadNext book={book} />
           <QuoteSuggestions book={book} />
         </div>
       </div>
+
+      {/* Only where the page is a long column; a wide screen keeps the
+          cover in view beside it */}
+      <BackToTop after={top} className='lg:hidden' />
 
       <RemoveBookDialog
         book={book}

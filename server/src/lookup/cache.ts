@@ -2,19 +2,69 @@ import { lookupCache } from '../db.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Returns the cached value for `key`, or computes, stores and returns it
-export async function cached<T>(
+// What's being looked up right now, by key
+const underway = new Map<string, Promise<unknown>>();
+
+// Returns the cached value for `key`, or computes, stores and returns it.
+// Asked for again while it's being worked out (many readers opening the
+// same new book at once), the one answer is waited for, not asked twice.
+// A failure isn't kept: the next ask tries again.
+export function cached<T>(
   key: string,
   days: number,
   compute: () => Promise<T>,
-) {
-  const hit = await lookupCache().findOne({ _id: key });
-  if (hit && hit.expiresAt.getTime() > Date.now()) return hit.value as T;
+): Promise<T> {
+  return once(key, async () => {
+    const hit = await lookupCache().findOne({ _id: key });
+    if (hit && hit.expiresAt.getTime() > Date.now()) return hit.value as T;
+    return store(key, await compute(), days);
+  });
+}
 
-  const value = await compute();
+// How long an answer kept past its time stays, at most, for the next ask
+const STALE_KEPT_DAYS = 60;
+
+// The same for an answer that's slow to get: once it's `days` old, the
+// one kept is still given at once, and a fresh one asked for behind it,
+// for the next time
+export async function cachedStale<T>(
+  key: string,
+  days: number,
+  compute: () => Promise<T>,
+): Promise<T> {
+  const hit = await lookupCache().findOne({ _id: key });
+  const refresh = () =>
+    once(key, async () => store(key, await compute(), days, STALE_KEPT_DAYS));
+  if (!hit) return refresh();
+  if ((hit.freshUntil ?? hit.expiresAt).getTime() <= Date.now())
+    void refresh().catch(() => {});
+  return hit.value as T;
+}
+
+// Asks for `key` behind the scenes, so it's there by the time it's wanted
+export const warm = <T>(key: string, days: number, compute: () => Promise<T>) =>
+  void cachedStale(key, days, compute).catch(() => {});
+
+// One job per key at a time: asked again while it runs, the same one
+function once<T>(key: string, job: () => Promise<T>): Promise<T> {
+  const running = underway.get(key);
+  if (running) return running as Promise<T>;
+  const started = job().finally(() => underway.delete(key));
+  underway.set(key, started);
+  return started;
+}
+
+async function store<T>(key: string, value: T, days: number, keptDays = days) {
+  const now = Date.now();
   await lookupCache().updateOne(
     { _id: key },
-    { $set: { value, expiresAt: new Date(Date.now() + days * DAY_MS) } },
+    {
+      $set: {
+        value,
+        freshUntil: new Date(now + days * DAY_MS),
+        expiresAt: new Date(now + keptDays * DAY_MS),
+      },
+    },
     { upsert: true },
   );
   return value;

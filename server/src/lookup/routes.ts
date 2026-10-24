@@ -1,7 +1,12 @@
 import { Router, type Request } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { HttpError } from '../lib/errors.js';
+import { currentUser } from '../auth/middleware.js';
+import { shelvedWorks } from '../books/repository.js';
 import { cached } from './cache.js';
+import { listsOfWork } from './lists.js';
+import { similarWorks } from './similar.js';
+import { workAuthor } from './author.js';
 import { bookQuotes } from './wikiquote.js';
 import {
   cleanIsbn,
@@ -95,6 +100,38 @@ lookupRouter.get('/works/:workKey/ratings', async (req, res) => {
     workRatings(workKey).catch(noneIfMissing),
   );
   res.json({ ratings });
+});
+
+// Who wrote the book: name, years, picture and a few lines about them
+lookupRouter.get('/works/:workKey/author', async (req, res) => {
+  const workKey = workKeyOf(req);
+  const author = await cached(`author3:${workKey}`, 30, () =>
+    workAuthor(workKey).catch(noneIfMissing),
+  );
+  res.json({ author });
+});
+
+// Lists on Open Library the book is in (lists.ts)
+lookupRouter.get('/works/:workKey/lists', async (req, res) => {
+  res.json(await listsOfWork(workKeyOf(req)));
+});
+
+// Books to read next: on the same themes, and by the same author. The
+// catalogue's answer is kept for all readers; which of the books are on
+// this reader's shelves already is looked up afresh, with their ids.
+lookupRouter.get('/works/:workKey/similar', async (req, res) => {
+  const workKey = workKeyOf(req);
+  const similar = (await cached(`similar4:${workKey}`, 7, () =>
+    similarWorks(workKey).catch(noneIfMissing),
+  )) ?? { alike: [], byAuthor: [] };
+  const keys = [...similar.alike, ...similar.byAuthor].map((w) => w.workKey);
+  const owned = await shelvedWorks(currentUser(req)._id, keys);
+  const withShelf = (list: typeof similar.alike) =>
+    list.map((work) => ({ ...work, bookId: owned.get(work.workKey) }));
+  res.json({
+    alike: withShelf(similar.alike),
+    byAuthor: withShelf(similar.byAuthor),
+  });
 });
 
 // Lines from the book, from Wikiquote, to keep among the reader's own

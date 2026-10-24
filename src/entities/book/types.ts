@@ -20,6 +20,8 @@ export type Book = {
   series?: { name: string; number?: number };
   format?: BookFormat;
   genres?: string[];
+  // The ids of the reader's lists it's in (entities/list)
+  lists?: string[];
   // What it's about, from the catalogue or in the reader's own words
   description?: string;
   // How readers rate it elsewhere, out of five, as the reader put it: only
@@ -34,12 +36,9 @@ export type Book = {
 
 export type BookCover = {
   url: string;
-  // From the catalogue, or a photo the reader took
   // The catalogue (shown from there), a photo the reader took, or a
-  // catalogue cover we keep a copy of. Mirrors the server.
+  // catalogue cover a copy was once kept of. Mirrors the server.
   source: 'openlibrary' | 'upload' | 'mirror';
-  // A catalogue cover we couldn't keep a copy of
-  uncopied?: boolean;
 };
 
 // On the reader's shelf, lent to someone, or someone else's book on loan
@@ -97,6 +96,28 @@ export type CatalogueWork = {
   coverUrl?: string;
   editionCount: number;
 };
+
+// A list a reader made on Open Library: its name, its page, how many books
+export type CatalogueList = { name: string; url: string; books: number };
+
+// Who wrote a book, as the catalogue knows them. `wikipedia`: the article
+// the lines about them come from, when they do, to credit.
+export type CatalogueAuthor = {
+  key: string;
+  name: string;
+  born?: number;
+  died?: number;
+  bio?: string;
+  photoUrl?: string;
+  wikipedia?: string;
+};
+
+// A book to read next, and its id if it's on the reader's shelves already
+export type SimilarBook = CatalogueWork & { bookId?: string };
+
+// What the page for adding a book may be opened with: one already found in
+// the catalogue (a book to read next, say), to start from its details
+export type AddBookState = { work?: CatalogueWork };
 
 // From the catalogue: one specific printing
 export type CatalogueEdition = {

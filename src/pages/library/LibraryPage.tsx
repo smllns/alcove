@@ -2,7 +2,6 @@ import { cn } from '@/shared/lib/cn';
 import { useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { useBottomEdge } from '@/shared/lib/useBottomEdge';
 import { useBooks } from '@/entities/book/queries';
-import { useCoverCopies } from '@/entities/book/useCoverCopies';
 import { useAuth } from '@/features/auth';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { BackToTop } from '@/shared/ui/BackToTop';
@@ -44,8 +43,6 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
   );
   const { all } = shelf;
   const total = books.data?.pages[0]?.total ?? 0;
-  // Catalogue covers load slowly; keep copies of our own
-  useCoverCopies(all);
   // Once there are books, the shelves take the page: tabs over the grid,
   // and adding another lives up in the header. Until then, a greeting and
   // the empty shelf sit in the middle of the screen.

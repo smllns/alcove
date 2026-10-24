@@ -10,7 +10,7 @@ import {
   discardCover,
   ensureEnabled,
   saveCover,
-  sweepOrphanCovers,
+  sweepOrphanCoversWhenDue,
   uploadsEnabled,
 } from './storage.js';
 
@@ -73,8 +73,9 @@ uploadsRouter.post('/cover', async (req, res) => {
   const me = currentUser(req)._id;
   const [url] = await Promise.all([
     saveCover(me, bytes, contentType),
-    // A good moment to clear out photos earlier forms left behind
-    sweepOrphanCovers(me).catch((err) =>
+    // A good moment to clear out photos earlier forms left behind, now
+    // and then
+    sweepOrphanCoversWhenDue(me).catch((err) =>
       console.error('Sweeping old covers failed:', err),
     ),
   ]);

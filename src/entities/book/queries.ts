@@ -11,6 +11,7 @@ import {
   deleteBook,
   fetchBook,
   fetchBooks,
+  fetchBooksByWriter,
   fetchUploadsEnabled,
   updateBook,
   type BooksPage,
@@ -21,6 +22,7 @@ const bookKeys = {
   all: ['books'] as const,
   shelf: ['books', 'shelf'] as const,
   book: (id: string) => ['books', 'one', id] as const,
+  byWriter: (name: string) => ['books', 'by-writer', name] as const,
 };
 
 // Changes the books already loaded onto the shelf, before the refetch
@@ -56,11 +58,32 @@ export function useBook(id: string) {
   });
 }
 
+// The reader's books by a writer; refreshed with the shelf, as books come
+// and go
+export const useBooksByWriter = (name: string | undefined) =>
+  useQuery({
+    queryKey: bookKeys.byWriter(name ?? ''),
+    queryFn: () => fetchBooksByWriter(name!),
+    enabled: Boolean(name),
+    // Asked afresh with the rest of the shelf, whenever a book changes
+    staleTime: Infinity,
+  });
+
+// A book added, changed or taken off: how many books each place and list
+// holds may have changed with it
+const recount = (client: QueryClient) => {
+  void client.invalidateQueries({ queryKey: ['places'] });
+  void client.invalidateQueries({ queryKey: ['lists'] });
+};
+
 export function useAddBook() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: addBook,
-    onSuccess: () => client.invalidateQueries({ queryKey: bookKeys.all }),
+    onSuccess: () => {
+      recount(client);
+      return client.invalidateQueries({ queryKey: bookKeys.all });
+    },
   });
 }
 
@@ -76,8 +99,7 @@ export function useUpdateBook() {
         books: page.books.map((b) => (b.id === book.id ? book : b)),
       }));
       void client.invalidateQueries({ queryKey: bookKeys.all });
-      // It may have moved to another place
-      void client.invalidateQueries({ queryKey: ['places'] });
+      recount(client);
     },
   });
 }
@@ -94,8 +116,7 @@ export function useDeleteBook() {
         total: Math.max(page.total - 1, 0),
       }));
       void client.invalidateQueries({ queryKey: bookKeys.all });
-      // Its place now holds one book fewer
-      void client.invalidateQueries({ queryKey: ['places'] });
+      recount(client);
     },
   });
 }

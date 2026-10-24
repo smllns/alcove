@@ -16,7 +16,7 @@ const usual = (how: string) =>
 export function draftFromBook(book: Book): {
   fields: DraftFields;
   extras: DraftExtras;
-  lists: DraftLists;
+  entries: DraftLists;
 } {
   const copy = book.copy;
   const how = copy?.acquired?.how ?? '';
@@ -64,10 +64,11 @@ export function draftFromBook(book: Book): {
     fields,
     extras: {
       genres: book.genres,
+      lists: book.lists,
       cover: book.cover && { url: book.cover.url, source: book.cover.source },
       openLibrary: book.openLibrary,
     },
-    lists: {
+    entries: {
       notes: passages(copy?.notes),
       quotes: passages(copy?.quotes),
       links: (copy?.links ?? []).map((link) => ({

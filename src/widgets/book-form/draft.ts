@@ -59,6 +59,8 @@ export type DraftFields = {
 // What goes with the text fields: what a catalogue pick brings, and genres
 export type DraftExtras = {
   genres?: string[];
+  // The ids of the reader's lists the book is in
+  lists?: string[];
   cover?: BookCover;
   openLibrary?: { work?: string; edition?: string };
 };

@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import type { CatalogueEdition, CatalogueWork } from '@/entities/book/types';
+import { useLocation } from 'react-router';
+import type {
+  AddBookState,
+  CatalogueEdition,
+  CatalogueWork,
+} from '@/entities/book/types';
 import { InnerPage } from '@/shared/ui/InnerPage';
 import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
@@ -16,7 +21,10 @@ type Step =
 // Find the book in the catalogue (or type it in), check the details, add it
 export function AddBookPage() {
   const navigate = useTransitionNavigate();
-  const [step, setStep] = useState<Step>({ kind: 'search' });
+  const found = (useLocation().state as AddBookState | null)?.work;
+  const [step, setStep] = useState<Step>(
+    found ? { kind: 'picked', work: found } : { kind: 'search' },
+  );
   const back = () => setStep({ kind: 'search' });
 
   return (

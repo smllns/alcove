@@ -32,6 +32,10 @@ export const paperClass =
 // sheet: where a copy lives, a link
 export const outlineCardClass = 'rounded-2xl border border-line/60';
 
+// A word to the reader in the course of a form, set apart on a pale card
+export const noticeClass =
+  'rounded-2xl border border-line bg-surface/70 px-5 py-4';
+
 // The room a page's content takes: across the screen inside its margins,
 // up to a width past which it stops spreading and sits in the middle
 export const pageWidthClass =

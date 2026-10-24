@@ -17,6 +17,7 @@ export function TransitionLink({
   onClick,
   to,
   replace,
+  state,
   ...props
 }: TransitionLinkProps) {
   const navigate = useTransitionNavigate();
@@ -26,6 +27,7 @@ export function TransitionLink({
     <Link
       to={to}
       replace={replace}
+      state={state}
       viewTransition={!curtain}
       onClick={(e) => {
         onClick?.(e);
@@ -38,7 +40,7 @@ export function TransitionLink({
           return;
         }
         e.preventDefault();
-        navigate(to, transition, { replace });
+        navigate(to, transition, { replace, state });
       }}
       {...props}
     />

@@ -27,7 +27,8 @@ type BookFormProps = {
   // Prefilled from the catalogue, or from the book being changed
   fields: Partial<DraftFields>;
   extras: DraftExtras;
-  lists?: DraftLists;
+  // The notes, quotes and links
+  entries?: DraftLists;
   editions: CatalogueEdition[];
   // The book on the shelves being changed; left out for a new one
   editing?: Book;
@@ -50,7 +51,7 @@ const stepOf = (errors: Record<string, string>): Step | null =>
 export function BookForm({
   fields,
   extras: initialExtras,
-  lists: initialLists = emptyLists,
+  entries: initialEntries = emptyLists,
   editions,
   editing,
   onSaved,
@@ -60,15 +61,15 @@ export function BookForm({
   const updateBook = useUpdateBook();
   const [step, setStep] = useState<Step>('book');
   const [extras, setExtras] = useState(initialExtras);
-  const [lists, setLists] = useState<DraftLists>(initialLists);
+  const [entries, setEntries] = useState<DraftLists>(initialEntries);
 
   // Set once the reader says yes, it's a second copy of a book they have
   const anotherCopy = useRef(false);
   const form = useForm<DraftFields>(
     { ...emptyFields, ...fields },
     async (values) => {
-      const tidied = tidyLists(lists);
-      setLists(tidied);
+      const tidied = tidyLists(entries);
+      setEntries(tidied);
       const input = toBookInput(values, extras, tidied);
       if (editing) {
         await updateBook.mutateAsync({
@@ -216,8 +217,10 @@ export function BookForm({
           ) : (
             <CopyStep
               form={form}
-              lists={lists}
-              onListsChange={setLists}
+              entries={entries}
+              onEntriesChange={setEntries}
+              lists={extras.lists ?? []}
+              onListsChange={(lists) => setExtras((x) => ({ ...x, lists }))}
               footer={footer}
             />
           )}

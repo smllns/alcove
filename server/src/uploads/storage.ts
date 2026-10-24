@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { del, list, put } from '@vercel/blob';
 import type { ObjectId } from 'mongodb';
 import { storedCoversInUse } from '../books/repository.js';
+import { users } from '../db.js';
 import { config } from '../config.js';
 import { HttpError } from '../lib/errors.js';
 
@@ -87,7 +88,7 @@ export async function discardCover(userId: ObjectId, url: string) {
 // Uploads no book ended up using, e.g. the reader left the form without
 // saving. Anything newer than a day may still be in a form that's open.
 const ORPHAN_AFTER_MS = 24 * 60 * 60 * 1000;
-export async function sweepOrphanCovers(
+async function sweepOrphanCovers(
   userId: ObjectId,
   olderThanMs = ORPHAN_AFTER_MS,
 ) {
@@ -101,6 +102,26 @@ export async function sweepOrphanCovers(
     .filter((b) => !inUse.has(b.url) && b.uploadedAt.getTime() < cutoff)
     .map((b) => b.url);
   if (orphans.length) await del(orphans, auth);
+}
+
+// How often a reader's uploads are swept: listing them is one of the
+// store's counted operations, of which the free plan allows few a month
+const SWEEP_EVERY_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Sweeps a reader's uploads if it's been a week since the last time
+export async function sweepOrphanCoversWhenDue(userId: ObjectId) {
+  if (!uploadsEnabled()) return;
+  const due = await users().findOneAndUpdate(
+    {
+      _id: userId,
+      $or: [
+        { coversSweptAt: { $exists: false } },
+        { coversSweptAt: { $lt: new Date(Date.now() - SWEEP_EVERY_MS) } },
+      ],
+    },
+    { $set: { coversSweptAt: new Date() } },
+  );
+  if (due) await sweepOrphanCovers(userId);
 }
 
 // Everything a reader uploaded, e.g. when their account is deleted

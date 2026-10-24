@@ -3,12 +3,14 @@ import { ObjectId } from 'mongodb';
 import { currentUser } from '../auth/middleware.js';
 import { HttpError } from '../lib/errors.js';
 import { parseBody } from '../lib/validation.js';
+import { getLists, ownLists } from '../lists/repository.js';
+import { warmListsOfWork } from '../lookup/lists.js';
 import { getPlaces, resolvePlace } from '../places/repository.js';
-import { storedCoverSources } from '../db.js';
-import { copyCatalogueCovers } from '../uploads/mirror.js';
+import { storedCoverSources, type BookDoc } from '../db.js';
 import { deleteCover, discardCover } from '../uploads/storage.js';
 import {
   addBook,
+  booksByWriter,
   countBooks,
   deleteBook,
   findBook,
@@ -61,15 +63,29 @@ booksRouter.get('/', async (req, res) => {
   });
 });
 
-// Only places the reader actually has; anything stale is trimmed away
-async function placed<T extends BookInput>(req: Request, input: T) {
-  if (input.copy?.place)
-    input.copy.place = resolvePlace(await getPlaces(me(req)), input.copy.place);
+// Only places and lists the reader actually has; anything stale is
+// trimmed away
+async function ownRefsOnly<T extends BookInput>(req: Request, input: T) {
+  const place = input.copy?.place;
+  const [homes, lists] = await Promise.all([
+    place && getPlaces(me(req)),
+    input.lists.length > 0 && getLists(me(req)),
+  ]);
+  if (place && homes) input.copy!.place = resolvePlace(homes, place);
+  if (lists) input.lists = ownLists(lists, input.lists);
   return input;
 }
 
+// Open Library is slow with a book's lists: asked for as soon as the book
+// is added, or turned into another of the catalogue's, they're there by
+// the time its page is opened
+function warmLists(book: BookDoc, before?: BookDoc) {
+  const work = book.openLibrary?.work;
+  if (work && work !== before?.openLibrary?.work) warmListsOfWork(work);
+}
+
 booksRouter.post('/', async (req, res) => {
-  const { anotherCopy, ...input } = await placed(
+  const { anotherCopy, ...input } = await ownRefsOnly(
     req,
     parseBody(addBookSchema, req.body),
   );
@@ -78,13 +94,17 @@ booksRouter.post('/', async (req, res) => {
     if (same) throw alreadyShelved(same);
   }
   const book = await addBook(me(req), input);
+  warmLists(book);
   res.status(201).json({ book: toPublicBook(book) });
 });
 
-// Keeps copies of catalogue covers in our own storage, a few at a time;
-// the library calls it again while any are left
-booksRouter.post('/covers/copy', async (req, res) => {
-  res.json(await copyCatalogueCovers(me(req)));
+// The reader's books by a writer, e.g. the one of a book about to be added
+booksRouter.get('/by-writer', async (req, res) => {
+  const name = String(req.query.name ?? '')
+    .trim()
+    .slice(0, 200);
+  const found = name ? await booksByWriter(me(req), name) : [];
+  res.json({ books: found.map(toPublicBook) });
 });
 
 booksRouter.get('/:id', async (req, res) => {
@@ -94,10 +114,11 @@ booksRouter.get('/:id', async (req, res) => {
 });
 
 booksRouter.put('/:id', async (req, res) => {
-  const input = await placed(req, parseBody(bookInputSchema, req.body));
+  const input = await ownRefsOnly(req, parseBody(bookInputSchema, req.body));
   const updated = await updateBook(me(req), objectId(req.params.id), input);
   if (!updated) throw notOnShelves();
   const { book, old } = updated;
+  warmLists(book, old);
   // A cover of ours it no longer shows, unless another book still does
   if (old.cover && old.cover.url !== book.cover?.url)
     await discardCover(me(req), old.cover.url).catch(() => {});

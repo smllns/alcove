@@ -7,13 +7,16 @@ import type { SkyStar as Star } from './layout';
 
 // One book in the sky, at its place, wandering a little. Hovering brings
 // it forward with its title (and rating) underneath. `lit`: found by a
-// search.
+// search; `kin`: by the writer of the book being hovered, so it stays lit
+// as the rest of the sky dims.
 export const SkyStar = memo(function SkyStar({
   star,
   lit,
+  kin,
 }: {
   star: Star;
   lit: boolean;
+  kin: boolean;
 }) {
   const { book, width } = star;
   const author = book.authors.join(', ');
@@ -22,6 +25,7 @@ export const SkyStar = memo(function SkyStar({
       className='star absolute'
       data-star={book.id}
       data-lit={lit || undefined}
+      data-kin={kin || undefined}
       style={
         {
           left: star.x - width / 2,
@@ -45,8 +49,7 @@ export const SkyStar = memo(function SkyStar({
           } as CSSProperties
         }
       >
-        {/* Glimmering as a whole, shadow and all (universe.css) */}
-        <div className='star-body sky-twinkle'>
+        <div className='star-body'>
           <BookCover
             title={book.title}
             author={author}

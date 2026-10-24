@@ -3,8 +3,11 @@ import type {
   Book,
   BookInput,
   CatalogueEdition,
+  CatalogueAuthor,
+  CatalogueList,
   CatalogueRatings,
   CatalogueWork,
+  SimilarBook,
 } from './types';
 
 export type BooksPage = {
@@ -23,6 +26,14 @@ export function fetchBooks(after: string | null) {
 export const addBook = async (input: BookInput) =>
   (await request<{ book: Book }>('/books', { method: 'POST', body: input }))
     .book;
+
+// The reader's books by a writer
+export const fetchBooksByWriter = async (name: string) =>
+  (
+    await request<{ books: Book[] }>(
+      `/books/by-writer?${new URLSearchParams({ name })}`,
+    )
+  ).books;
 
 export const fetchBook = async (id: string) =>
   (await request<{ book: Book }>(`/books/${id}`)).book;
@@ -66,6 +77,25 @@ export const fetchWorkRatings = async (workKey: string) =>
     )
   ).ratings;
 
+// Who wrote the book; null if the catalogue doesn't say
+export const fetchWorkAuthor = async (workKey: string) =>
+  (
+    await request<{ author: CatalogueAuthor | null }>(
+      `/lookup/works/${workKey}/author`,
+    )
+  ).author;
+
+// Books to read next: on the same themes, and by the same author
+export const fetchSimilarBooks = (workKey: string) =>
+  request<{ alike: SimilarBook[]; byAuthor: SimilarBook[] }>(
+    `/lookup/works/${workKey}/similar`,
+  );
+
+// Lists readers have made on Open Library that hold the book: the most
+// popular few
+export const fetchWorkLists = (workKey: string) =>
+  request<{ lists: CatalogueList[] }>(`/lookup/works/${workKey}/lists`);
+
 // Lines from the book, gathered on Wikiquote, and the page they're from
 export const fetchBookQuotes = (title: string, author: string) =>
   request<{ quotes: string[]; source: string | null }>(
@@ -80,11 +110,6 @@ export const uploadCover = async (image: string) =>
       body: { image },
     })
   ).url;
-
-// Copies a few more catalogue covers into our own storage, where they load
-// quickly; how many are still to go
-export const copyCatalogueCovers = () =>
-  request<{ remaining: number }>('/books/covers/copy', { method: 'POST' });
 
 // The picture at a link someone found, fetched by the server (sites rarely
 // let the browser read their images), to be shrunk and uploaded like a photo

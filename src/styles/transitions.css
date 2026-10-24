@@ -147,6 +147,22 @@
   object-fit: cover;
   animation-duration: 0.6s;
 }
+/* Flying home to the sky, the cover is taken without its shadow (that's
+   on the book around it, universe.css), which would only show, all at
+   once, as it lands; so it takes the same shadow on as it goes */
+:root[data-transition='return']:has(.sky)::view-transition-image-pair(
+    flying-cover
+  ) {
+  animation: flight-shadow 1.05s cubic-bezier(0.65, 0, 0.2, 1) both;
+}
+@keyframes flight-shadow {
+  from {
+    filter: var(--star-unlit);
+  }
+  to {
+    filter: var(--star-flight);
+  }
+}
 /* A faded book's cover is taken at full strength, so it brightens from
    its fade on the way to its page (data-flight-faded, set as it leaves a
    faded place), and fades back on the way home */

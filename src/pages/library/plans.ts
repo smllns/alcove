@@ -33,16 +33,16 @@ export const plans: Record<Exclude<SectionKey, 'all'>, Plan> = {
       },
     ],
   },
-  quotes: {
-    title: 'Everything you underlined',
-    text: 'The quotes and notes from every book, gathered in one place, to read through or search.',
+  lists: {
+    title: 'Books, gathered your way',
+    text: 'Every list you’ve made, with the books in it: to read this summer, the best of the year, the ones to lend. Add a book to one as you add it, or from its page.',
     cards: [
+      { title: 'To read this summer', detail: '12 books' },
+      { title: 'Best of the year', detail: '8 books · 3 still to read' },
       {
-        title: '“What is essential is invisible to the eye.”',
-        detail: 'The Little Prince',
+        title: 'From Open Library',
+        detail: 'Lists other readers made that your books are in',
       },
-      { title: 'Search them all', detail: 'Find that line you half remember' },
-      { title: 'A quote a day', detail: 'One of yours, picked at random' },
     ],
   },
   stats: {

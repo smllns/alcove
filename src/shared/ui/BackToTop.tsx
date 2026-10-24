@@ -7,7 +7,13 @@ import { Tooltip } from './Tooltip';
 
 // A way back up a long page, showing as soon as `after` (whatever sits at
 // the top, say the search) has scrolled out of sight above
-export function BackToTop({ after }: { after: Element | null }) {
+export function BackToTop({
+  after,
+  className,
+}: {
+  after: Element | null;
+  className?: string;
+}) {
   const [far, setFar] = useState(false);
 
   useEffect(() => {
@@ -26,6 +32,7 @@ export function BackToTop({ after }: { after: Element | null }) {
       className={cn(
         'fixed bottom-6 right-6 z-20 transition-[opacity,translate] duration-500 ease-soft sm:bottom-8 sm:right-8',
         far ? 'opacity-100' : 'pointer-events-none translate-y-3 opacity-0',
+        className,
       )}
     >
       <IconButton

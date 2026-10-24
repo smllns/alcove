@@ -90,6 +90,8 @@ export const bookInputSchema = z.object({
     10,
     'Keep it to 10 genres.',
   ),
+  // The ids of the reader's lists it's in
+  lists: list(z.string().max(40), 200, 'That’s a lot of lists.'),
   description: optionalText(DESCRIPTION_MAX),
   // Out of five, to one decimal place: 4.2
   averageRating: maybe(

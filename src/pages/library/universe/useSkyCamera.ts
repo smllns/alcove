@@ -11,15 +11,37 @@ import { between, easeOut, GLIDE_MS } from './glide';
 import type { Bounds } from './layout';
 import { useSkyGestures } from './useSkyGestures';
 
-// How wide a typical cover should look at the start, at the least. A big
-// library opens on the heart of its galaxy at this size rather than
-// shrinking every book to a speck; the rest is a drag away.
-const READABLE_WIDTH = 36;
+// How wide a typical cover should look at the start, at the least: big
+// enough to know the book by, on a phone, and a little bigger again where
+// there's room (a sky WIDE or wider). A library too big to fit at this
+// size opens on the heart of its galaxy, the rest of it past the edges, a
+// drag away; a new book never makes the others smaller.
+const READABLE_WIDTH = 52;
+const READABLE_WIDTH_WIDE = 64;
+const WIDE = 768;
 // Drawing back out to the whole sky once a search is cleared takes its
 // time, an unhurried pull back rather than a jump
 const UNFOCUS_GLIDE_MS = 1000;
 // How far an arrow key moves the sky, in screen pixels
 const KEY_STEP = 80;
+
+// The sky as it opens, in a sky of `box`'s size: every book in view,
+// unless that would make a typical cover (`typicalWidth` across, in the
+// sky) look smaller than readable
+const opening = (
+  box: Size,
+  insetTop: number,
+  bounds: Bounds,
+  typicalWidth: number,
+) =>
+  fitted(
+    box,
+    insetTop,
+    bounds,
+    typicalWidth
+      ? (box.width < WIDE ? READABLE_WIDTH : READABLE_WIDTH_WIDE) / typicalWidth
+      : MIN_ZOOM,
+  );
 
 // The sky's own size, unscaled: it may be growing or shrinking into view
 // as it comes or goes
@@ -42,7 +64,6 @@ export function useSkyCamera(
   onTap?: (target: Element) => void,
 ) {
   // The start: everything, unless that would make the books too small
-  const readable = typicalWidth ? READABLE_WIDTH / typicalWidth : MIN_ZOOM;
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, zoom: 1 });
   // Whether the camera has been fitted yet: until then nothing is shown, so
   // the books never flash where an unfitted camera would put them
@@ -92,14 +113,14 @@ export function useSkyCamera(
     if (!el) return;
     const refit = () => {
       if (!touched.current)
-        setCamera(fitted(sizeOf(el), insetTop, bounds, readable));
+        setCamera(opening(sizeOf(el), insetTop, bounds, typicalWidth));
       setPlaced(true);
     };
     refit();
     const observer = new ResizeObserver(refit);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [sky, bounds, readable, insetTop]);
+  }, [sky, bounds, typicalWidth, insetTop]);
 
   // Straight away, for hands on the sky: they move it, and nothing else does
   const zoomAt = useCallback(
@@ -147,17 +168,17 @@ export function useSkyCamera(
       glideTo(fitted(box, insetTop, focus));
     } else if (wasFocused.current) {
       touched.current = false;
-      glideTo(fitted(box, insetTop, bounds, readable), UNFOCUS_GLIDE_MS);
+      glideTo(opening(box, insetTop, bounds, typicalWidth), UNFOCUS_GLIDE_MS);
     }
     wasFocused.current = Boolean(focus);
   });
   useEffect(() => onFocusChange(), [focusKey]);
 
-  // Every book in view, however small that makes them
+  // Back to the sky as it opens
   const fit = () => {
     touched.current = false;
     const box = sky.current && sizeOf(sky.current);
-    if (box) glideTo(fitted(box, insetTop, bounds));
+    if (box) glideTo(opening(box, insetTop, bounds, typicalWidth));
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {

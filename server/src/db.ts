@@ -7,6 +7,8 @@ export type UserDoc = {
   name: string;
   passwordHash: string;
   createdAt: Date;
+  // When their uploads were last swept for ones no book uses
+  coversSweptAt?: Date;
 };
 
 export type SessionDoc = {
@@ -18,8 +20,9 @@ export type SessionDoc = {
 };
 
 // Where a cover came from: the catalogue (shown from there), a photo the
-// reader uploaded, or a catalogue cover we keep a copy of. The last two are
-// files in our own storage.
+// reader uploaded, or a catalogue cover a copy was once kept of (no longer
+// made: every copy cost one of the storage's few counted operations a
+// month). The last two are files in our own storage.
 export const coverSources = ['openlibrary', 'upload', 'mirror'] as const;
 export type CoverSource = (typeof coverSources)[number];
 export const storedCoverSources: CoverSource[] = ['upload', 'mirror'];
@@ -45,6 +48,16 @@ export type PlaceRef = {
   room?: string;
   unit?: string;
   shelf?: string;
+};
+
+// The reader's own lists of books (to read this summer, the best of the
+// year, …), named however they like; one document per reader, keyed by
+// their id. A book says which lists it's in.
+export type BookListNode = { id: string; name: string };
+export type ListsDoc = {
+  _id: ObjectId;
+  lists: BookListNode[];
+  updatedAt: Date;
 };
 
 // On the reader's shelf, lent to someone, or someone else's book on loan
@@ -110,13 +123,14 @@ export type BookDoc = {
   series?: { name: string; number?: number };
   format?: BookFormat;
   genres?: string[];
+  // The ids of the reader's lists it's in
+  lists?: string[];
   // What it's about, from the catalogue or in the reader's own words
   description?: string;
   // How readers rate it elsewhere, out of five, as the reader put it: only
   // for a book the catalogue has no ratings for (those are asked afresh)
   averageRating?: number;
-  // `uncopied`: a catalogue cover we couldn't keep a copy of
-  cover?: { url: string; source: CoverSource; uncopied?: boolean };
+  cover?: { url: string; source: CoverSource };
   // Where the details came from, for refreshing them later
   openLibrary?: { work?: string; edition?: string };
   copy?: CopyDetails;
@@ -128,7 +142,11 @@ export type BookDoc = {
 export type LookupCacheDoc = {
   _id: string;
   value: unknown;
+  // Gone once this passes (Mongo deletes it)
   expiresAt: Date;
+  // For an answer kept past its time (cachedStale): when it's due to be
+  // asked afresh
+  freshUntil?: Date;
 };
 
 const client = new MongoClient(config.MONGODB_URI, {
@@ -157,6 +175,7 @@ export const users = () => database().collection<UserDoc>('users');
 export const sessions = () => database().collection<SessionDoc>('sessions');
 export const books = () => database().collection<BookDoc>('books');
 export const places = () => database().collection<PlacesDoc>('places');
+export const lists = () => database().collection<ListsDoc>('lists');
 export const lookupCache = () =>
   database().collection<LookupCacheDoc>('lookupCache');
 

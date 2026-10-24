@@ -4,16 +4,18 @@ import type { ReactNode } from 'react';
 // a chapter's in an old book, with a hairline running on from it across
 // the page
 export function BookSection({
+  id,
   title,
   children,
   className,
 }: {
+  id?: string;
   title: string;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section className={className}>
+    <section id={id} className={className}>
       <div className='mb-6 flex items-center gap-4'>
         <h2 className='font-serif text-[15px] uppercase tracking-[0.18em] text-ink'>
           {title}

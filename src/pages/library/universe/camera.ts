@@ -12,8 +12,6 @@ const MAX_ZOOM = 3;
 // The closest the whole sky is ever fitted: a handful of books fill the
 // screen nicely without any one of them turning huge
 const MAX_FIT_ZOOM = 1.6;
-// Smaller than this share of the readable zoom, and the books are specks
-const SPECKS = 0.6;
 // Room left around the books when the whole sky is fitted on screen
 const FIT_SIDE = 40;
 const FIT_ENDS = 48;
@@ -36,10 +34,9 @@ export function zoomedAt(
 
 // The camera that shows every book centred in the free part of `box`,
 // below `insetTop` (where the tabs and the search sit over the sky). With
-// `readable`, a library so big that fitting it would shrink the books to
-// specks is shown at that zoom instead, centred on the heart of the
-// galaxy; only then, so a sky that nearly fits is never cropped for a few
-// pixels.
+// `readable`, never further out than that: a library that would only fit
+// smaller is shown at that zoom instead, centred on the heart of the
+// galaxy, the rest of it past the edges.
 export function fitted(
   box: Size,
   insetTop: number,
@@ -51,7 +48,7 @@ export function fitted(
   const top = Math.min(insetTop, box.height / 2);
   const room = box.height - top - FIT_ENDS * 2;
   const whole = Math.min(box.width / width, room / height, MAX_FIT_ZOOM);
-  const zoom = clampZoom(whole < readable * SPECKS ? readable : whole);
+  const zoom = clampZoom(Math.max(whole, readable));
   return {
     zoom,
     x: box.width / 2 - ((bounds.minX + bounds.maxX) / 2) * zoom,

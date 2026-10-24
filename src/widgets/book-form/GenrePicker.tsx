@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { cn } from '@/shared/lib/cn';
+import { AddOwnPill } from '@/shared/ui/AddOwnPill';
 import { choiceClass } from '@/shared/ui/buttonStyles';
-import { labelClass, smallInputText } from '@/shared/ui/fieldStyles';
-import { AddButton } from '@/shared/ui/ListControls';
+import { labelClass } from '@/shared/ui/fieldStyles';
 
 // The usual shelves of a bookshop, to pick from with a tap. The server
 // picks these same ones out of the catalogue's subjects
@@ -36,8 +35,6 @@ export function GenrePicker({
   value: string[];
   onChange: (genres: string[]) => void;
 }) {
-  const [own, setOwn] = useState('');
-  const [typing, setTyping] = useState(false);
   const chosen = new Set(value.map((g) => g.toLowerCase()));
   // The common ones, then whatever the reader added that isn't among them
   const shown = [
@@ -57,13 +54,12 @@ export function GenrePicker({
           : [...value, genre],
     );
 
-  const addOwn = () => {
-    const genre = own.trim();
+  const addOwn = (typed: string) => {
+    const genre = typed.trim();
     if (!genre) return;
     // Typing one that's already there just picks it
     const known = shown.find((g) => g.toLowerCase() === genre.toLowerCase());
     if (!chosen.has((known ?? genre).toLowerCase())) toggle(known ?? genre);
-    setOwn('');
   };
 
   return (
@@ -88,37 +84,17 @@ export function GenrePicker({
             </button>
           );
         })}
-        {typing ? (
-          <input
-            autoFocus
-            value={own}
-            onChange={(e) => setOwn(e.target.value)}
-            onKeyDown={(e) => {
-              // Enter adds the genre rather than moving on to the next step
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addOwn();
-              }
-              if (e.key === 'Escape') setTyping(false);
-            }}
-            onBlur={() => {
-              addOwn();
-              setTyping(false);
-            }}
+        {!full && (
+          <AddOwnPill
+            onAdd={addOwn}
             placeholder='Your own, then Enter'
+            label='Your own genre'
             maxLength={40}
-            aria-label='Your own genre'
-            className={cn(
-              'w-44 rounded-full border border-ink bg-transparent px-4 py-1.5 text-ink outline-none placeholder:text-faint',
-              smallInputText,
-            )}
-          />
-        ) : (
-          !full && (
-            <AddButton onClick={() => setTyping(true)} className='px-2'>
-              Your own
-            </AddButton>
-          )
+            staysOpen
+            className='w-44'
+          >
+            Your own
+          </AddOwnPill>
         )}
       </div>
     </fieldset>

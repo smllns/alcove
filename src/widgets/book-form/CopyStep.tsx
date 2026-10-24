@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { copyConditions } from '@/entities/book/conditions';
+import { ListPicker } from '@/features/lists';
 import { PlacePicker } from '@/features/places';
 import { StepSlider } from '@/shared/ui/StepSlider';
 import { StarRating } from '@/shared/ui/StarRating';
@@ -15,8 +16,12 @@ import { TextEntries } from './TextEntries';
 
 type CopyStepProps = {
   form: DraftForm;
-  lists: DraftLists;
-  onListsChange: (update: (lists: DraftLists) => DraftLists) => void;
+  // The notes, quotes and links
+  entries: DraftLists;
+  onEntriesChange: (update: (entries: DraftLists) => DraftLists) => void;
+  // The ids of the reader's own lists the book is in
+  lists: string[];
+  onListsChange: (lists: string[]) => void;
   // The buttons at the bottom, and anything above them
   footer: ReactNode;
 };
@@ -26,14 +31,16 @@ type CopyStepProps = {
 // it optional.
 export function CopyStep({
   form,
+  entries,
+  onEntriesChange,
   lists,
   onListsChange,
   footer,
 }: CopyStepProps) {
-  const setList =
+  const setEntries =
     <K extends keyof DraftLists>(name: K) =>
-    (update: (entries: DraftLists[K]) => DraftLists[K]) =>
-      onListsChange((l) => ({ ...l, [name]: update(l[name]) }));
+    (update: (each: DraftLists[K]) => DraftLists[K]) =>
+      onEntriesChange((e) => ({ ...e, [name]: update(e[name]) }));
 
   return (
     <div className='flex flex-col gap-8'>
@@ -51,6 +58,8 @@ export function CopyStep({
         value={placeOf(form.values)}
         onChange={(place) => form.setValues((v) => withPlace(v, place))}
       />
+
+      <ListPicker value={lists} onChange={onListsChange} />
 
       <AcquiredFields form={form} />
 
@@ -73,8 +82,8 @@ export function CopyStep({
       <TextEntries
         form={form}
         name='notes'
-        entries={lists.notes}
-        onChange={setList('notes')}
+        entries={entries.notes}
+        onChange={setEntries('notes')}
         label='Note'
         placeholder='Something worth saying about it. It reminded me of Anna the whole way through. Reading it felt like floating above the clouds.'
         addFirst='Add a note'
@@ -84,8 +93,8 @@ export function CopyStep({
       <TextEntries
         form={form}
         name='quotes'
-        entries={lists.quotes}
-        onChange={setList('quotes')}
+        entries={entries.quotes}
+        onChange={setEntries('quotes')}
         label='Quote'
         placeholder='A line worth keeping'
         addFirst='Add a quote'
@@ -94,8 +103,8 @@ export function CopyStep({
 
       <LinkEntries
         form={form}
-        entries={lists.links}
-        onChange={setList('links')}
+        entries={entries.links}
+        onChange={setEntries('links')}
       />
 
       {footer}

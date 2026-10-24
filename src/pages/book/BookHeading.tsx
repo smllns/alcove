@@ -4,6 +4,7 @@ import { readingState } from '@/entities/book/reading';
 import { cn } from '@/shared/lib/cn';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { TapedLabel } from '@/shared/ui/TapedLabel';
+import { AuthorByline } from './AuthorByline';
 import { BookRatings } from './BookRatings';
 import { loanLine } from './copyLines';
 
@@ -14,9 +15,10 @@ const seriesLine = (series: Book['series']) =>
     .filter(Boolean)
     .join(' · ');
 
-// The book's title, who wrote it, and at a glance where the reader is
-// with it: labels taped on for whether it's been read and whether it's out on
-// loan, and the ratings.
+// The book's title, who wrote it (with the first lines about them, and how
+// many more of theirs the reader has: AuthorByline), and at a glance where the
+// reader is with it: labels taped on for whether it's been read and
+// whether it's out on loan, and the ratings.
 // `ref`: the title, to tell when it's been scrolled out of sight.
 export function BookHeading({
   book,
@@ -79,13 +81,7 @@ export function BookHeading({
           {book.subtitle}
         </p>
       )}
-      <p
-        className='mt-3 animate-rise font-serif text-lg font-medium text-ink sm:mt-4 sm:text-xl'
-        style={{ animationDelay: '140ms' }}
-      >
-        <span className='font-normal text-muted italic'>by</span>{' '}
-        {book.authors.join(', ')}
-      </p>
+      <AuthorByline book={book} />
       <div
         className='order-2 mt-8 animate-rise'
         style={{ animationDelay: '220ms' }}

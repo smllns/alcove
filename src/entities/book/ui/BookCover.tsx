@@ -27,7 +27,7 @@ export function BookCover({
   home,
 }: BookCoverProps) {
   const src = url && sizedCover(url, size);
-  const { load, picture } = useCoverPicture(src);
+  const { known, load, picture } = useCoverPicture(src);
   const showPicture = src && load !== 'failed';
 
   return (
@@ -45,7 +45,10 @@ export function BookCover({
         <img
           src={src}
           alt=''
-          loading='lazy'
+          // One seen already is in the cache: left to load lazily, Safari
+          // puts it off until a page turn is over, and the turn shows the
+          // cover blank, picture and shadow arriving only after it
+          loading={known ? 'eager' : 'lazy'}
           draggable={false}
           {...picture}
           className={cn(

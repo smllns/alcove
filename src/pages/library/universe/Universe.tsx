@@ -1,7 +1,16 @@
-import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+} from 'react';
 import type { Book } from '@/entities/book/types';
 import { boundsOf, layoutSky } from './layout';
 import { SkyControls } from './SkyControls';
+import { SkyDust } from './SkyDust';
+import { SkyLinks } from './SkyLinks';
 import { useSkyShape } from './shape';
 import { SkyStar } from './SkyStar';
 import { useSkyCamera } from './useSkyCamera';
@@ -11,11 +20,9 @@ import { cn } from '@/shared/lib/cn';
 import { floatingClass } from '@/shared/ui/surfaces';
 import { paths } from '@/shared/config/paths';
 
-// How much slower the dust moves than the books, for a sense of depth
-const DUST_DEPTH = 0.35;
-
 // Every book a star, scattered across a sky to drag around and zoom into.
-// The best loved shine the biggest. While searching, the books in `lit`
+// The best loved shine the biggest; a writer's books are gathered into a
+// constellation, which lights up as one of them is pointed at. While searching, the books in `lit`
 // shine and the rest fade, and the view glides over to them.
 export function Universe({
   books,
@@ -42,6 +49,25 @@ export function Universe({
     () => (lit ? layout.stars.filter((star) => lit.has(star.book.id)) : []),
     [layout, lit],
   );
+  // The writer of the book under the mouse, whose constellation lights up
+  const [kin, setKin] = useState<string | null>(null);
+  const writerOf = useMemo(
+    () => new Map(layout.stars.map((star) => [star.book.id, star.group])),
+    [layout],
+  );
+  // The book under the mouse, whose caption is kept the same size on
+  // screen however far the sky is zoomed (universe.css)
+  const pointed = useRef<HTMLElement | null>(null);
+  const pointAt = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse') return;
+    const star = (e.target as Element)
+      .closest<HTMLElement>('.star-body')
+      ?.closest<HTMLElement>('[data-star]');
+    pointed.current = star ?? null;
+    star?.style.setProperty('--zoom', String(camera.zoom));
+    const id = star?.dataset.star;
+    setKin((id && writerOf.get(id)) || null);
+  };
   const navigate = useTransitionNavigate();
   // A book tapped (not dragged past) opens
   const open = (target: Element) => {
@@ -62,6 +88,12 @@ export function Universe({
       open,
     );
 
+  // Only that book is told the zoom, as it changes: told to the whole sky,
+  // every book in it was restyled at every step of a zoom
+  useLayoutEffect(() => {
+    pointed.current?.style.setProperty('--zoom', String(camera.zoom));
+  }, [camera.zoom]);
+
   return (
     <div
       ref={sky}
@@ -72,15 +104,14 @@ export function Universe({
       data-shape={shape}
       data-searching={lit ? true : undefined}
       className='sky relative flex-1 cursor-grab touch-none select-none overflow-hidden outline-none data-dragging:cursor-grabbing'
-      style={
-        {
-          '--dust-x': `${camera.x * DUST_DEPTH}px`,
-          '--dust-y': `${camera.y * DUST_DEPTH}px`,
-          '--zoom': camera.zoom,
-        } as CSSProperties
-      }
       {...handlers}
+      onPointerOver={pointAt}
+      onPointerLeave={(e) => {
+        handlers.onPointerLeave(e);
+        setKin(null);
+      }}
     >
+      <SkyDust x={camera.x} y={camera.y} />
       <div
         className={cn(
           'absolute left-0 top-0 z-1 origin-top-left will-change-transform',
@@ -93,11 +124,13 @@ export function Universe({
           transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`,
         }}
       >
+        <SkyLinks links={layout.links} kin={kin} />
         {layout.stars.map((star) => (
           <SkyStar
             key={star.book.id}
             star={star}
             lit={lit?.has(star.book.id) ?? false}
+            kin={Boolean(kin) && star.group === kin}
           />
         ))}
       </div>

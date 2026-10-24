@@ -43,7 +43,7 @@ function Control({
 }
 
 // The shape of the stars, zooming without a trackpad, and a way back to
-// seeing every book
+// the sky as it first opens
 export function SkyControls({
   shape,
   onShape,
@@ -73,7 +73,7 @@ export function SkyControls({
       <Control label='Zoom out' onClick={onZoomOut}>
         <Minus size={16} />
       </Control>
-      <Control label='Fit to screen' onClick={onFit}>
+      <Control label='Reset view' onClick={onFit}>
         <Maximize size={14} />
       </Control>
     </div>

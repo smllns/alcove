@@ -1,14 +1,11 @@
 import { boldParts, plainText } from './wikitext.js';
-import { HEADERS } from './agent.js';
-import { throttle } from './throttle.js';
+import { unaccented } from '../lib/text.js';
+import { fromWikimedia } from './wikimedia.js';
 
 // Wikiquote (en.wikiquote.org): quotations gathered by the Wikimedia
 // community, free to reuse with credit (CC BY-SA). A well-known book has a
-// page of its own; others are a section on their author's page. No key;
-// Wikimedia asks for a User-Agent with a way to get in touch, and turns
-// away anyone asking too often.
+// page of its own; others are a section on their author's page.
 const API = 'https://en.wikiquote.org/w/api.php';
-const nextTurn = throttle(1, 8000);
 
 // As many as are offered for a book
 const MAX = 8;
@@ -18,29 +15,14 @@ const LONGEST = 320;
 
 export type BookQuotes = { quotes: string[]; source: string | null };
 
-async function api<T>(params: Record<string, string>): Promise<T> {
-  await nextTurn();
-  const query = new URLSearchParams({
-    format: 'json',
-    formatversion: '2',
-    ...params,
-  });
-  const res = await fetch(`${API}?${query}`, {
-    headers: HEADERS,
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!res.ok) throw new Error(`Wikiquote answered ${res.status}`);
-  return res.json() as Promise<T>;
-}
+const api = <T>(params: Record<string, string>) =>
+  fromWikimedia<T>(
+    `${API}?${new URLSearchParams({ format: 'json', formatversion: '2', ...params })}`,
+  );
 
 // Titles and names compared without case, accents or punctuation:
 // "J.R.R. Tolkien" is "J. R. R. Tolkien", "Mr Fox" is "Mr. Fox"
-const norm = (text: string) =>
-  text
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+const norm = (text: string) => unaccented(text).replace(/[^a-z0-9]/g, '');
 
 const searchTitles = async (search: string) =>
   (
