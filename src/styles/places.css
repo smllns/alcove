@@ -1,0 +1,175 @@
+/* The places view of the library (pages/library/places): a home drawn as
+   an architect's section, its bookcases in it, the books on them as spines
+   (spines.css). Nothing in it moves by itself; only a book pointed at, a
+   lamp coming on, and a room opening from the drawing of its home. */
+
+/* A home drawn as an architect's section through it: what's cut through
+   (walls, floors, roof) solid, the ground hatched, everything else in a
+   fine line; only the books and the light have colour */
+:root {
+  --poche: color-mix(in oklab, var(--ink) 88%, var(--bg-mid));
+  --fine: color-mix(in oklab, var(--ink) 94%, var(--bg-mid));
+  --hatch: color-mix(in oklab, var(--ink) 35%, var(--bg-mid));
+}
+:root[data-theme='dark'] {
+  --poche: color-mix(in oklab, var(--ink) 80%, var(--bg-mid));
+  --fine: color-mix(in oklab, var(--ink) 90%, var(--bg-mid));
+  --hatch: color-mix(in oklab, var(--ink) 32%, var(--bg-mid));
+}
+
+/* A bookcase seen from the front, as an architect draws one: its outline
+   and its shelves as fine lines (.bookcase-shelf), small in a home's plan
+   (.bookcase-mini) and full size in its room */
+.bookcase {
+  --line: 1.25px;
+  position: relative;
+  border: var(--line) solid var(--fine);
+  border-bottom: 0;
+}
+.bookcase-mini {
+  --line: 0.9px;
+}
+.bookcase-shelf {
+  border-bottom: var(--line) solid var(--fine);
+}
+
+/* The books in the drawing of a home: their covers' colours half gone
+   into the paper, so they sit in the drawing; the lamp's light falls on
+   them as on the rest of the room */
+.mini-spine {
+  background-color: color-mix(in oklab, var(--tone) 45%, var(--bg-mid));
+}
+
+/* A room of the home, cut open. Pointed at, its lamp comes on. */
+.house-room {
+  position: relative;
+}
+
+/* The colour of a room's lamplight (data-light, decor.ts), and of its
+   bulb: in the light, strong enough to show on paper yet never orange;
+   in the dark, gentler, as it shines on its own */
+:root {
+  --warm-light: rgb(255 208 140 / 0.3);
+  --rose-light: rgb(255 170 190 / 0.3);
+  --mint-light: rgb(150 225 195 / 0.32);
+  --lavender-light: rgb(190 170 255 / 0.3);
+  --sky-light: rgb(150 200 255 / 0.32);
+}
+:root[data-theme='dark'] {
+  --warm-light: rgb(255 200 120 / 0.26);
+  --rose-light: rgb(255 160 185 / 0.2);
+  --mint-light: rgb(130 230 195 / 0.17);
+  --lavender-light: rgb(175 155 255 / 0.22);
+  --sky-light: rgb(140 195 255 / 0.18);
+}
+[data-light] {
+  --light: var(--warm-light);
+  --bulb: var(--gold-light);
+}
+[data-light='rose'] {
+  --light: var(--rose-light);
+  --bulb: #f6b3c4;
+}
+[data-light='mint'] {
+  --light: var(--mint-light);
+  --bulb: #a4e6cb;
+}
+[data-light='lavender'] {
+  --light: var(--lavender-light);
+  --bulb: #c9b8ff;
+}
+[data-light='sky'] {
+  --light: var(--sky-light);
+  --bulb: #aed6ff;
+}
+/* A lamp's light, round it: hanging, a pool spreading down into the
+   room; standing, a glow round its shade. Each fades out within its own
+   box, so no edge of it shows. On paper a pale light laid over would
+   hardly show, so there it's mixed into the wall it falls on, warming
+   it as lamplight does; in the dark it simply shines. Behind everything
+   in the room, the first thing drawn in it, so nothing is dimmed by it
+   and nothing is in the pointer's way. */
+/* (So too the light of a room opened, room.css) */
+:is(.room-glow, .room-wash, .lamp-light) {
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+:root[data-theme='dark'] :is(.room-glow, .room-wash, .lamp-light) {
+  mix-blend-mode: normal;
+}
+.room-glow {
+  position: absolute;
+  opacity: 0;
+  translate: -50% 0;
+  left: 50%;
+  transition: opacity 0.6s var(--ease-soft);
+}
+.pendant-glow {
+  top: 0;
+  width: 26rem;
+  height: 22rem;
+  background: radial-gradient(
+    ellipse 13rem 22rem at 50% 0,
+    var(--light),
+    transparent
+  );
+}
+.standing-glow {
+  bottom: 0;
+  width: 30rem;
+  height: 26rem;
+  background: radial-gradient(
+    ellipse 15rem 26rem at 50% 62%,
+    var(--light),
+    transparent
+  );
+}
+
+/* A lamp, off: its shade an empty outline, its bulb unseen. Coming on,
+   the bulb shows and the shade fills with its light, which spreads
+   through the room a moment after; going off, it all fades together. */
+.lamp-shade {
+  fill: transparent;
+  stroke: var(--fine);
+  stroke-width: 1;
+  transition: fill 0.6s var(--ease-soft);
+}
+.lamp-bulb {
+  fill: var(--bulb, var(--gold-light));
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-soft);
+}
+.house-room:hover .lamp-shade,
+.house-room[data-current] .lamp-shade,
+.house-room:focus-visible .lamp-shade,
+.room-frame[data-lit] .lamp-shade {
+  fill: color-mix(in oklab, var(--bulb, var(--gold)) 55%, transparent);
+}
+.house-room:hover .lamp-bulb,
+.house-room[data-current] .lamp-bulb,
+.house-room:focus-visible .lamp-bulb,
+.room-frame[data-lit] .lamp-bulb {
+  opacity: 1;
+}
+.house-room:hover .room-glow,
+.house-room[data-current] .room-glow,
+.house-room:focus-visible .room-glow {
+  opacity: 1;
+  transition: opacity 0.9s var(--ease-soft) 0.15s;
+}
+
+/* home: another home's drawing shown in place of the one before, coming
+   in over it where it stands, nothing moving (the one before staying as
+   it is under it, so nothing shows through between the two); the header
+   and the tabs staying put (transitions-in-place.css) */
+:root[data-transition='home']::view-transition-old(root) {
+  animation: none;
+}
+:root[data-transition='home']::view-transition-new(root) {
+  animation: home-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes home-in {
+  from {
+    opacity: 0;
+  }
+}

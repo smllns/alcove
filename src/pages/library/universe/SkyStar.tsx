@@ -1,9 +1,10 @@
-import { memo, type CSSProperties } from 'react';
+import { memo, useRef, type CSSProperties } from 'react';
 import { BookCover } from '@/entities/book/ui/BookCover';
 import { cn } from '@/shared/lib/cn';
 import { Rating } from '@/shared/ui/Rating';
 import { raisedClass } from '@/shared/ui/surfaces';
 import type { SkyStar as Star } from './layout';
+import { useDrift } from './useDrift';
 
 // One book in the sky, at its place, wandering a little. Hovering brings
 // it forward with its title (and rating) underneath. `lit`: found by a
@@ -19,6 +20,8 @@ export const SkyStar = memo(function SkyStar({
   kin: boolean;
 }) {
   const { book, width } = star;
+  const drifting = useRef<HTMLDivElement>(null);
+  useDrift(drifting, star);
   const author = book.authors.join(', ');
   return (
     <div
@@ -31,23 +34,15 @@ export const SkyStar = memo(function SkyStar({
           left: star.x - width / 2,
           top: star.y - width * 0.75,
           width,
-          // For the shapes in universe.css, which are cut to the cover's size
+          // For the shapes in stars.css, which are cut to the cover's size
           '--w': `${width}px`,
         } as CSSProperties
       }
     >
       <div
+        ref={drifting}
         className='sky-drift'
-        style={
-          {
-            '--drift-x': `${star.driftX}px`,
-            '--drift-y': `${star.driftY}px`,
-            '--drift-time': `${star.driftSeconds}s`,
-            '--sway': `${star.sway}deg`,
-            '--drift-delay': `${star.phase}s`,
-            '--tilt': `${star.tilt}deg`,
-          } as CSSProperties
-        }
+        style={{ '--tilt': `${star.tilt}deg` } as CSSProperties}
       >
         <div className='star-body'>
           <BookCover

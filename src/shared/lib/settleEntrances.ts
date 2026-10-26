@@ -1,19 +1,29 @@
-// A page that rises in over the old one (the 'forward' transition), or is
-// uncovered as the old one lowers away ('return'), needs no entrance of
-// its own: whatever it would fade or rise into place is simply
+// A page that rises in over the old one (the 'forward' transition, and
+// 'onward' to a section of the library), is uncovered as the old one
+// lowers away ('return'), or a room opened or closed or another home shown
+// ('room', 'room-back', 'home') needs no entrance of its own: whatever it would fade or rise into place is simply
 // there, including whatever turns up while it's still rising (once its
 // data loads, say). More than tidier: as a transition ends, WebKit
 // (Safari, every iPhone browser) draws a frame of any entrance still under
 // way back at its start, a visible blink. Only what plays once is settled;
-// the sky's endless drifting and twinkling go on. Called once, it watches
-// every view transition, the router's included, and keeps one the browser
-// gives up on from turning into an error.
+// the sky's endless drifting is held still instead (stillWhileTurning).
+// Called once, it watches every view transition, the router's included,
+// and keeps one the browser gives up on from turning into an error.
 
-// Plays once, on the page itself (not the transition's own sheet)
-const isEntrance = (animation: Animation) =>
-  (animation instanceof CSSAnimation || animation instanceof CSSTransition) &&
-  animation.effect?.getComputedTiming().iterations !== Infinity &&
-  !(animation.effect as KeyframeEffect | null)?.pseudoElement;
+import { pageTurning } from './stillWhileTurning';
+
+// Plays once, on the page itself (not the transition's own sheet), and
+// isn't part of the change itself (data-moves-along: the library's tabs'
+// shading, gliding over to the section chosen)
+const isEntrance = (animation: Animation) => {
+  const effect = animation.effect as KeyframeEffect | null;
+  return (
+    (animation instanceof CSSAnimation || animation instanceof CSSTransition) &&
+    effect?.getComputedTiming().iterations !== Infinity &&
+    !effect?.pseudoElement &&
+    !effect?.target?.closest('[data-moves-along]')
+  );
+};
 
 const settle = (animations: Animation[]) => {
   for (const animation of animations)
@@ -42,8 +52,14 @@ export function settleEntrances() {
       transition.finished,
     ])
       step.catch(() => {});
+    pageTurning(transition.finished, transition.ready);
     const kind = document.documentElement.dataset.transition;
-    if (kind !== 'forward' && kind !== 'return') return transition;
+    if (
+      !['forward', 'return', 'onward', 'room', 'room-back', 'home'].includes(
+        kind ?? '',
+      )
+    )
+      return transition;
     transition.updateCallbackDone
       .then(() => {
         settle(document.getAnimations());

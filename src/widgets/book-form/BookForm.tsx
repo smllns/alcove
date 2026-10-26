@@ -1,24 +1,19 @@
 import { useRef, useState, type SubmitEvent } from 'react';
 import { useAddBook, useUpdateBook } from '@/entities/book/queries';
 import type { Book, CatalogueEdition } from '@/entities/book/types';
-import { pageScrollY, scrollPageTo } from '@/shared/lib/pageScroll';
-import { softSwitch, softSwitchAt } from '@/shared/lib/softSwitch';
+import { softSwitch } from '@/shared/lib/softSwitch';
 import { useForm } from '@/shared/lib/useForm';
 import { BookStep } from './BookStep';
 import { CopyStep } from './CopyStep';
 import { CoverPicker } from './CoverPicker';
 import { coverChoices, extrasForEdition, withEdition } from './catalogue';
-import {
-  bookFieldNames,
-  emptyFields,
-  type DraftExtras,
-  type DraftFields,
-} from './draft';
+import { emptyFields, type DraftExtras, type DraftFields } from './draft';
 import { emptyLists, tidyLists, type DraftLists } from './entries';
 import { FormButtons } from './FormButtons';
 import { FormNotice } from './FormNotice';
 import { StepHeading, type Step } from './StepHeading';
-import { ROOM_ABOVE, useStepScroll } from './useStepScroll';
+import { useErrorStep } from './useErrorStep';
+import { useStepScroll } from './useStepScroll';
 import { toBookInput } from './toBookInput';
 
 export type DraftForm = ReturnType<typeof useForm<DraftFields>>;
@@ -35,15 +30,9 @@ type BookFormProps = {
   onSaved: () => void;
   // Choosing another book to add, or leaving the changes unsaved
   onBack: () => void;
+  // The step it opens on
+  startStep?: Step;
 };
-
-// The step a problem is on, to go back to it
-const stepOf = (errors: Record<string, string>): Step | null =>
-  bookFieldNames.some((name) => errors[name])
-    ? 'book'
-    : Object.keys(errors).some((key) => key.startsWith('copy.') && errors[key])
-      ? 'copy'
-      : null;
 
 // A book in two steps: the book itself, prefilled from the catalogue and
 // editable, then the reader's own copy of it. Adding goes through them in
@@ -56,10 +45,11 @@ export function BookForm({
   editing,
   onSaved,
   onBack,
+  startStep = 'book',
 }: BookFormProps) {
   const addBook = useAddBook();
   const updateBook = useUpdateBook();
-  const [step, setStep] = useState<Step>('book');
+  const [step, setStep] = useState<Step>(startStep);
   const [extras, setExtras] = useState(initialExtras);
   const [entries, setEntries] = useState<DraftLists>(initialEntries);
 
@@ -94,35 +84,12 @@ export function BookForm({
     },
   );
 
-  const stepHeading = useStepScroll(step, Boolean(editing));
-  const formRef = useRef<HTMLFormElement>(null);
-  // Changing a book, over to the other step from the buttons below it: up
-  // to where that step starts first, the book's from its cover, the copy's
-  // from the tabs; and kept there as the step changes, though what's above
-  // may change with it (on a phone, the copy has no cover choices)
-  const switchFromBelow = (next: Step) => {
-    const startOf = () => {
-      const start = next === 'book' ? formRef.current : stepHeading.current;
-      if (!start) return 0;
-      return Math.max(
-        0,
-        pageScrollY(start) + start.getBoundingClientRect().top - ROOM_ABOVE,
-      );
-    };
-    softSwitchAt(
-      startOf(),
-      () => setStep(next),
-      () => scrollPageTo(startOf()),
-    );
-  };
-
-  // A problem on the other step sends the reader over to it
-  const errorStep = stepOf(form.errors);
-  const [sawErrorStep, setSawErrorStep] = useState(errorStep);
-  if (errorStep !== sawErrorStep) {
-    setSawErrorStep(errorStep);
-    if (errorStep) setStep(errorStep);
-  }
+  const {
+    heading: stepHeading,
+    form: formRef,
+    switchFromBelow,
+  } = useStepScroll(step, Boolean(editing), setStep);
+  useErrorStep(form.errors, setStep);
 
   const onSubmit = (e: SubmitEvent) => {
     e.preventDefault();

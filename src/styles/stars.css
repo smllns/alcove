@@ -1,0 +1,125 @@
+/* Each book in the sky (pages/library/universe/SkyStar): its shadow, the
+   shape its cover is cut to, and how it comes forward with its caption as
+   it's pointed at, and settles back once let go. The sky round it, its
+   dimming and its constellations are in universe.css. */
+
+/* A shadow that follows the shape the cover is cut to. For a cover flying
+   home to take it on gradually (transitions.css): --star-flight, the
+   shadow it flies with, and --star-unlit, the same with nothing showing */
+:root {
+  --star-shadow: drop-shadow(0 10px 12px rgb(40 28 14 / 0.3));
+  --star-flight: var(--star-shadow);
+  --star-unlit: drop-shadow(0 10px 12px rgb(40 28 14 / 0));
+}
+/* On the dark sky even a black shadow hardly shows, so the books stand
+   out the other way: a thin lamplit rim round the edge, over a deep
+   shadow below. Flying, just the deep one: Safari draws neither for a
+   flying cover given both */
+:root[data-theme='dark'] {
+  --star-shadow: drop-shadow(0 0 0.5px rgb(255 236 205 / 0.45))
+    drop-shadow(0 14px 18px rgb(0 0 0 / 0.7));
+  --star-flight: drop-shadow(0 14px 18px rgb(0 0 0 / 0.7));
+  --star-unlit: drop-shadow(0 14px 18px rgb(0 0 0 / 0));
+}
+/* Its tilt and its growing (on hover, below) are moved by these two rather
+   than by transform itself: a transform Chrome would move on its own,
+   drawing the shadow once, at the start, so the book would shrink back
+   with its grown shadow still round it, and that shadow then snap to size
+   once it had. These it works out at every step, shadow and all. */
+@property --turn {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@property --lift {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+.star-body {
+  --turn: var(--tilt);
+  --lift: 1;
+  --settle: 0.9s cubic-bezier(0.45, 0, 0.25, 1);
+  transform: rotate(var(--turn)) scale(var(--lift));
+  transition:
+    --turn var(--settle),
+    --lift var(--settle),
+    opacity 0.5s var(--ease-soft);
+  filter: var(--star-shadow);
+}
+/* Safari, as the cover changes shape, draws the cover over again but not
+   its shadow beyond it, which keeps the old shape's. A change of opacity,
+   too slight to see, as long as the shape's, has it draw the whole book,
+   shadow and all, at every step. Only there (WebKit alone knows that
+   font): Chrome redraws the shadows itself, and drawing every one of them
+   at every step besides makes the change stutter. */
+@supports (font: -apple-system-body) {
+  .sky[data-shape='circle'] .star-body {
+    opacity: 0.999;
+  }
+  .sky[data-shape='rounded'] .star-body {
+    opacity: 0.998;
+  }
+}
+
+/* The shape a star takes (data-shape on the sky, --w the cover's width):
+   a circle from the middle of the cover, or the cover with its corners
+   rounded right off. Both open into the whole cover on hover; inset() at
+   every step, so the change is a smooth one. */
+.star-cover {
+  clip-path: inset(0 round 3px);
+  transition: clip-path 0.9s cubic-bezier(0.45, 0, 0.25, 1);
+}
+.sky[data-shape='circle'] .star-cover {
+  clip-path: inset(calc(var(--w) * 0.25) 0 round calc(var(--w) / 2));
+}
+.sky[data-shape='rounded'] .star-cover {
+  clip-path: inset(0 round calc(var(--w) * 0.26));
+}
+.sky .star:hover .star-cover {
+  clip-path: inset(0 round 3px);
+  transition-duration: 0.5s;
+  transition-timing-function: var(--ease-soft);
+}
+/* Under the cover, clear of it even when it's grown, and the same size
+   on screen however far the sky is zoomed. Without the frosting of a
+   raised card: it's nearly solid anyway, and the blur behind every hidden
+   caption would be drawn over again whenever the sky moves */
+.star-caption > * {
+  backdrop-filter: none;
+}
+.star-caption {
+  scale: calc(1 / var(--zoom));
+  transform-origin: top center;
+  opacity: 0;
+  translate: -50% 4px;
+  transition:
+    opacity 0.5s var(--ease-soft),
+    translate 0.5s var(--ease-soft);
+}
+/* The one under the pointer lights at once, and comes up quickly; let
+   go, it settles back slowly and evenly (--settle), staying over the
+   rest, the veil too, while it does (data-leaving, leaving.ts) */
+.sky .star[data-leaving] {
+  z-index: 999;
+}
+.sky .star:hover {
+  z-index: 1000;
+}
+.sky .star:hover .star-body {
+  --turn: 0deg;
+  --lift: 1.25;
+  --settle: 0.5s var(--ease-soft);
+}
+/* A book is something to open, even out in the sky; while the sky is being
+   dragged, though, the hand holding it stays */
+.sky .star-body {
+  cursor: pointer;
+}
+.sky[data-dragging] .star-body {
+  cursor: grabbing;
+}
+.sky .star:hover .star-caption {
+  opacity: 1;
+  translate: -50% 0;
+}

@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router';
 import { useEditions } from '@/entities/book/catalogueQueries';
 import { useGoBack } from '@/shared/lib/useGoBack';
 import { Loading } from '@/shared/ui/Loading';
@@ -15,6 +16,8 @@ export function EditBookPage() {
   const backToBook = useGoBack(path);
   // Other editions to switch to, and their covers, once they've come
   const editions = useEditions(book?.openLibrary?.work);
+  // Sent here to give the book a place, say, it opens on the reader's copy
+  const [params] = useSearchParams();
   return (
     <BookFrame back={path}>
       {book ? (
@@ -34,6 +37,7 @@ export function EditBookPage() {
               editing={book}
               onSaved={() => void backToBook()}
               onBack={() => void backToBook()}
+              startStep={params.get('step') === 'copy' ? 'copy' : 'book'}
             />
           </div>
         </>

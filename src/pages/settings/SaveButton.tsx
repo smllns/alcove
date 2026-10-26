@@ -7,16 +7,18 @@ type SaveButtonProps = {
   disabled?: boolean;
 };
 
-// Submit button that types "Saved" for a moment after a successful save
+// Submit button that types "Saved" for a moment after a successful save.
+// Quiet while there's nothing to save, it lights up once there is.
 export function SaveButton({
   status,
   label = 'Save',
   disabled,
 }: SaveButtonProps) {
+  const savable = !disabled && status !== 'saved';
   return (
     <Button
       type='submit'
-      variant='secondary'
+      variant={savable ? 'primary' : 'secondary'}
       loading={status === 'saving'}
       disabled={disabled}
       className='self-start'

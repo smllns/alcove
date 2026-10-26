@@ -7,11 +7,18 @@
   --faded: 0.3;
 }
 
-/* forward: the old page sinks back and dims; the new one rises over it like a sheet */
-:root[data-transition='forward']::view-transition-old(root) {
+/* forward: the old page sinks back and dims; the new one rises over it like
+   a sheet (and onward, transitions-in-place.css, the same) */
+:root:is(
+    [data-transition='forward'],
+    [data-transition='onward']
+  )::view-transition-old(root) {
   animation: page-sink var(--page-turn) both;
 }
-:root[data-transition='forward']::view-transition-new(root) {
+:root:is(
+    [data-transition='forward'],
+    [data-transition='onward']
+  )::view-transition-new(root) {
   /* Already where the rise starts, hidden below, even before the animation
      takes hold: WebKit (Safari, every iPhone browser) can paint the new page
      whole for a frame first, which flashes */
@@ -148,7 +155,7 @@
   animation-duration: 0.6s;
 }
 /* Flying home to the sky, the cover is taken without its shadow (that's
-   on the book around it, universe.css), which would only show, all at
+   on the book around it, stars.css), which would only show, all at
    once, as it lands; so it takes the same shadow on as it goes */
 :root[data-transition='return']:has(.sky)::view-transition-image-pair(
     flying-cover
@@ -209,66 +216,5 @@
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
-  }
-}
-
-/* switch: one part of a page (.soft-switch) changing what it shows: the
-   old fades up and away, the new settles in, and the part grows or shrinks
-   to fit between them. The rest of the page simply stays. */
-:root[data-transition='switch']::view-transition-old(root),
-:root[data-transition='switch']::view-transition-new(root) {
-  animation: none;
-}
-:root[data-transition='switch'] .soft-switch {
-  view-transition-name: soft-switch;
-}
-::view-transition-group(soft-switch) {
-  overflow: clip;
-  animation-duration: 0.6s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-/* Each at its own height, from the top, not stretched to the other's */
-::view-transition-old(soft-switch),
-::view-transition-new(soft-switch) {
-  height: auto;
-  object-fit: none;
-  object-position: top;
-}
-/* One after the other: the two never show through each other */
-::view-transition-old(soft-switch) {
-  animation: switch-out 0.2s ease-in both;
-}
-::view-transition-new(soft-switch) {
-  animation: switch-in 0.45s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-/* Around it, the cover choices a phone shows only for the book come and
-   go, and the tabs below them move along, rather than jumping */
-:root[data-transition='switch'] .cover-choices {
-  view-transition-name: cover-choices;
-}
-:root[data-transition='switch'] .step-tabs {
-  view-transition-name: step-tabs;
-}
-::view-transition-group(cover-choices),
-::view-transition-group(step-tabs) {
-  animation-duration: 0.6s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-::view-transition-old(cover-choices):only-child {
-  animation: switch-out 0.2s ease-in both;
-}
-::view-transition-new(cover-choices):only-child {
-  animation: switch-in 0.45s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-@keyframes switch-out {
-  to {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-}
-@keyframes switch-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
   }
 }

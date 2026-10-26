@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib/cn';
 const DUST_DEPTH = 0.35;
 
 // One repeating pattern of the sky's dust: its look (a class in
-// universe.css, or `image`, given here), the size of its tile, how fast it
+// universe.css, or `marks`, given here), the size of its tile, how fast it
 // moves against the rest of the dust (the further, the slower), and where
 // its tiles start. Odd, unrelated sizes and offsets, so the layers never
 // line up into a visible grid.
@@ -13,50 +13,67 @@ type Layer = {
   tile: [number, number];
   speed: number;
   offset: [number, number];
-  image?: string;
+  // A picture of a tile, in either theme's ink, as --marks-light and
+  // --marks-dark
+  marks?: Record<string, string>;
 };
 
-// A star of the sky's own, bigger and brighter than the dust: where it is
-// in its tile and its radius. All of one colour (--star in universe.css),
-// glowing: a bright middle that softens out into a wide halo, part of the
-// picture itself, so drawn once with the rest of the layer.
-type Star = [x: number, y: number, radius: number];
-const starry = (stars: Star[]) =>
-  stars
-    .map(
-      ([x, y, r]) =>
-        `radial-gradient(circle at ${x}px ${y}px, var(--star) ${r}px, color-mix(in oklab, var(--star) 40%, transparent) ${r * 1.7}px, color-mix(in oklab, var(--star) 12%, transparent) ${r * 3}px, transparent ${r * 5}px)`,
-    )
-    .join(',');
+// The sky's own stars, marked as a star chart marks them: a fine cross,
+// its arms as long as the star is bright. Where each is in its tile and
+// how long its arms are; drawn as a picture of the whole tile, in the
+// ink of either theme (a picture can't take the page's colours), so the
+// layer shows the one for the theme (universe.css).
+type Star = [x: number, y: number, arm: number];
+const INK = { light: 'rgb(41 40 32)', dark: 'rgb(227 219 207)' };
+const charted = ([w, h]: [number, number], stars: Star[]) =>
+  Object.fromEntries(
+    Object.entries(INK).map(([theme, ink]) => {
+      const marks = stars
+        .map(
+          ([x, y, arm]) =>
+            `M${x - arm} ${y}h${2 * arm}M${x} ${y - arm}v${2 * arm}`,
+        )
+        .join('');
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'><path d='${marks}' stroke='${ink}' stroke-opacity='0.55' stroke-width='0.9'/></svg>`;
+      return [
+        `--marks-${theme}`,
+        `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+      ];
+    }),
+  );
 
 const DUST: Layer[] = [
   { look: 'sky-speck-l', tile: [173, 191], speed: 1, offset: [0, 0] },
   { look: 'sky-speck-m', tile: [97, 83], speed: 0.6, offset: [37, 11] },
   { look: 'sky-speck-s', tile: [131, 59], speed: 0.45, offset: [71, 29] },
 ];
-// The glints, a brighter gold speck in the middle of each tile, share
-// their layers with the stars
-const GLINTS: Layer[] = [
+// The stars, few and far between, in two layers moving at their own
+// speeds
+const STARS: Layer[] = [
   {
-    tile: [389, 311],
+    tile: [443, 367],
     speed: 0.8,
     offset: [41, 97],
-    image: `${starry([
-      [48, 62, 1.5],
-      [300, 40, 1],
-      [352, 250, 1.3],
-      [70, 250, 1.2],
-    ])}, radial-gradient(circle, var(--glint) 1.4px, transparent 2.4px)`,
+    marks: charted(
+      [443, 367],
+      [
+        [62, 80, 3.5],
+        [301, 214, 2.5],
+      ],
+    ),
   },
   {
-    tile: [257, 433],
+    tile: [571, 487],
     speed: 0.5,
     offset: [170, 23],
-    image: `${starry([
-      [40, 60, 1],
-      [210, 130, 1.4],
-      [70, 330, 1.2],
-    ])}, radial-gradient(circle, var(--glint) 1.1px, transparent 2px)`,
+    marks: charted(
+      [571, 487],
+      [
+        [196, 92, 2.5],
+        [470, 361, 3],
+        [88, 402, 2],
+      ],
+    ),
   },
 ];
 
@@ -68,7 +85,7 @@ const shifted = (by: number, tile: number) =>
 
 function Tiles({ layers, x, y }: { layers: Layer[]; x: number; y: number }) {
   return layers.map(
-    ({ look, tile: [w, h], speed, offset: [ox, oy], image }, i) => {
+    ({ look, tile: [w, h], speed, offset: [ox, oy], marks }, i) => {
       const depth = DUST_DEPTH * speed;
       return (
         <div
@@ -76,11 +93,11 @@ function Tiles({ layers, x, y }: { layers: Layer[]; x: number; y: number }) {
           key={i}
           className={cn('sky-tiles', look)}
           style={{
+            ...marks,
             width: `calc(100% + ${w}px)`,
             height: `calc(100% + ${h}px)`,
             backgroundSize: `${w}px ${h}px`,
             backgroundPosition: `${ox}px ${oy}px`,
-            backgroundImage: image,
             transform: `translate3d(${shifted(x * depth, w)}px, ${shifted(y * depth, h)}px, 0)`,
           }}
         />
@@ -89,7 +106,7 @@ function Tiles({ layers, x, y }: { layers: Layer[]; x: number; y: number }) {
   );
 }
 
-// The sky's dust and stars, and its few brighter glints, panned with the
+// The sky's dust and its stars, panned with the
 // camera at `x`, `y`, slower than the books. Each pattern is drawn once,
 // on a layer of its own a tile larger than the sky, and only ever slid
 // about as the sky moves: drawn afresh at every move instead (by its
@@ -102,7 +119,7 @@ export function SkyDust({ x, y }: { x: number; y: number }) {
         <Tiles layers={DUST} x={x} y={y} />
       </div>
       <div aria-hidden className='sky-glints'>
-        <Tiles layers={GLINTS} x={x} y={y} />
+        <Tiles layers={STARS} x={x} y={y} />
       </div>
     </>
   );

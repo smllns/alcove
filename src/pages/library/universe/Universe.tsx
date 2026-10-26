@@ -8,11 +8,13 @@ import {
 } from 'react';
 import type { Book } from '@/entities/book/types';
 import { boundsOf, layoutSky } from './layout';
+import { letGo } from './leaving';
 import { SkyControls } from './SkyControls';
 import { SkyDust } from './SkyDust';
 import { SkyLinks } from './SkyLinks';
 import { useSkyShape } from './shape';
 import { SkyStar } from './SkyStar';
+import { SkyVeil } from './SkyVeil';
 import { useSkyCamera } from './useSkyCamera';
 import { leaveForBook } from '../views/leaveForBook';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
@@ -56,14 +58,20 @@ export function Universe({
     [layout],
   );
   // The book under the mouse, whose caption is kept the same size on
-  // screen however far the sky is zoomed (universe.css)
+  // screen however far the sky is zoomed (stars.css). The sky is told
+  // whether one is (data-pointing), for the rest of it to dim: told only
+  // as the mouse comes onto a book or leaves the books, not at each one
+  // it passes, as asking the sky whether any book is hovered would have
+  // it look again at every book as each was
   const pointed = useRef<HTMLElement | null>(null);
   const pointAt = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== 'mouse') return;
     const star = (e.target as Element)
       .closest<HTMLElement>('.star-body')
       ?.closest<HTMLElement>('[data-star]');
+    if (pointed.current && pointed.current !== star) letGo(pointed.current);
     pointed.current = star ?? null;
+    sky.current?.toggleAttribute('data-pointing', Boolean(star));
     star?.style.setProperty('--zoom', String(camera.zoom));
     const id = star?.dataset.star;
     setKin((id && writerOf.get(id)) || null);
@@ -108,7 +116,10 @@ export function Universe({
       onPointerOver={pointAt}
       onPointerLeave={(e) => {
         handlers.onPointerLeave(e);
+        if (pointed.current) letGo(pointed.current);
+        pointed.current = null;
         setKin(null);
+        sky.current?.removeAttribute('data-pointing');
       }}
     >
       <SkyDust x={camera.x} y={camera.y} />
@@ -125,6 +136,7 @@ export function Universe({
         }}
       >
         <SkyLinks links={layout.links} kin={kin} />
+        <SkyVeil bounds={layout.bounds} />
         {layout.stars.map((star) => (
           <SkyStar
             key={star.book.id}

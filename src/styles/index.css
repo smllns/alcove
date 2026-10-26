@@ -1,7 +1,11 @@
 @import 'tailwindcss';
 @import './theme.css';
 @import './transitions.css';
+@import './transitions-in-place.css';
 @import './universe.css';
+@import './stars.css';
+@import './places.css';
+@import './room.css';
 
 :root {
   font-family: Arial, Helvetica, sans-serif;

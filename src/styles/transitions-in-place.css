@@ -1,0 +1,102 @@
+/* Page transitions in which part of the page changes while the rest of
+   it stays put (the kinds, and how a transition is started:
+   styles/transitions.css). */
+
+/* switch: one part of a page (.soft-switch) changing what it shows: the
+   old fades up and away, the new settles in, and the part grows or shrinks
+   to fit between them. The rest of the page simply stays. */
+:root[data-transition='switch']::view-transition-old(root),
+:root[data-transition='switch']::view-transition-new(root) {
+  animation: none;
+}
+:root[data-transition='switch'] .soft-switch {
+  view-transition-name: soft-switch;
+}
+::view-transition-group(soft-switch) {
+  overflow: clip;
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Each at its own height, from the top, not stretched to the other's */
+::view-transition-old(soft-switch),
+::view-transition-new(soft-switch) {
+  height: auto;
+  object-fit: none;
+  object-position: top;
+}
+/* One after the other: the two never show through each other */
+::view-transition-old(soft-switch) {
+  animation: switch-out 0.2s ease-in both;
+}
+::view-transition-new(soft-switch) {
+  animation: switch-in 0.45s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Around it, the cover choices a phone shows only for the book come and
+   go, and the tabs below them move along, rather than jumping */
+:root[data-transition='switch'] .cover-choices {
+  view-transition-name: cover-choices;
+}
+:root[data-transition='switch'] .step-tabs {
+  view-transition-name: step-tabs;
+}
+::view-transition-group(cover-choices),
+::view-transition-group(step-tabs) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(cover-choices):only-child {
+  animation: switch-out 0.2s ease-in both;
+}
+::view-transition-new(cover-choices):only-child {
+  animation: switch-in 0.45s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes switch-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes switch-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* onward: from one of the library's sections to another, chosen from
+   the tabs, the new one rising over the old as forward does
+   (transitions.css), under the header and the tabs, which stay put (the
+   tabs' shading gliding over on its own, useTabPill), as they do as a room
+   of a home opens and closes (room.css) or another home is shown
+   (places.css) */
+.library-header {
+  --stays: library-header;
+}
+.library-nav {
+  --stays: library-nav;
+}
+:root:is(
+    [data-transition='onward'],
+    [data-transition='room'],
+    [data-transition='room-back'],
+    [data-transition='home']
+  )
+  :is(.library-header, .library-nav) {
+  view-transition-name: var(--stays);
+}
+/* Over the page turning, just as they are now: the tabs as they are in the
+   section chosen, their shading gliding there */
+::view-transition-group(library-header),
+::view-transition-group(library-nav),
+::view-transition-new(library-header),
+::view-transition-new(library-nav) {
+  animation: none;
+}
+::view-transition-group(library-header),
+::view-transition-group(library-nav) {
+  z-index: 2;
+}
+::view-transition-old(library-header),
+::view-transition-old(library-nav) {
+  display: none;
+}

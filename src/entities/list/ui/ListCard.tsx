@@ -34,7 +34,7 @@ export function ListCard({
         {LEANS.map((lean, i) => (
           <span
             key={i}
-            className='absolute bottom-0 h-10 w-7 rounded-[2px] shadow-[0_4px_8px_-4px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]'
+            className='absolute bottom-0 h-10 w-7 rounded-xs shadow-[0_4px_8px_-4px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]'
             style={{
               backgroundColor: clothFor(`${name}${i}`),
               rotate: `${lean}deg`,

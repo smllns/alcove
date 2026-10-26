@@ -76,7 +76,7 @@ export function CoverPicker({
 
       {/* On a phone, only while choosing; coming and going softly as the
           steps of a book being changed switch (.cover-choices,
-          transitions.css) */}
+          transitions-in-place.css) */}
       <div
         className={cn(
           'cover-choices w-full flex-col items-center lg:flex lg:items-stretch',

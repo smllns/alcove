@@ -9,5 +9,7 @@ export const paths = {
   settings: '/settings',
   welcome: '/welcome',
   book: (id: string) => `/library/books/${id}`,
-  editBook: (id: string) => `/library/books/${id}/edit`,
+  // `step`: open on the reader's own copy, rather than the book itself
+  editBook: (id: string, step?: 'copy') =>
+    `/library/books/${id}/edit${step ? `?step=${step}` : ''}`,
 };

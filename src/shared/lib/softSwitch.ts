@@ -4,7 +4,7 @@ import { pageScroller } from './pageScroll';
 import { setPageTransition } from './pageTransition';
 
 // Changes what a part of the page shows (`.soft-switch`, styles in
-// transitions.css) softly: the old fades away as the new comes in, and the
+// transitions-in-place.css) softly: the old fades away as the new comes in, and the
 // part grows or shrinks to fit, rather than everything jumping at once.
 // Plainly, where the browser can't or the reader would rather not.
 // `settle`: anything to put right once the change is on the page, before

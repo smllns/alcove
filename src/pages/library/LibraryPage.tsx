@@ -1,4 +1,7 @@
+import { useLayoutEffect } from 'react';
+import { useNavigationType } from 'react-router';
 import { cn } from '@/shared/lib/cn';
+import { scrollPageTo } from '@/shared/lib/pageScroll';
 import { useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { useBottomEdge } from '@/shared/lib/useBottomEdge';
 import { useBooks } from '@/entities/book/queries';
@@ -13,6 +16,7 @@ import {
 import { ComingSoon } from './ComingSoon';
 import { EmptyShelf } from './EmptyShelf';
 import { LibraryBooks } from './LibraryBooks';
+import { PlacesSection } from './places/PlacesSection';
 import { useShelf } from './useShelf';
 import { useBookView } from './views/views';
 import { needsEveryBook } from './views/order';
@@ -35,11 +39,13 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
 
   const shelfOrder = useShelfOrder();
   // The sky shows every book, and any order but the newest first needs
-  // them all
+  // them all, as do the places, to find the books not yet in one
   const shelf = useShelf(
     books,
     search.query,
-    view === 'universe' || needsEveryBook(shelfOrder.arrangement),
+    view === 'universe' ||
+      needsEveryBook(shelfOrder.arrangement) ||
+      section === 'places',
   );
   const { all } = shelf;
   const total = books.data?.pages[0]?.total ?? 0;
@@ -56,6 +62,12 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
   // On a phone the keyboard hides most of the sky, so a search over it
   // lists what it finds rather than lighting the stars up
   const listFinds = sky && phone;
+  // Another section, chosen, starts at its top, already there as the page
+  // turns to it; gone back to, it's where it was left (app/PageScroll)
+  const arrival = useNavigationType();
+  useLayoutEffect(() => {
+    if (arrival !== 'POP') scrollPageTo(0);
+  }, [section, arrival]);
 
   return (
     <main
@@ -67,8 +79,12 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
     >
       <LibraryHeader
         adding={tabbed}
-        // Over the sky, and over it still as it goes
-        className={sky || leaving === 'universe' ? 'relative z-10' : undefined}
+        // Over the sky, and over it still as it goes; staying put from one
+        // section to another (transitions-in-place.css)
+        className={cn(
+          'library-header',
+          (sky || leaving === 'universe') && 'relative z-10',
+        )}
       />
 
       <div
@@ -125,7 +141,11 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
               </>
             ) : (
               <div className='mt-8 sm:mt-12 xl:mt-16'>
-                <ComingSoon section={section} />
+                {section === 'places' ? (
+                  <PlacesSection shelf={shelf} total={total} />
+                ) : (
+                  <ComingSoon section={section} />
+                )}
               </div>
             )}
           </>

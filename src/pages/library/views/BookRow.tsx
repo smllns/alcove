@@ -3,18 +3,23 @@ import type { Book } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
 import { cn } from '@/shared/lib/cn';
 import { Rating } from '@/shared/ui/Rating';
+import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { publishedIn } from './order';
 import { BookLink } from './BookLink';
 import { RemoveBook } from './RemoveBook';
 
+const linkClass = 'flex min-w-0 flex-1 items-center';
+
 // One book in the list: a small cover, then its title, author and the odd
-// detail, opening the book's page
+// detail, opening the book's page, or `opens`, where else it's to lead
 export function BookRow({
   book,
   size = 'md',
+  opens,
 }: {
   book: Book;
   size?: 'md' | 'lg';
+  opens?: string;
 }) {
   const author = book.authors.join(', ');
   const rating = book.copy?.rating;
@@ -23,6 +28,16 @@ export function BookRow({
     book.format && formatLabel(book.format),
     rating ? <Rating value={rating} /> : null,
   ];
+  const line = (
+    <BookLine
+      size={size}
+      title={book.title}
+      byline={author}
+      coverUrl={book.cover?.url}
+      bookId={book.id}
+      details={details}
+    />
+  );
 
   return (
     <article
@@ -32,16 +47,15 @@ export function BookRow({
         size === 'lg' && 'sm:p-3.5',
       )}
     >
-      <BookLink id={book.id} className='flex min-w-0 flex-1 items-center'>
-        <BookLine
-          size={size}
-          title={book.title}
-          byline={author}
-          coverUrl={book.cover?.url}
-          bookId={book.id}
-          details={details}
-        />
-      </BookLink>
+      {opens ? (
+        <TransitionLink to={opens} className={linkClass}>
+          {line}
+        </TransitionLink>
+      ) : (
+        <BookLink id={book.id} className={linkClass}>
+          {line}
+        </BookLink>
+      )}
       <RemoveBook book={book} className='shrink-0' />
     </article>
   );

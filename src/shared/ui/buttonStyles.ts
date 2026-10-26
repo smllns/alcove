@@ -6,7 +6,7 @@ const variants: Record<ButtonVariant, string> = {
   primary:
     'min-h-11 [--gap:--spacing(2.5)] bg-button px-6 py-2.5 text-button-text sm:min-h-12 sm:[--gap:--spacing(3)] sm:px-7 sm:py-3 text-shadow-none hover:bg-button-hover',
   secondary:
-    'min-h-11 border border-line/80 bg-surface/75 px-6 py-2.5 text-ink-soft sm:min-h-12 sm:px-7 sm:py-3 backdrop-blur-sm hover:border-ink hover:text-ink',
+    'min-h-11 [--gap:--spacing(2.5)] sm:[--gap:--spacing(3)] border border-line/80 bg-surface/75 px-6 py-2.5 text-ink-soft sm:min-h-12 sm:px-7 sm:py-3 backdrop-blur-sm hover:border-ink hover:text-ink',
   // For things that can't be undone
   danger:
     'min-h-11 [--gap:--spacing(2.5)] border border-danger/60 px-6 py-2.5 text-danger text-shadow-none sm:min-h-12 sm:px-7 sm:py-3 hover:border-danger hover:bg-danger hover:text-button-text',

@@ -1,0 +1,98 @@
+/* A room of a home, opened (pages/library/places/RoomView), and the way
+   into it from the drawing of its home. The drawing's own look (--poche,
+   --hatch, the lamps, the light's colours) is in places.css. */
+
+/* A room opened (RoomView): its lamp lit, its light over the whole
+   screen, falling from above, and its lamp's own light round it out to
+   the screen's edges (LampLight: reaching a screen's width past the
+   room each way, a screen's height above it and down to the page's
+   foot, for nothing but the screen to stop it), behind all that's on the
+   page, mixed in as the lamplight in a home's drawing is (places.css);
+   its floor in the drawing cut through, solid, the ground hatched under
+   it */
+.room-frame {
+  isolation: isolate;
+}
+/* Its lamp off as the room opens, coming on once it's open (data-lit,
+   usePageTurned): the shade and the bulb first (places.css), then its
+   light spreading through the room */
+:is(.room-wash, .lamp-light) {
+  opacity: 0;
+  transition: opacity 1.6s cubic-bezier(0.45, 0, 0.25, 1) 0.15s;
+}
+.room-frame[data-lit] :is(.room-wash, .lamp-light) {
+  opacity: 1;
+}
+@starting-style {
+  .room-frame[data-lit] .lamp-light {
+    opacity: 0;
+  }
+}
+.lamp-light {
+  position: absolute;
+  inset: -100vh -100vw auto;
+  background: radial-gradient(
+    circle 34rem at calc(100vw + var(--x)) calc(100vh + var(--y)),
+    var(--light),
+    transparent
+  );
+}
+.room-wash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 90% at 50% 0,
+    var(--light),
+    transparent
+  );
+}
+.room-floor {
+  height: 20px;
+  margin-inline: -1.5rem;
+  background:
+    linear-gradient(var(--poche), var(--poche)) top / 100% 5px no-repeat,
+    repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 7px)
+      bottom / 100% 15px no-repeat;
+}
+/* room, room-back: a room in the drawing of its home opening into the
+   room, and closing back into it, as if the two lay side by side on one
+   long sheet: the home slides away to the left as the room comes in from
+   the right, and closing, back the other way. The header and the tabs
+   stay put (transitions-in-place.css). */
+:root[data-transition='room']::view-transition-old(root) {
+  animation: room-aside-left 0.65s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+:root[data-transition='room']::view-transition-new(root) {
+  animation: room-aside-right 0.65s cubic-bezier(0.65, 0, 0.35, 1) reverse both;
+}
+:root[data-transition='room-back']::view-transition-old(root) {
+  animation: room-aside-right 0.65s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+:root[data-transition='room-back']::view-transition-new(root) {
+  animation: room-aside-left 0.65s cubic-bezier(0.65, 0, 0.35, 1) reverse both;
+}
+@keyframes room-aside-left {
+  to {
+    opacity: 0;
+    transform: translateX(-40%);
+  }
+}
+@keyframes room-aside-right {
+  to {
+    opacity: 0;
+    transform: translateX(40%);
+  }
+}
+
+/* A bookcase in a room's drawing, leading down to its shelves: pointed
+   at, its books take their full colours, it fills in pale as the sheets of
+   its shelves below, and its tag goes solid */
+.case-link :is(.bookcase, .mini-spine) {
+  transition: background-color 0.8s var(--ease-soft);
+}
+.case-link:is(:hover, :focus-visible) .mini-spine {
+  background-color: var(--tone);
+}
+.case-link:is(:hover, :focus-visible) .bookcase {
+  background-color: color-mix(in oklab, var(--ink) 4%, transparent);
+}

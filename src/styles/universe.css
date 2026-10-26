@@ -1,33 +1,9 @@
 /* The universe view of the library: books as stars in a sky you can drag.
    Layout and camera live in pages/library/universe; this is how it moves. */
 
-/* Behind everything, two broad washes of colour where nebulae would be,
-   sea green and yellow (in the dark, sky blue and dusty rose),
-   soft-edged by their gradients alone. The sky's own background, still:
-   drawn once and never again, however the sky moves. */
-.sky {
-  --sky-nebula-a: rgb(64 170 168 / 0.24);
-  --sky-nebula-b: rgb(240 196 40 / 0.24);
-  background-image:
-    radial-gradient(
-      ellipse 70% 60% at 22% 30%,
-      var(--sky-nebula-a),
-      transparent 72%
-    ),
-    radial-gradient(
-      ellipse 65% 58% at 80% 76%,
-      var(--sky-nebula-b),
-      transparent 72%
-    );
-}
-:root[data-theme='dark'] .sky {
-  --sky-nebula-a: rgb(50 125 215 / 0.17);
-  --sky-nebula-b: rgb(200 110 140 / 0.14);
-}
-
-/* Dust: tiny specks in three layers, panned slower than the books for
-   depth, and in two more, gold glints and glowing stars of a few sizes,
-   all shining steadily. Each pattern is a layer of its own
+/* Drawn as a star chart: plain paper, the dust as faint ink dots in three
+   layers, panned slower than the books for depth, and in two more, the
+   stars marked as fine ink crosses. Each pattern is a layer of its own
    (SkyDust.tsx), drawn once and only slid about as the sky moves. */
 .sky-dust,
 .sky-glints {
@@ -43,15 +19,13 @@
   will-change: transform;
 }
 .sky-dust {
-  --speck: color-mix(in oklab, var(--ink) 24%, transparent);
+  --speck: color-mix(in oklab, var(--ink) 22%, transparent);
 }
-.sky-glints {
-  --glint: color-mix(in oklab, var(--accent) 80%, transparent);
-  /* The sky's own stars, glowing gold; in the dark, a pale warm light */
-  --star: rgb(200 150 50 / 0.45);
+.sky-glints .sky-tiles {
+  background-image: var(--marks-light);
 }
-:root[data-theme='dark'] .sky-glints {
-  --star: rgb(255 232 190 / 0.5);
+:root[data-theme='dark'] .sky-glints .sky-tiles {
+  background-image: var(--marks-dark);
 }
 .sky-speck-l {
   background-image: radial-gradient(
@@ -75,166 +49,41 @@
   );
 }
 
-/* Each book wanders slowly about its place */
-@keyframes sky-drift {
-  /* Round a little loop through two points, rather than back and forth */
-  33% {
-    transform: translate(var(--drift-x), var(--drift-y)) rotate(var(--sway));
-  }
-  66% {
-    transform: translate(
-        calc(var(--drift-y) * -0.7),
-        calc(var(--drift-x) * 0.7)
-      )
-      rotate(calc(var(--sway) * -1));
-  }
-}
-.sky-drift {
-  animation: sky-drift var(--drift-time) ease-in-out var(--drift-delay) infinite;
-}
-
 /* A hovered star grows a little and comes forward; the rest of the sky
    dims. Unhurried both ways, so a pointer sweeping across the sky doesn't
    make it flicker: the dimming waits a beat (a star only passed over
    doesn't start it), and the light comes back only once the pointer has
    stayed off the books for a moment (moving from one to the next keeps the
-   sky dim). The transition delay used is the one of the state arrived at. */
-.sky .star {
+   sky dim). The transition delay used is the one of the state arrived at.
+   The dimming is a veil of the paper's colour (SkyVeil) over the books,
+   under the one pointed at and its writer's others. */
+.sky-veil {
+  position: absolute;
+  z-index: 500;
+  pointer-events: none;
+  background: var(--bg-mid);
+  opacity: 0;
   transition: opacity 0.7s var(--ease-soft) 0.35s;
 }
-/* A shadow that follows the shape the cover is cut to. For a cover flying
-   home to take it on gradually (transitions.css): --star-flight, the
-   shadow it flies with, and --star-unlit, the same with nothing showing */
-:root {
-  --star-shadow: drop-shadow(0 10px 12px rgb(40 28 14 / 0.3));
-  --star-flight: var(--star-shadow);
-  --star-unlit: drop-shadow(0 10px 12px rgb(40 28 14 / 0));
-}
-/* On the dark sky even a black shadow hardly shows, so the books stand
-   out the other way: a thin lamplit rim round the edge, over a deep
-   shadow below. Flying, just the deep one: Safari draws neither for a
-   flying cover given both */
-:root[data-theme='dark'] {
-  --star-shadow: drop-shadow(0 0 0.5px rgb(255 236 205 / 0.45))
-    drop-shadow(0 14px 18px rgb(0 0 0 / 0.7));
-  --star-flight: drop-shadow(0 14px 18px rgb(0 0 0 / 0.7));
-  --star-unlit: drop-shadow(0 14px 18px rgb(0 0 0 / 0));
-}
-/* Its tilt and its growing (on hover, below) are moved by these two rather
-   than by transform itself: a transform Chrome would move on its own,
-   drawing the shadow once, at the start, so the book would shrink back
-   with its grown shadow still round it, and that shadow then snap to size
-   once it had. These it works out at every step, shadow and all. */
-@property --turn {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-@property --lift {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 1;
-}
-.star-body {
-  --turn: var(--tilt);
-  --lift: 1;
-  transform: rotate(var(--turn)) scale(var(--lift));
-  transition:
-    --turn 0.5s var(--ease-soft),
-    --lift 0.5s var(--ease-soft),
-    opacity 0.5s var(--ease-soft);
-  filter: var(--star-shadow);
-}
-/* Safari, as the cover changes shape, draws the cover over again but not
-   its shadow beyond it, which keeps the old shape's. A change of opacity,
-   too slight to see, as long as the shape's, has it draw the whole book,
-   shadow and all, at every step. Only there (WebKit alone knows that
-   font): Chrome redraws the shadows itself, and drawing every one of them
-   at every step besides makes the change stutter. */
-@supports (font: -apple-system-body) {
-  .sky[data-shape='circle'] .star-body {
-    opacity: 0.999;
-  }
-  .sky[data-shape='rounded'] .star-body {
-    opacity: 0.998;
-  }
-}
-
-/* The shape a star takes (data-shape on the sky, --w the cover's width):
-   a circle from the middle of the cover, or the cover with its corners
-   rounded right off. Both open into the whole cover on hover; inset() at
-   every step, so the change is a smooth one. */
-.star-cover {
-  clip-path: inset(0 round 3px);
-  transition: clip-path 0.5s var(--ease-soft);
-}
-.sky[data-shape='circle'] .star-cover {
-  clip-path: inset(calc(var(--w) * 0.25) 0 round calc(var(--w) / 2));
-}
-.sky[data-shape='rounded'] .star-cover {
-  clip-path: inset(0 round calc(var(--w) * 0.26));
-}
-.sky .star:hover .star-cover {
-  clip-path: inset(0 round 3px);
-}
-/* Under the cover, clear of it even when it's grown, and the same size
-   on screen however far the sky is zoomed. Without the frosting of a
-   raised card: it's nearly solid anyway, and the blur behind every hidden
-   caption would be drawn over again whenever the sky moves */
-.star-caption > * {
-  backdrop-filter: none;
-}
-.star-caption {
-  scale: calc(1 / var(--zoom));
-  transform-origin: top center;
-  opacity: 0;
-  translate: -50% 4px;
-  transition:
-    opacity 0.5s var(--ease-soft),
-    translate 0.5s var(--ease-soft);
-}
-.sky:has(.star:hover) .star:not(:hover) {
-  opacity: 0.4;
+.sky[data-pointing]:not([data-dragging]) .sky-veil {
+  opacity: 0.6;
   transition-delay: 0.12s;
 }
-/* The one under the pointer lights at once */
-.sky .star:hover {
-  transition-delay: 0s;
+/* Over the veil, but under the one pointed at (one of them itself) */
+.sky[data-pointing]:not([data-dragging])
+  .star[data-kin]:not(:hover, [data-leaving]),
+.sky-links-kin {
+  z-index: 600;
 }
-.sky .star:hover {
-  z-index: 1000;
-}
-.sky .star:hover .star-body {
-  --turn: 0deg;
-  --lift: 1.25;
-}
-/* A book is something to open, even out in the sky; while the sky is being
-   dragged, though, the hand holding it stays */
-.sky .star-body {
-  cursor: pointer;
-}
-.sky[data-dragging] .star-body {
-  cursor: grabbing;
-}
-.sky .star:hover .star-caption {
-  opacity: 1;
-  translate: -50% 0;
-}
-
 /* While dragging, nothing reacts to the pointer passing over it */
 .sky[data-dragging] .star {
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sky-drift {
-    animation: none;
-  }
-}
-
-/* While searching, the books that weren't found all but fade away. On the
-   inner layer, so the dimming around a hovered star still applies too. */
-.sky .star .sky-drift {
+/* While searching, the books that weren't found all but fade away: on
+   their drifting layer, which the browser moves on its own, so it fades
+   them too without the page redrawing them */
+.sky .sky-drift {
   transition: opacity 0.6s var(--ease-soft);
 }
 .sky[data-searching] .star:not([data-lit]) .sky-drift {
@@ -244,41 +93,24 @@
 /* A writer's books joined into a constellation (pages/library/universe/
    SkyLinks): lines under the stars, the same weight on screen however far
    the sky is zoomed, showing across the sky kept between the writer's
-   books. Pointing at one of them lights its constellation up in the
-   accent, and keeps the writer's other books lit while the rest of the
-   sky dims. While searching, the lines all but fade too. */
+   books, in thin ink, as on a star chart. Pointing at one of them draws
+   its constellation again over the veil that dims the rest of the sky,
+   darker, its books over it too. While searching, the lines all but fade
+   too. */
 .sky-links {
   transition: opacity 0.6s var(--ease-soft);
 }
 .sky-links path {
   fill: none;
   stroke: var(--ink);
-  stroke-opacity: 0.32;
-  stroke-width: 1.5;
+  stroke-opacity: 0.5;
+  stroke-width: 1.25;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
-  transition:
-    stroke 0.5s var(--ease-soft),
-    stroke-opacity 0.5s var(--ease-soft),
-    stroke-width 0.5s var(--ease-soft);
 }
-:root[data-theme='dark'] .sky-links path {
-  stroke: rgb(255 226 180);
-  stroke-opacity: 0.3;
-}
-.sky-links path[data-kin],
-:root[data-theme='dark'] .sky-links path[data-kin] {
-  stroke: var(--accent);
-  stroke-opacity: 1;
-  stroke-width: 2.5;
-}
-.sky:has(.star:hover) .star[data-kin]:not(:hover) {
-  opacity: 1;
-}
-/* Other writers' lines dim with their books, rather than showing through
-   their faded covers */
-.sky:has(.star:hover) .sky-links path:not([data-kin]) {
-  stroke-opacity: 0.06;
+.sky-links-kin path {
+  stroke-opacity: 0.9;
+  stroke-width: 1.8;
 }
 .sky[data-searching] .sky-links {
   opacity: 0.25;

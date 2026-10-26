@@ -10,6 +10,7 @@ export function BookList({
   columns,
   rise = true,
   faded,
+  opens,
   ...paging
 }: {
   books: Book[];
@@ -18,6 +19,8 @@ export function BookList({
   rise?: boolean;
   // Books to fade back, so the others stand out
   faded?: (book: Book) => boolean;
+  // Where a book leads, if not to its page
+  opens?: (book: Book) => string;
 } & Paging) {
   return (
     <>
@@ -38,7 +41,11 @@ export function BookList({
               faded: faded?.(book),
             })}
           >
-            <BookRow book={book} size={columns ? 'md' : 'lg'} />
+            <BookRow
+              book={book}
+              size={columns ? 'md' : 'lg'}
+              opens={opens?.(book)}
+            />
           </li>
         ))}
       </ul>

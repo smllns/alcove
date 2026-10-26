@@ -41,7 +41,10 @@ export function EmailForm({ user }: { user: User }) {
         <FormError message={form.formError} />
         <SaveButton
           status={form.status}
-          disabled={!changed && form.status !== 'saved'}
+          // A new address, and the password to confirm it
+          disabled={
+            !(changed && form.values.password) && form.status !== 'saved'
+          }
         />
       </div>
     </form>

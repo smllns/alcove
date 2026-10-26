@@ -18,7 +18,7 @@ type PlacesEditorProps = {
   onSaved?: () => void;
   // Beside the save button, e.g. "Set up later"
   secondary?: ReactNode;
-  // A quieter save button, among other settings
+  // A quieter save button, among other settings, until there's a change
   quiet?: boolean;
 };
 
@@ -72,8 +72,10 @@ export function PlacesEditor({
         <div className='flex flex-wrap items-center gap-3'>
           <Button
             type='submit'
-            variant={quiet ? 'secondary' : 'primary'}
-            arrow={!places.justSaved && !quiet}
+            // Quiet, it lights up once there's a change to save
+            variant={quiet && !places.changed ? 'secondary' : 'primary'}
+            // Only when saving leads on somewhere (`onSaved`)
+            arrow={Boolean(onSaved) && !places.justSaved && !quiet}
             loading={places.saving}
             disabled={!places.changed && !startBlank}
           >
