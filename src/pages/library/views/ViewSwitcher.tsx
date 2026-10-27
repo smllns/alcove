@@ -1,11 +1,8 @@
 import { Columns3, LayoutGrid, List, Rows3, Sparkles } from 'lucide-react';
-import { Fragment, type ReactNode } from 'react';
-import { cn } from '@/shared/lib/cn';
+import type { ReactNode } from 'react';
 import { useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { Tooltip } from '@/shared/ui/Tooltip';
+import { ChoiceCapsule } from '@/shared/ui/ChoiceCapsule';
 import { kindOf, type BookView, type ViewKind } from './views';
-import { capsuleClass } from '@/shared/ui/surfaces';
-import { softClass } from '@/shared/ui/buttonStyles';
 
 // `wide`: only offered where there's room for it to look any different
 type Option = {
@@ -33,61 +30,6 @@ const listLayouts: Option[] = [
   { value: 'list-columns', label: 'Columns', icon: <Columns3 size={15} /> },
 ];
 
-// A small capsule of choices; the chosen one sits in a soft pill
-function Group<T extends string>({
-  label,
-  options,
-  current,
-  onChange,
-  tips = true,
-  className,
-}: {
-  label: string;
-  options: { value: T; label: string; icon: ReactNode; wide?: boolean }[];
-  current: T;
-  onChange: (value: T) => void;
-  // Hover labels, for icons that need explaining
-  tips?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      role='radiogroup'
-      aria-label={label}
-      className={cn('flex animate-rise', capsuleClass, className)}
-    >
-      {options.map((option) => {
-        const on = option.value === current;
-        const button = (
-          <button
-            type='button'
-            role='radio'
-            aria-checked={on}
-            aria-label={option.label}
-            onClick={() => onChange(option.value)}
-            className={softClass(
-              on,
-              cn(
-                'grid h-8 min-w-8 place-items-center px-2 text-xs font-medium',
-                option.wide && 'max-sm:hidden',
-              ),
-            )}
-          >
-            {option.icon}
-          </button>
-        );
-        return tips ? (
-          <Tooltip key={option.value} label={option.label} side='bottom'>
-            {button}
-          </Tooltip>
-        ) : (
-          <Fragment key={option.value}>{button}</Fragment>
-        );
-      })}
-    </div>
-  );
-}
-
 // Universe, grid or list; the grid comes in three sizes (two on a phone),
 // the list in one column or several
 export function ViewSwitcher({
@@ -107,7 +49,7 @@ export function ViewSwitcher({
   return (
     <div className='flex items-center gap-2'>
       {kind === 'grid' && (
-        <Group
+        <ChoiceCapsule
           label='Cover size'
           options={gridSizes}
           // S, M and L say it already
@@ -117,7 +59,7 @@ export function ViewSwitcher({
         />
       )}
       {kind === 'list' && (
-        <Group
+        <ChoiceCapsule
           label='List layout'
           options={listLayouts}
           // Phones only ever fit one column, so there's nothing to choose
@@ -126,7 +68,7 @@ export function ViewSwitcher({
           onChange={onChange}
         />
       )}
-      <Group
+      <ChoiceCapsule
         label='View'
         options={kinds}
         current={kind}

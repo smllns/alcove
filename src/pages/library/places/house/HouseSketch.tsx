@@ -2,8 +2,9 @@ import type { RefObject } from 'react';
 import { seedOf } from '@/shared/lib/seed';
 import { SectionNotes } from './SectionNotes';
 import { SectionWall } from './SectionWall';
-import { SLAB, UNDER, WALL } from './section';
-import { useMeasured } from './useMeasured';
+import { AtticLight } from './AtticLight';
+import { EAVES, RIDGE, SLAB, UNDER, WALL } from '../drawing/section';
+import { useMeasured } from '../drawing/useMeasured';
 
 // The house drawn as an architect's section through it, over its rooms
 // (each marked data-room): what's cut through solid (the roof following
@@ -33,12 +34,9 @@ const measure = (house: HTMLElement): Shape => {
 };
 
 // How thick the walls between rooms and the roof are where they're cut
-// through (the rest: section.ts); how far the roof reaches past the walls,
-// and how high its ridge is
+// through (the rest: section.ts)
 const PARTITION = 2.5;
 const ROOF = 7;
-const EAVES = 22;
-const RIDGE = 10;
 
 const poche = { fill: 'var(--poche)' } as const;
 
@@ -75,84 +73,87 @@ export function HouseSketch({
     });
 
   return (
-    <svg
-      aria-hidden
-      className='pointer-events-none absolute left-0 top-0 z-3 overflow-visible'
-      width={w}
-      height={ground + UNDER}
-    >
-      <defs>
-        <pattern
-          id='section-hatch'
-          width='7'
-          height='7'
-          patternUnits='userSpaceOnUse'
-          patternTransform='rotate(45)'
-        >
-          <line y2='7' stroke='var(--hatch)' strokeWidth='0.8' />
-        </pattern>
-      </defs>
-      {/* The roof, cut along its pitch, and the slab it stands on */}
-      <path
-        d={`M${-WALL - EAVES} ${roof}L${w / 2} ${RIDGE}L${w + WALL + EAVES} ${roof}`}
-        fill='none'
-        stroke='var(--poche)'
-        strokeWidth={ROOF}
-        strokeLinejoin='miter'
-      />
-      <rect
-        x={-WALL}
-        y={roof - SLAB}
-        width={w + 2 * WALL}
-        height={SLAB}
-        {...poche}
-      />
-      {/* The outer walls, a window in some storeys, and the floors */}
-      <SectionWall
-        x={-WALL}
-        width={WALL}
-        top={roof - SLAB}
-        bottom={ground}
-        windows={windows('left')}
-      />
-      <SectionWall
-        x={w}
-        width={WALL}
-        top={roof - SLAB}
-        bottom={ground}
-        windows={windows('right')}
-      />
-      {floors.map((y) => (
+    <>
+      <AtticLight width={w} roof={roof} />
+      <svg
+        aria-hidden
+        className='pointer-events-none absolute left-0 top-0 z-3 overflow-visible'
+        width={w}
+        height={ground + UNDER}
+      >
+        <defs>
+          <pattern
+            id='section-hatch'
+            width='7'
+            height='7'
+            patternUnits='userSpaceOnUse'
+            patternTransform='rotate(45)'
+          >
+            <line y2='7' stroke='var(--hatch)' strokeWidth='0.8' />
+          </pattern>
+        </defs>
+        {/* The roof, cut along its pitch, and the slab it stands on */}
+        <path
+          d={`M${-WALL - EAVES} ${roof}L${w / 2} ${RIDGE}L${w + WALL + EAVES} ${roof}`}
+          fill='none'
+          stroke='var(--poche)'
+          strokeWidth={ROOF}
+          strokeLinejoin='miter'
+        />
         <rect
-          key={y}
           x={-WALL}
-          y={y}
+          y={roof - SLAB}
           width={w + 2 * WALL}
           height={SLAB}
           {...poche}
         />
-      ))}
-      {/* Between rooms side by side */}
-      {rooms
-        .filter((room) => room.x > 2)
-        .map((room) => (
+        {/* The outer walls, a window in some storeys, and the floors */}
+        <SectionWall
+          x={-WALL}
+          width={WALL}
+          top={roof - SLAB}
+          bottom={ground}
+          windows={windows('left')}
+        />
+        <SectionWall
+          x={w}
+          width={WALL}
+          top={roof - SLAB}
+          bottom={ground}
+          windows={windows('right')}
+        />
+        {floors.map((y) => (
           <rect
-            key={`${room.x},${room.y}`}
-            x={room.x - PARTITION / 2}
-            y={room.y}
-            width={PARTITION}
-            height={room.bottom - room.y}
+            key={y}
+            x={-WALL}
+            y={y}
+            width={w + 2 * WALL}
+            height={SLAB}
             {...poche}
           />
         ))}
-      <SectionNotes
-        width={w}
-        ground={ground}
-        walls={[0, ...groundFloor.map((room) => Math.round(room.right))]}
-        name={name}
-        rooms={rooms.length}
-        books={books}
-      />
-    </svg>
+        {/* Between rooms side by side */}
+        {rooms
+          .filter((room) => room.x > 2)
+          .map((room) => (
+            <rect
+              key={`${room.x},${room.y}`}
+              x={room.x - PARTITION / 2}
+              y={room.y}
+              width={PARTITION}
+              height={room.bottom - room.y}
+              {...poche}
+            />
+          ))}
+        <SectionNotes
+          width={w}
+          ground={ground}
+          walls={[0, ...groundFloor.map((room) => Math.round(room.right))]}
+          name={name}
+          rooms={rooms.length}
+          books={books}
+        />
+      </svg>
+    </>
   );
 }

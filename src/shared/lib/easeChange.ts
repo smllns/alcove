@@ -8,11 +8,11 @@ let easing = false;
 export const isEasing = () => easing;
 
 // Runs a DOM update as a view transition of the given kind (styled in
-// styles/transitions.css): what stays glides to where it now belongs, what
+// styles/transitions.css, swap in styles/places.css): what stays glides to where it now belongs, what
 // goes fades out, what's new fades in. A plain update where unsupported.
 export function easeChange(
   update: () => void,
-  kind: Extract<PageTransition, 'shelf' | 'view'> = 'shelf',
+  kind: Extract<PageTransition, 'shelf' | 'view' | 'swap'> = 'shelf',
 ) {
   if (!document.startViewTransition || reducedMotionNow()) {
     update();

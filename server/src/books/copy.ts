@@ -48,6 +48,10 @@ const readingDates = (
 export const copySchema = z
   .object({
     place: maybe(placeRefSchema),
+    // When the reader put it there, as their own screen has it (books put
+    // somewhere together, one a moment after the other, to keep their
+    // order); taken only when it's fresh, the server's own time otherwise
+    placedAt: maybe(z.iso.datetime()),
     location: optionalText(120),
     status: maybe(z.enum(copyStatuses)).transform(
       (status) => status ?? 'shelf',

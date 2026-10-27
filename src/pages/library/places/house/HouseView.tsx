@@ -1,23 +1,21 @@
 import { useRef } from 'react';
-import type { HomeBooks } from './arrange';
-import { furnish } from './decor';
+import { LOOSE, type HomeBooks } from '../arrange';
+import { atticOf, furnish } from '../drawing/decor';
 import { HouseRoom } from './HouseRoom';
 import { useCurrentRoom } from './useCurrentRoom';
 import { HouseSketch } from './HouseSketch';
-import { SLAB, UNDER } from './section';
-import { MiniPile } from './RoomMiniature';
+import { SLAB, UNDER } from '../drawing/section';
+import { HouseAttic } from './HouseAttic';
 import { useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { counted } from '@/shared/lib/plural';
 
-// Kept in the home but in no room: by the door, opened like a room
-export const LOOSE = 'loose';
-// How tall the roof is, over the rooms
-const ROOF = 96;
+// How tall the roof is, over the rooms, its attic under it
+const ROOF = 120;
 
 // A home drawn as an architect's section through it (HouseSketch): its
 // name under the roof, its rooms storey over storey (as many side by side
 // as the screen has room for), each numbered, its bookcases standing in
-// it, and any books in no room in a pile by the door.
+// it, and under the roof its attic, with any books in no room in a pile
+// there (HouseAttic).
 export function HouseView({
   home,
   rooms,
@@ -38,22 +36,28 @@ export function HouseView({
     (_, i) => rooms.slice(i * perFloor, (i + 1) * perFloor),
   );
 
+  const attic = atticOf(
+    home.id,
+    rooms.map(({ room }) => room.id),
+  );
+
   return (
-    <div className='flex flex-col gap-8 sm:flex-row sm:items-end'>
+    // The attic's light the colour for the drawing round the rooms, each
+    // room with its own
+    <div data-light={attic.lamp.light} className='house-plan flex flex-col'>
       <div
         ref={house}
-        className='relative min-w-0 flex-1'
+        className='relative min-w-0'
         // Room under it for the ground and the drawing's notes
         style={{ paddingBottom: UNDER }}
       >
-        {/* Under the roof, the home's name, in the gable */}
-        <div
-          className='relative z-4 flex items-end justify-center pb-5'
-          style={{ height: ROOF }}
-        >
-          <p className='text-[11px] uppercase tracking-[0.24em] text-muted'>
-            {home.name}
-          </p>
+        <div className='relative z-4' style={{ height: ROOF }}>
+          <HouseAttic
+            lamp={attic.lamp}
+            books={loose}
+            homeEmpty={!count}
+            onOpen={() => onOpen(LOOSE)}
+          />
         </div>
         {floors.map((floor, f) => (
           // A floor's slab under each storey
@@ -81,19 +85,6 @@ export function HouseView({
         )}
         <HouseSketch house={house} roof={ROOF} name={home.name} books={count} />
       </div>
-
-      {loose.length > 0 && (
-        <button
-          type='button'
-          onClick={() => onOpen(LOOSE)}
-          className='flex shrink-0 cursor-pointer flex-col items-start gap-2 rounded-xl p-3 text-left transition-colors duration-500 ease-soft hover:bg-surface/60'
-        >
-          <MiniPile books={loose} />
-          <span className='text-xs text-muted'>
-            By the door · {counted(loose.length, 'book')}
-          </span>
-        </button>
-      )}
     </div>
   );
 }

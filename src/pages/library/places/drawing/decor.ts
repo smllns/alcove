@@ -53,7 +53,7 @@ const lookOf = (thing: Thing) => `${thing.family}:${thing.look}`;
 
 // `near`: the rooms beside it, already furnished, whose pictures, plants,
 // lamps and light it picks others than
-export function decorOf(room: string, near: Decor[] = []): Decor {
+function decorOf(room: string, near: Decor[] = []): Decor {
   const seed = (what: string) => seedOf(`${room}:${what}`);
   const taken = new Set(
     near
@@ -112,4 +112,31 @@ export function furnish(rooms: string[]) {
   for (const [i, room] of rooms.entries())
     decors.push(decorOf(room, decors.slice(Math.max(0, i - NEAR), i)));
   return new Map(rooms.map((room, i) => [room, decors[i]]));
+}
+
+// A home's attic, furnished as a room is, by the home itself: only its
+// lamp, hanging from the middle of the ridge, its light a colour unlike
+// that of the rooms on the top storey under it (the first few, however
+// many to a storey). In the drawing of the home and opened alike.
+export function atticOf(home: string, rooms: string[]): Decor {
+  const seed = (what: string) => seedOf(`${home}:attic:${what}`);
+  const looks = Object.keys(families.pendant);
+  const below = [...furnish(rooms.slice(0, NEAR)).values()];
+  return {
+    lamp: {
+      family: 'pendant',
+      look: looks[Math.floor(seed('lamp') * looks.length)],
+      hanging: true,
+      drop: 0.3,
+      at: 0.5,
+      first: false,
+      light: firstFree(
+        lights,
+        Math.floor(seed('light') * lights.length),
+        new Set(below.map((decor) => decor.lamp.light)),
+      ),
+    },
+    wall: [],
+    floor: [],
+  };
 }

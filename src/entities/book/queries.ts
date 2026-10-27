@@ -18,7 +18,7 @@ import {
 } from './api';
 import type { Book, BookInput, CopyDetails } from './types';
 
-const bookKeys = {
+export const bookKeys = {
   all: ['books'] as const,
   shelf: ['books', 'shelf'] as const,
   book: (id: string) => ['books', 'one', id] as const,
@@ -27,7 +27,10 @@ const bookKeys = {
 
 // Changes the books already loaded onto the shelf, before the refetch
 // comes back with the same
-const onShelf = (client: QueryClient, change: (page: BooksPage) => BooksPage) =>
+export const onShelf = (
+  client: QueryClient,
+  change: (page: BooksPage) => BooksPage,
+) =>
   client.setQueryData<InfiniteData<BooksPage>>(
     bookKeys.shelf,
     (data) => data && { ...data, pages: data.pages.map(change) },
@@ -71,7 +74,7 @@ export const useBooksByWriter = (name: string | undefined) =>
 
 // A book added, changed or taken off: how many books each place and list
 // holds may have changed with it
-const recount = (client: QueryClient) => {
+export const recount = (client: QueryClient) => {
   void client.invalidateQueries({ queryKey: ['places'] });
   void client.invalidateQueries({ queryKey: ['lists'] });
 };

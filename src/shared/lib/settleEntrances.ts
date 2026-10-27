@@ -1,7 +1,7 @@
 // A page that rises in over the old one (the 'forward' transition, and
 // 'onward' to a section of the library), is uncovered as the old one
-// lowers away ('return'), or a room opened or closed or another home shown
-// ('room', 'room-back', 'home') needs no entrance of its own: whatever it would fade or rise into place is simply
+// lowers away ('return'), or something shown in place of what was (a room
+// or a home in the places: 'swap') needs no entrance of its own: whatever it would fade or rise into place is simply
 // there, including whatever turns up while it's still rising (once its
 // data loads, say). More than tidier: as a transition ends, WebKit
 // (Safari, every iPhone browser) draws a frame of any entrance still under
@@ -54,11 +54,7 @@ export function settleEntrances() {
       step.catch(() => {});
     pageTurning(transition.finished, transition.ready);
     const kind = document.documentElement.dataset.transition;
-    if (
-      !['forward', 'return', 'onward', 'room', 'room-back', 'home'].includes(
-        kind ?? '',
-      )
-    )
+    if (!['forward', 'return', 'onward', 'swap'].includes(kind ?? ''))
       return transition;
     transition.updateCallbackDone
       .then(() => {

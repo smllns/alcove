@@ -54,6 +54,9 @@ export type BookFormat = 'hardcover' | 'paperback' | 'pocket';
 // calendar days, YYYY-MM-DD.
 export type CopyDetails = {
   place?: PlaceRef;
+  // When it was put there (a moment), for those put there last to stand
+  // last
+  placedAt?: string;
   // Free text from before places existed
   location?: string;
   status: CopyStatus;

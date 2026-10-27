@@ -1,5 +1,5 @@
 import { counted } from '@/shared/lib/plural';
-import { WALL } from './section';
+import { WALL } from '../drawing/section';
 
 // What's drawn under a section through a home, as under an architect's
 // drawing: the ground it stands on, hatched, a line under that ticked at

@@ -1,6 +1,6 @@
-/* A room of a home, opened (pages/library/places/RoomView), and the way
-   into it from the drawing of its home. The drawing's own look (--poche,
-   --hatch, the lamps, the light's colours) is in places.css. */
+/* A room of a home, opened (pages/library/places/RoomView). The
+   drawing's own look (--poche, --hatch, the lamps, the light's colours) is
+   in places.css. */
 
 /* A room opened (RoomView): its lamp lit, its light over the whole
    screen, falling from above, and its lamp's own light round it out to
@@ -54,36 +54,6 @@
     repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 7px)
       bottom / 100% 15px no-repeat;
 }
-/* room, room-back: a room in the drawing of its home opening into the
-   room, and closing back into it, as if the two lay side by side on one
-   long sheet: the home slides away to the left as the room comes in from
-   the right, and closing, back the other way. The header and the tabs
-   stay put (transitions-in-place.css). */
-:root[data-transition='room']::view-transition-old(root) {
-  animation: room-aside-left 0.65s cubic-bezier(0.65, 0, 0.35, 1) both;
-}
-:root[data-transition='room']::view-transition-new(root) {
-  animation: room-aside-right 0.65s cubic-bezier(0.65, 0, 0.35, 1) reverse both;
-}
-:root[data-transition='room-back']::view-transition-old(root) {
-  animation: room-aside-right 0.65s cubic-bezier(0.65, 0, 0.35, 1) both;
-}
-:root[data-transition='room-back']::view-transition-new(root) {
-  animation: room-aside-left 0.65s cubic-bezier(0.65, 0, 0.35, 1) reverse both;
-}
-@keyframes room-aside-left {
-  to {
-    opacity: 0;
-    transform: translateX(-40%);
-  }
-}
-@keyframes room-aside-right {
-  to {
-    opacity: 0;
-    transform: translateX(40%);
-  }
-}
-
 /* A bookcase in a room's drawing, leading down to its shelves: pointed
    at, its books take their full colours, it fills in pale as the sheets of
    its shelves below, and its tag goes solid */

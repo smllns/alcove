@@ -20,6 +20,9 @@ type PlacesEditorProps = {
   secondary?: ReactNode;
   // A quieter save button, among other settings, until there's a change
   quiet?: boolean;
+  // Just the one home with this id to change (or remove), the rest kept
+  // as they are
+  only?: string;
 };
 
 // Homes, rooms, bookcases and shelves, named and arranged by the reader.
@@ -33,6 +36,7 @@ export function PlacesEditor({
   onSaved,
   secondary,
   quiet = false,
+  only,
 }: PlacesEditorProps) {
   const places = usePlacesDraft({ homes, counts, startBlank, onSaved });
   const { draft, ops, moving } = places;
@@ -45,13 +49,20 @@ export function PlacesEditor({
 
   return (
     <form onSubmit={onSubmit} noValidate className='flex flex-col'>
-      {draft.map((home, i) => (
-        <PlaceNode key={home.id} node={home} path={[i]} ops={ops} />
-      ))}
-      {!live && <p className='mb-4 text-sm text-muted'>No places yet.</p>}
-      <AddButton onClick={() => ops.add([])}>
-        {live ? 'Add another home' : 'Add a home'}
-      </AddButton>
+      {draft.map(
+        (home, i) =>
+          (!only || home.id === only) && (
+            <PlaceNode key={home.id} node={home} path={[i]} ops={ops} />
+          ),
+      )}
+      {!only && (
+        <>
+          {!live && <p className='mb-4 text-sm text-muted'>No places yet.</p>}
+          <AddButton onClick={() => ops.add([])}>
+            {live ? 'Add another home' : 'Add a home'}
+          </AddButton>
+        </>
+      )}
 
       <Collapse open={moving > 0}>
         <div className='mt-6'>

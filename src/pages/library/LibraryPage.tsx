@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useNavigationType } from 'react-router';
 import { cn } from '@/shared/lib/cn';
 import { scrollPageTo } from '@/shared/lib/pageScroll';
@@ -59,6 +59,9 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
   const sky = shelved && section === 'all' && view === 'universe';
   // The books are fitted into the sky below the search and view choices
   const [toolbar, skyInset, toolbarShown] = useBottomEdge();
+  // The top of another section (the places, a home or a room in them), for
+  // the way back up to show once it's scrolled away
+  const [sectionTop, setSectionTop] = useState<HTMLElement | null>(null);
   // On a phone the keyboard hides most of the sky, so a search over it
   // lists what it finds rather than lighting the stars up
   const listFinds = sky && phone;
@@ -141,6 +144,7 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
               </>
             ) : (
               <div className='mt-8 sm:mt-12 xl:mt-16'>
+                <span ref={setSectionTop} aria-hidden className='block' />
                 {section === 'places' ? (
                   <PlacesSection shelf={shelf} total={total} />
                 ) : (
@@ -165,7 +169,9 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
       </div>
       {/* The sky never scrolls; long shelves do. Up once the search and
           the view choices are gone. */}
-      {tabbed && !sky && <BackToTop after={toolbarShown} />}
+      {tabbed && !sky && (
+        <BackToTop after={section === 'all' ? toolbarShown : sectionTop} />
+      )}
     </main>
   );
 }

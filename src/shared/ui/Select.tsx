@@ -1,9 +1,10 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { FieldNote } from './FieldNote';
-import { labelClass, smallInputText } from './fieldStyles';
+import { labelClass } from './fieldStyles';
 import { Popover } from './Popover';
+import { PopoverSearch } from './PopoverSearch';
 import { Option } from './SelectOption';
 import { jumpTo, type SelectOption } from './selectOptions';
 
@@ -155,26 +156,20 @@ export function Select<T extends string>({
         className='min-w-56'
       >
         {searchable && (
-          <label className='flex shrink-0 items-center gap-2 border-b border-line/60 px-3.5 py-2.5'>
-            <Search size={14} className='shrink-0 text-faint' />
-            <input
-              ref={search}
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setActive(0);
-              }}
-              onKeyDown={onListKey}
-              placeholder='Type to narrow down'
-              aria-label={`Search ${label.toLowerCase()}`}
-              aria-controls={`${id}-list`}
-              aria-activedescendant={`${id}-${active}`}
-              className={cn(
-                'min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-faint',
-                smallInputText,
-              )}
-            />
-          </label>
+          <PopoverSearch
+            ref={search}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActive(0);
+            }}
+            onKeyDown={onListKey}
+            placeholder='Type to narrow down'
+            aria-label={`Search ${label.toLowerCase()}`}
+            aria-controls={`${id}-list`}
+            aria-activedescendant={`${id}-${active}`}
+            className='border-b border-line/60 px-3.5 py-2.5'
+          />
         )}
         <ul
           ref={list}

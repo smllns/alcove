@@ -11,12 +11,29 @@ export const toPublicBook = ({ _id, userId: _userId, ...book }: BookDoc) => ({
   updatedAt: book.updatedAt.toISOString(),
 });
 
+// How fresh a moment the reader's screen says the copy was put somewhere
+// must be, to be taken
+const FRESH = 60_000;
+
+// When the copy was put where it is: just now when it's somewhere it
+// wasn't (`before`), as the reader's screen has it if that's fresh, or
+// otherwise when it was put there before
+function placedAt(copy: BookInput['copy'], before?: BookDoc['copy']) {
+  if (!copy?.place) return undefined;
+  const now = new Date().toISOString();
+  if (JSON.stringify(copy.place) === JSON.stringify(before?.place))
+    return before?.placedAt ?? now;
+  const told = copy.placedAt;
+  return told && Math.abs(Date.parse(told) - Date.now()) < FRESH ? told : now;
+}
+
 export async function addBook(userId: ObjectId, input: BookInput) {
   const now = new Date();
   const book: BookDoc = {
     _id: new ObjectId(),
     userId,
     ...input,
+    copy: input.copy && { ...input.copy, placedAt: placedAt(input.copy) },
     createdAt: now,
     updatedAt: now,
   };
@@ -119,6 +136,10 @@ export async function updateBook(
     _id: id,
     userId,
     ...input,
+    copy: input.copy && {
+      ...input.copy,
+      placedAt: placedAt(input.copy, old.copy),
+    },
     cover: input.cover?.url === old.cover?.url ? old.cover : input.cover,
     createdAt: old.createdAt,
     updatedAt: new Date(),

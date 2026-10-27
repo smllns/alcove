@@ -17,10 +17,9 @@ import { flyCoverHome } from './coverFlight';
 //                to its new place, those leaving fade, newcomers fade in
 //   view:        the books shown another way (grid, list): each cover in
 //                sight flies to where it is in the new view
-//   room,        a room in the drawing of a home opening into the room,
-//   room-back:   and closing back into it (styles/room.css)
-//   home:        another home's drawing, in place of the one shown: the one
-//                fading into the other where it stands (styles/places.css)
+//   swap:        something shown in place of what was (another home or
+//                room, the places shown another way): coming in over it
+//                where it stands (styles/places.css)
 //   onward:      another of the library's sections, chosen from the tabs:
 //                it rises over the one left, as forward does, under the
 //                header and the tabs, which stay put
@@ -34,9 +33,7 @@ export type PageTransition =
   | 'theme'
   | 'shelf'
   | 'view'
-  | 'room'
-  | 'room-back'
-  | 'home'
+  | 'swap'
   | 'onward';
 
 // back is done with a curtain over the page rather than a View Transition

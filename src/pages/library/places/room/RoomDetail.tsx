@@ -1,9 +1,9 @@
 import { cn } from '@/shared/lib/cn';
 import { captionClass } from '@/shared/ui/fieldStyles';
-import { sheetClass } from '@/shared/ui/surfaces';
 import type { Book } from '@/entities/book/types';
-import { CoverShelf } from './CoverShelf';
-import { SectionTag } from './SectionTag';
+import { CoverShelf } from '../shelf/CoverShelf';
+import { SectionTag } from '../drawing/SectionTag';
+import { ShelfSheet } from '../shelf/ShelfSheet';
 
 // One bookcase of a room drawn again on its own, large, as a detail on an
 // architect's sheet, tagged as it is in the room's drawing: its name and
@@ -28,25 +28,32 @@ export function RoomDetail({
       <h3 className={cn('mb-5 flex items-center gap-3 text-ink', captionClass)}>
         {tag && <SectionTag>{tag}</SectionTag>}
         {name}
-        <span className='font-normal text-ink-soft'>{count}</span>
+        <span
+          className={cn('font-normal', count ? 'text-ink-soft' : 'text-faint')}
+        >
+          {count || 'empty'}
+        </span>
       </h3>
+      {!shelves.length && (
+        <p className='text-sm text-muted'>Nothing in it yet.</p>
+      )}
       <div className='flex flex-col gap-4'>
         {shelves.map((shelf) => (
-          <div key={shelf.key} className='relative px-5 pb-6 pt-5 sm:px-6'>
-            {/* The sheet drawn behind it rather than being it: a sheet
-                blurring what's under it is a layer of its own, which the
-                next sheet would cover a book's caption with */}
-            <span aria-hidden className={cn('absolute inset-0', sheetClass)} />
-            <div className='relative'>
-              <p className={cn('mb-3.5 flex gap-2.5', captionClass)}>
-                {shelf.name}
+          <ShelfSheet key={shelf.key}>
+            <p className={cn('mb-3.5 flex gap-2.5', captionClass)}>
+              {shelf.name}
+              {shelf.books.length > 0 && (
                 <span className='font-normal text-muted'>
                   {shelf.books.length}
                 </span>
-              </p>
+              )}
+            </p>
+            {shelf.books.length ? (
               <CoverShelf books={shelf.books} />
-            </div>
-          </div>
+            ) : (
+              <p className='text-sm text-muted'>Nothing on it yet.</p>
+            )}
+          </ShelfSheet>
         ))}
       </div>
     </section>

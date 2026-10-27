@@ -3,7 +3,9 @@ import { useEditCopy } from '@/entities/book/queries';
 import type { Book } from '@/entities/book/types';
 import { placePath } from '@/entities/place/names';
 import { usePlaces } from '@/entities/place/queries';
+import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/cn';
+import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { FormError } from '@/shared/ui/FormError';
 import { StepSlider } from '@/shared/ui/StepSlider';
 import { outlineCardClass } from '@/shared/ui/surfaces';
@@ -36,7 +38,21 @@ export function YourCopy({ book }: { book: Book }) {
           {where && (
             <div className='min-w-0'>
               {path.length > 0 ? (
-                <PlaceTrail path={path} />
+                <>
+                  <PlaceTrail path={path} />
+                  {/* Over to it in its room, if it's in one, found there */}
+                  {copy?.place?.room && (
+                    <div className='mt-6 flex justify-center'>
+                      <ButtonLink
+                        to={paths.placeOf(copy.place, book.id)}
+                        variant='secondary'
+                        arrow
+                      >
+                        Show on the shelf
+                      </ButtonLink>
+                    </div>
+                  )}
+                </>
               ) : (
                 <p className='font-serif text-[17px] text-ink'>
                   {copy?.location}

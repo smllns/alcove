@@ -6,6 +6,9 @@ import type { Home, Room, Shelf, Unit } from '@/entities/place/types';
 // `loose` there, lying in a pile rather than standing on a shelf.
 
 type ShelfBooks = { shelf: Shelf; books: Book[] };
+// Kept in a home but in no room: in its attic, opened like a room
+export const LOOSE = 'loose';
+
 export type UnitBooks = {
   unit: Unit;
   shelves: ShelfBooks[];
@@ -53,7 +56,10 @@ export function arrange(homes: Home[], books: Book[]) {
     if (deepest) at.set(deepest, [...(at.get(deepest) ?? []), book]);
     else unplaced.push(book);
   }
-  const booksAt = (id: string) => at.get(id) ?? [];
+  // In the order they were put there, the last put there last
+  const since = (book: Book) => book.copy?.placedAt ?? book.createdAt;
+  const booksAt = (id: string) =>
+    (at.get(id) ?? []).toSorted((a, b) => since(a).localeCompare(since(b)));
 
   const arranged: HomeBooks[] = homes.map((home) => {
     const rooms = home.rooms.map((room) => {

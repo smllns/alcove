@@ -114,6 +114,20 @@
     transparent
   );
 }
+/* The attic's, coming on as its lamp does (AtticLight) */
+.attic-light {
+  opacity: 0;
+  mix-blend-mode: multiply;
+  transition: opacity 0.6s var(--ease-soft);
+}
+:root[data-theme='dark'] .attic-light {
+  mix-blend-mode: normal;
+}
+.house-plan:has(.house-attic:is(:hover, :focus-visible, [data-current]))
+  .attic-light {
+  opacity: 1;
+  transition: opacity 0.9s var(--ease-soft) 0.15s;
+}
 .standing-glow {
   bottom: 0;
   width: 30rem;
@@ -158,17 +172,18 @@
   transition: opacity 0.9s var(--ease-soft) 0.15s;
 }
 
-/* home: another home's drawing shown in place of the one before, coming
-   in over it where it stands, nothing moving (the one before staying as
-   it is under it, so nothing shows through between the two); the header
-   and the tabs staying put (transitions-in-place.css) */
-:root[data-transition='home']::view-transition-old(root) {
+/* swap: something shown in place of what was (another home or room, the
+   places shown another way), coming in over it where it stands, nothing
+   moving (what was staying as it is under it, so nothing shows through
+   between the two); the header and the tabs staying put
+   (transitions-in-place.css) */
+:root[data-transition='swap']::view-transition-old(root) {
   animation: none;
 }
-:root[data-transition='home']::view-transition-new(root) {
-  animation: home-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+:root[data-transition='swap']::view-transition-new(root) {
+  animation: swap-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
-@keyframes home-in {
+@keyframes swap-in {
   from {
     opacity: 0;
   }

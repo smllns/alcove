@@ -76,6 +76,9 @@ export type BookFormat = (typeof bookFormats)[number];
 // Dates are calendar days (YYYY-MM-DD), not moments.
 export type CopyDetails = {
   place?: PlaceRef;
+  // The moment it was put there (not a day, unlike the rest), for those
+  // put there last to stand last
+  placedAt?: string;
   // Free text from before places existed
   location?: string;
   status: CopyStatus;

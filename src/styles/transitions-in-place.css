@@ -66,37 +66,42 @@
 /* onward: from one of the library's sections to another, chosen from
    the tabs, the new one rising over the old as forward does
    (transitions.css), under the header and the tabs, which stay put (the
-   tabs' shading gliding over on its own, useTabPill), as they do as a room
-   of a home opens and closes (room.css) or another home is shown
-   (places.css) */
+   tabs' shading gliding over on its own, useTabPill), as they do as
+   something is shown in place of what was (places.css) */
 .library-header {
   --stays: library-header;
 }
 .library-nav {
   --stays: library-nav;
 }
-:root:is(
-    [data-transition='onward'],
-    [data-transition='room'],
-    [data-transition='room-back'],
-    [data-transition='home']
-  )
-  :is(.library-header, .library-nav) {
+.home-title {
+  --stays: home-title;
+}
+/* Pinned only as the page turns under them (onward): fading in over
+   itself (swap), the page carries them as they are, blurring what's
+   behind them, which a pinned one, drawn on its own, would lose for a
+   moment, a blink */
+:root[data-transition='onward'] :is(.library-header, .library-nav),
+:root[data-transition='swap'] .home-title {
   view-transition-name: var(--stays);
 }
 /* Over the page turning, just as they are now: the tabs as they are in the
    section chosen, their shading gliding there */
 ::view-transition-group(library-header),
 ::view-transition-group(library-nav),
+::view-transition-group(home-title),
 ::view-transition-new(library-header),
-::view-transition-new(library-nav) {
+::view-transition-new(library-nav),
+::view-transition-new(home-title) {
   animation: none;
 }
 ::view-transition-group(library-header),
-::view-transition-group(library-nav) {
+::view-transition-group(library-nav),
+::view-transition-group(home-title) {
   z-index: 2;
 }
 ::view-transition-old(library-header),
-::view-transition-old(library-nav) {
+::view-transition-old(library-nav),
+::view-transition-old(home-title) {
   display: none;
 }

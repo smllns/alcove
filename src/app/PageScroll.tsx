@@ -28,7 +28,11 @@ export function PageScroll({ children }: { children: ReactNode }) {
     <div
       key={page}
       data-page-scroll
-      className='h-dvh overflow-x-hidden overflow-y-auto'
+      // Never scrolled by the browser on its own as something above the
+      // screen grows or shrinks (Chrome's scroll anchoring; Safari has
+      // none): books gliding to new places on a shelf, say, would land
+      // where the page was, not where it's been moved to
+      className='h-dvh overflow-x-hidden overflow-y-auto [overflow-anchor:none]'
     >
       <KeepScroll />
       {children}

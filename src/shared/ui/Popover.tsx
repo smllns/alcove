@@ -60,9 +60,14 @@ export function Popover({
     place();
     addEventListener('scroll', place, true);
     addEventListener('resize', place);
+    // Again as what's in it grows or shrinks (a list narrowed down), so one
+    // opened above stays against its field
+    const sized = new ResizeObserver(place);
+    sized.observe(el);
     return () => {
       removeEventListener('scroll', place, true);
       removeEventListener('resize', place);
+      sized.disconnect();
     };
   }, [open, anchor, width]);
 
