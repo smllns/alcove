@@ -32,6 +32,8 @@ export function Eyebrow({ children, className, rise }: TextProps) {
 }
 
 const titleSizes = {
+  // Beside something on a wide screen (settings, over its index)
+  sm: 'text-[2.5rem] sm:text-5xl lg:text-[2.6rem]',
   md: 'text-[2.75rem] sm:text-6xl',
   lg: 'text-5xl sm:text-7xl',
 };

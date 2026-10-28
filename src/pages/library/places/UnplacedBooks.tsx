@@ -1,6 +1,6 @@
 import { Loading } from '@/shared/ui/Loading';
 import { SectionIntro } from '../SectionIntro';
-import type { Shelf } from '../useShelf';
+import type { Shelf } from '@/entities/book/useShelf';
 import { UnplacedShelf } from './shelf/UnplacedShelf';
 
 // Places named and books added, but none of them put anywhere yet: the

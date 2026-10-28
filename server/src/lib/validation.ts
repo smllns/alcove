@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import { z } from 'zod';
 import { HttpError } from './errors.js';
 
@@ -15,6 +16,13 @@ function validationError(error: z.ZodError) {
     fields,
   );
 }
+
+// One of the address's ?key= values as plain text: trimmed, and no longer
+// than `max`, so an endless one costs nothing
+export const queryText = (req: Request, key: string, max: number) =>
+  String(req.query[key] ?? '')
+    .trim()
+    .slice(0, max);
 
 // The request body, checked against `schema`, or a 400 listing what's wrong
 export function parseBody<T extends z.ZodType>(

@@ -1,0 +1,9 @@
+{
+  // The API's tests, type-checked against the server code they test
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true
+  },
+  "include": [".", "../src"]
+}

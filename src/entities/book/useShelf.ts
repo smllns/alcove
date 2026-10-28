@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
-import { bookMatches } from '@/entities/book/matches';
-import type { useBooks } from '@/entities/book/queries';
+import { bookMatches } from './matches';
+import type { useBooks } from './queries';
 
 type Books = ReturnType<typeof useBooks>;
 

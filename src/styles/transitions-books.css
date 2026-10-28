@@ -1,0 +1,136 @@
+/* Page transitions for the books themselves: the shelf rearranging, the
+   books shown another way, a cover flying between the shelves and its page */
+
+/* shelf: the books on a page rearranging. Each card carries its own
+   --shelf-name, so it moves from its old place to its new one rather than
+   the page cross-fading as a whole. */
+:root[data-transition='shelf'] .shelf-item {
+  view-transition-name: var(--shelf-name);
+}
+
+/* view: the books shown another way. Only the covers carry a name (set as
+   --cover-name on the card or the row), so each one in sight flies from
+   where it was to where it is now, while the rest of the page, titles and
+   all, cross-fades. */
+:root[data-transition='view'] .shelf-item .book-cover {
+  view-transition-name: var(--cover-name, none);
+}
+
+/* A book faded back (to let the others stand out) steps forward again
+   when hovered, gently either way. The fade is on what's inside the
+   item: the item's own rise into place holds its opacity once done, and
+   would make every change to it a jump. Its cover, flying on its own
+   between views, is lifted out from under the card's fade, so it carries
+   the same fade with it. */
+.shelf-item > * {
+  transition: opacity 0.5s var(--ease-soft);
+}
+.shelf-faded > * {
+  opacity: var(--faded);
+}
+.shelf-faded:hover > * {
+  opacity: 1;
+}
+:root[data-transition='view'] .shelf-faded .book-cover {
+  view-transition-class: faded;
+}
+::view-transition-group(.faded) {
+  opacity: var(--faded);
+}
+
+:root:is(
+    [data-transition='shelf'],
+    [data-transition='view']
+  )::view-transition-group(*) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:is(
+    [data-transition='shelf'],
+    [data-transition='view']
+  )::view-transition-old(*),
+:root:is(
+    [data-transition='shelf'],
+    [data-transition='view']
+  )::view-transition-new(*) {
+  animation-duration: 0.45s;
+}
+
+/* A book's cover flying between the shelves and the book's own page
+   (shared/lib/coverFlight), over the page turning underneath, in the
+   page's own time */
+::view-transition-group(flying-cover) {
+  z-index: 10;
+  animation-duration: 1.05s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.2, 1);
+}
+::view-transition-old(flying-cover),
+::view-transition-new(flying-cover) {
+  height: 100%;
+  object-fit: cover;
+  animation-duration: 0.6s;
+}
+/* Flying home to the sky, the cover is taken without its shadow (that's
+   on the book around it, stars.css), which would only show, all at
+   once, as it lands; so it takes the same shadow on as it goes */
+:root[data-transition='return']:has(.sky)::view-transition-image-pair(
+    flying-cover
+  ) {
+  animation: flight-shadow 1.05s cubic-bezier(0.65, 0, 0.2, 1) both;
+}
+@keyframes flight-shadow {
+  from {
+    filter: var(--star-unlit);
+  }
+  to {
+    filter: var(--star-flight);
+  }
+}
+/* A faded book's cover is taken at full strength, so it brightens from
+   its fade on the way to its page (data-flight-faded, set as it leaves a
+   faded place), and fades back on the way home */
+:root[data-transition='forward'][data-flight-faded] [data-cover-of] {
+  view-transition-class: brightens;
+}
+:root[data-transition='return'] .shelf-faded [data-cover-of] {
+  view-transition-class: dims;
+}
+::view-transition-image-pair(.brightens) {
+  animation: flight-brighten 1.05s cubic-bezier(0.65, 0, 0.2, 1) both;
+}
+::view-transition-image-pair(.dims) {
+  animation: flight-brighten 1.05s cubic-bezier(0.65, 0, 0.2, 1) reverse both;
+}
+@keyframes flight-brighten {
+  from {
+    opacity: var(--faded);
+  }
+}
+
+/* zoom: a book's cover drawn up to fill the screen, and back. Only the
+   cover moves; the veil behind it fades in and out with the page. */
+:root[data-transition='zoom'] .cover-zoom {
+  view-transition-name: cover-zoom;
+}
+::view-transition-group(cover-zoom) {
+  z-index: 10;
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(cover-zoom),
+::view-transition-new(cover-zoom) {
+  height: 100%;
+  object-fit: cover;
+}
+:root[data-transition='zoom']::view-transition-old(root),
+:root[data-transition='zoom']::view-transition-new(root) {
+  animation-duration: 0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

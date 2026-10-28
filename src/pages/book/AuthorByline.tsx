@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { lifespan } from '@/entities/book/authors';
 import { useWorkAuthor } from '@/entities/book/catalogueQueries';
@@ -9,10 +8,12 @@ import { settled } from '@/shared/lib/settled';
 import { Collapse } from '@/shared/ui/Collapse';
 import { Fold } from '@/shared/ui/Fold';
 import { QuietButton } from '@/shared/ui/ListControls';
+import { RoundPhoto } from '@/shared/ui/RoundPhoto';
 import { Spinner } from '@/shared/ui/Spinner';
 import { AUTHOR_SECTION } from './SameAuthor';
 import { SourceCredit } from './SourceCredit';
 import { useTheirOthers } from './useTheirOthers';
+import { textLinkClass } from '@/shared/ui/buttonStyles';
 
 const bioText =
   'whitespace-pre-line font-serif text-[15px] leading-relaxed text-ink-soft';
@@ -59,7 +60,12 @@ export function AuthorByline({ book }: { book: Book }) {
           <div className='max-w-2xl border-l border-line pl-4'>
             {(author?.photoUrl || years) && (
               <div className='mb-3 flex items-center gap-3'>
-                {author?.photoUrl && <Portrait url={author.photoUrl} />}
+                {author?.photoUrl && (
+                  <RoundPhoto
+                    url={author.photoUrl}
+                    className='size-10 shrink-0 bg-line/40'
+                  />
+                )}
                 {years && <span className='text-sm text-muted'>{years}</span>}
               </div>
             )}
@@ -84,10 +90,7 @@ export function AuthorByline({ book }: { book: Book }) {
                     .getElementById(AUTHOR_SECTION)
                     ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                 }
-                className={cn(
-                  'group underline decoration-line underline-offset-4 hover:decoration-ink',
-                  author?.bio && 'mt-2',
-                )}
+                className={cn('group', textLinkClass, author?.bio && 'mt-2')}
               >
                 {counted(more, 'more book')} by them on your shelves
                 <ArrowDown
@@ -101,26 +104,5 @@ export function AuthorByline({ book }: { book: Book }) {
         </div>
       </Collapse>
     </div>
-  );
-}
-
-// Their photograph, round, in a place of its own size, so it only fades
-// in as it loads; one that doesn't load leaves the place to the years
-function Portrait({ url }: { url: string }) {
-  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>(
-    'loading',
-  );
-  if (state === 'failed') return null;
-  return (
-    <img
-      src={url}
-      alt=''
-      onLoad={() => setState('loaded')}
-      onError={() => setState('failed')}
-      className={cn(
-        'size-10 shrink-0 rounded-full bg-line/40 object-cover transition-opacity duration-500 ease-soft',
-        state === 'loaded' ? 'opacity-100' : 'opacity-0',
-      )}
-    />
   );
 }

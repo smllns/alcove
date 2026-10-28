@@ -1,9 +1,10 @@
 import { request, requestBlob } from '@/shared/api/http';
 import type {
+  AuthorFound,
   Book,
   BookInput,
-  CatalogueEdition,
   CatalogueAuthor,
+  CatalogueEdition,
   CatalogueList,
   CatalogueRatings,
   CatalogueWork,
@@ -54,6 +55,13 @@ export const searchCatalogue = (query: string) =>
   request<{ results: CatalogueWork[]; isbnEdition: CatalogueEdition | null }>(
     `/lookup/search?q=${encodeURIComponent(query)}`,
   );
+
+export const searchAuthors = async (query: string) =>
+  (
+    await request<{ authors: AuthorFound[] }>(
+      `/lookup/authors?q=${encodeURIComponent(query)}`,
+    )
+  ).authors;
 
 export const fetchEditions = async (workKey: string) =>
   (

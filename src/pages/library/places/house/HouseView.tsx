@@ -6,7 +6,7 @@ import { useCurrentRoom } from './useCurrentRoom';
 import { HouseSketch } from './HouseSketch';
 import { SLAB, UNDER } from '../drawing/section';
 import { HouseAttic } from './HouseAttic';
-import { useMediaQuery } from '@/shared/lib/useMediaQuery';
+import { PHONE, useMediaQuery } from '@/shared/lib/useMediaQuery';
 
 // How tall the roof is, over the rooms, its attic under it
 const ROOF = 120;
@@ -27,7 +27,7 @@ export function HouseView({
 }) {
   const house = useRef<HTMLDivElement>(null);
   useCurrentRoom(house, rooms);
-  const narrow = useMediaQuery('(max-width: 639px)');
+  const narrow = useMediaQuery(PHONE);
   const middling = useMediaQuery('(max-width: 1023px)');
   const perFloor = narrow ? 1 : middling ? 2 : 3;
   const decors = furnish(rooms.map(({ room }) => room.id));

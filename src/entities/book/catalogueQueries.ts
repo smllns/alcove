@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { keepWhileTyping } from '@/shared/lib/keepWhileTyping';
 import {
   fetchBookQuotes,
   fetchEditions,
@@ -8,6 +9,7 @@ import {
   fetchWorkDetails,
   fetchWorkLists,
   fetchWorkRatings,
+  searchAuthors,
   searchCatalogue,
 } from './api';
 
@@ -18,6 +20,7 @@ import {
 
 const catalogueKeys = {
   search: (query: string) => ['catalogue', 'search', query] as const,
+  authors: (query: string) => ['catalogue', 'authors', query] as const,
   editions: (workKey: string) => ['catalogue', 'editions', workKey] as const,
   about: (workKey: string) => ['catalogue', 'about2', workKey] as const,
   ratings: (workKey: string) => ['catalogue', 'ratings', workKey] as const,
@@ -29,13 +32,23 @@ const catalogueKeys = {
 };
 
 // Keeps showing the last results while the next query loads, so the list
-// doesn't flash empty between keystrokes
+// doesn't flash empty between keystrokes; not after the field's cleared
 export const useCatalogueSearch = (query: string) =>
   useQuery({
     queryKey: catalogueKeys.search(query),
     queryFn: () => searchCatalogue(query),
     enabled: query.length >= 2,
-    placeholderData: keepPreviousData,
+    placeholderData: keepWhileTyping(query),
+    staleTime: 5 * 60 * 1000,
+  });
+
+// Writers by name, the last found kept showing while typing, as above
+export const useAuthorSearch = (query: string) =>
+  useQuery({
+    queryKey: catalogueKeys.authors(query),
+    queryFn: () => searchAuthors(query),
+    enabled: query.length >= 2,
+    placeholderData: keepWhileTyping(query),
     staleTime: 5 * 60 * 1000,
   });
 

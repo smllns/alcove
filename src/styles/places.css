@@ -173,18 +173,24 @@
 }
 
 /* swap: something shown in place of what was (another home or room, the
-   places shown another way), coming in over it where it stands, nothing
-   moving (what was staying as it is under it, so nothing shows through
-   between the two); the header and the tabs staying put
+   places shown another way), nothing moving: what was fades out just as
+   the new fades in, at the same pace, the two adding up to one whole
+   picture all the way (the browser's own plus-lighter blend), so neither
+   lingers nor pops in; the header and the tabs staying put
    (transitions-in-place.css) */
 :root[data-transition='swap']::view-transition-old(root) {
-  animation: none;
+  animation: swap-out 0.4s cubic-bezier(0.45, 0, 0.55, 1) both;
 }
 :root[data-transition='swap']::view-transition-new(root) {
-  animation: swap-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: swap-in 0.4s cubic-bezier(0.45, 0, 0.55, 1) both;
 }
 @keyframes swap-in {
   from {
+    opacity: 0;
+  }
+}
+@keyframes swap-out {
+  to {
     opacity: 0;
   }
 }

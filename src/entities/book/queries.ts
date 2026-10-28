@@ -36,10 +36,12 @@ export const onShelf = (
     (data) => data && { ...data, pages: data.pages.map(change) },
   );
 
-// The reader's books, newest first, a page at a time
-export const useBooks = () =>
+// The reader's books, newest first, a page at a time. Not `enabled`, it
+// asks for nothing itself, but still gives what's been loaded already.
+export const useBooks = (enabled = true) =>
   useInfiniteQuery({
     queryKey: bookKeys.shelf,
+    enabled,
     queryFn: ({ pageParam }) => fetchBooks(pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,

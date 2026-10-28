@@ -19,3 +19,15 @@ export const scrollPageTo = (
   behavior: ScrollBehavior = 'instant',
   el?: Element | null,
 ) => pageScroller(el).scrollTo({ top, behavior });
+
+// Smoothly down (or up) to `el`, stopping with it as far under the top of
+// the screen as it asks (its scroll-margin-top: clear of the tabs floating
+// there, say)
+export const scrollPageToElement = (el: Element) =>
+  scrollPageTo(
+    pageScrollY(el) +
+      el.getBoundingClientRect().top -
+      (parseFloat(getComputedStyle(el).scrollMarginTop) || 0),
+    'smooth',
+    el,
+  );

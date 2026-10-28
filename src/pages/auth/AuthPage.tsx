@@ -1,13 +1,15 @@
 import { Link, useMatch } from 'react-router';
 import { BackLink } from '@/shared/ui/BackLink';
-import { buttonClass } from '@/shared/ui/buttonStyles';
+import { buttonClass, textLinkClass } from '@/shared/ui/buttonStyles';
 import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
+import { ThemeToggle } from '@/shared/theme';
 import { SiteHeader } from '@/shared/ui/SiteHeader';
 import { Typewriter } from '@/shared/ui/Typewriter';
 import { authCopy, type AuthMode } from './authCopy';
 import { AuthForm } from './AuthForm';
 import { CoverFan } from './CoverFan';
 import { paths } from '@/shared/config/paths';
+import { cn } from '@/shared/lib/cn';
 
 // Log in and sign up are one screen that changes in place: the covers
 // reshuffle, the words retype themselves, and the form grows or loses a field.
@@ -22,6 +24,7 @@ export function AuthPage() {
   return (
     <main className='bg-paper flex min-h-screen flex-col overflow-x-clip text-ink'>
       <SiteHeader>
+        <ThemeToggle />
         <Link to={copy.switchTo} className={buttonClass('pill')}>
           <Typewriter text={copy.headerSwitch} />
         </Link>
@@ -60,10 +63,7 @@ export function AuthPage() {
             style={rise(400)}
           >
             <Typewriter text={copy.switchPrompt} delay={STAGGER * 4} />{' '}
-            <Link
-              to={copy.switchTo}
-              className='text-ink underline-offset-4 hover:underline'
-            >
+            <Link to={copy.switchTo} className={cn('text-ink', textLinkClass)}>
               <Typewriter text={copy.switchLink} delay={STAGGER * 4} />
             </Link>
           </p>

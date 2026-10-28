@@ -6,6 +6,9 @@ import { floatingClass } from '@/shared/ui/surfaces';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { softClass } from '@/shared/ui/buttonStyles';
 import { useTabPill } from './useTabPill';
+import { callName } from '@/entities/user/types';
+import { useAuth } from '@/features/auth';
+import { Avatar } from '@/shared/ui/Avatar';
 
 // The parts of the library: a small capsule floating over the shelves,
 // which stays in view while the books scroll by underneath. Switching
@@ -15,14 +18,10 @@ import { useTabPill } from './useTabPill';
 // sideways on a phone, where the tabs don't all fit. On a wide screen it
 // sits in the header row, between the logo and the buttons. On a page
 // within the library (a book's), no tab is `current`, and each leads back
-// out to its section the way the reader goes back.
-export function LibraryNav({
-  current,
-  counts,
-}: {
-  current?: SectionKey;
-  counts: Partial<Record<SectionKey, number>>;
-}) {
+// out to its section the way the reader goes back. Last, set apart by a
+// thin line, the reader's own circle, leading to their profile.
+export function LibraryNav({ current }: { current?: SectionKey }) {
+  const { user } = useAuth();
   const list = useRef<HTMLUListElement>(null);
   const pill = useTabPill(list, current);
 
@@ -71,13 +70,21 @@ export function LibraryNav({
         {sections.map((section) => {
           const on = section.key === current;
           const lit = section.key === pill.lit;
-          const count = counts[section.key];
+          const me = section.key === 'profile';
           return (
-            <li key={section.key} className='shrink-0'>
+            <li
+              key={section.key}
+              className={cn(
+                'shrink-0',
+                me &&
+                  'ml-1 flex items-center border-l border-line/70 pl-1 sm:ml-0.5 sm:pl-1.5',
+              )}
+            >
               <TransitionLink
                 to={section.path}
                 transition={current ? 'onward' : 'return'}
                 aria-current={on ? 'page' : undefined}
+                aria-label={me ? section.label : undefined}
                 data-section={section.key}
                 data-moves-along
                 // The section already open: back to its top instead
@@ -87,24 +94,17 @@ export function LibraryNav({
                   scrollToTop();
                 }}
                 className={cn(
-                  'relative flex items-baseline gap-1.5 whitespace-nowrap px-2.5 py-2 font-serif text-[15px] tracking-[-0.01em] sm:gap-2 sm:px-5 sm:text-[17px]',
+                  'relative flex',
+                  me
+                    ? 'p-1'
+                    : 'whitespace-nowrap px-2.5 py-2 font-serif text-[15px] tracking-[-0.01em] sm:px-5 sm:text-[17px]',
                   // The open one's shading is the pill under them all
                   lit
                     ? 'cursor-pointer rounded-full text-ink transition-colors duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]'
                     : softClass(false),
                 )}
               >
-                {section.label}
-                {count !== undefined && (
-                  <span
-                    className={cn(
-                      'font-sans text-xs tabular-nums transition-colors duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]',
-                      lit ? 'text-muted' : 'text-faint',
-                    )}
-                  >
-                    {count}
-                  </span>
-                )}
+                {me ? <Avatar name={callName(user)} /> : section.label}
               </TransitionLink>
             </li>
           );

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { Book } from '@/entities/book/types';
 import { Loading } from '@/shared/ui/Loading';
 import { Universe } from './universe/Universe';
-import type { Shelf } from './useShelf';
+import type { Shelf } from '@/entities/book/useShelf';
 import { BookGrid } from './views/BookGrid';
 import { BookList } from './views/BookList';
 import type { CardSize } from './views/BookCard';

@@ -100,6 +100,18 @@ export type CatalogueWork = {
   editionCount: number;
 };
 
+// A writer the catalogue knows, as a search finds them. Mirrors
+// AuthorResult in server/src/lookup/authors.ts.
+export type AuthorFound = {
+  key: string;
+  name: string;
+  born?: string;
+  died?: string;
+  // Their best-known book, and how many they wrote
+  topWork?: string;
+  workCount: number;
+};
+
 // A list a reader made on Open Library: its name, its page, how many books
 export type CatalogueList = { name: string; url: string; books: number };
 

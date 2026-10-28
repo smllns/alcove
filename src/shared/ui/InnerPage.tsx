@@ -1,14 +1,22 @@
 import type { ReactNode } from 'react';
+import { LibraryBig } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { BackLink } from './BackLink';
 import { ButtonLink } from './ButtonLink';
 import { SiteHeader } from './SiteHeader';
+import { pageWidthClass } from './surfaces';
 import { paths } from '@/shared/config/paths';
 
-const widths = { md: 'max-w-3xl', lg: 'max-w-4xl' };
+const widths = {
+  md: 'max-w-3xl',
+  lg: 'max-w-4xl',
+  // Settings and the like: as wide as the library's own pages
+  wide: pageWidthClass,
+};
 
 // A page one step in from the library (settings, adding a book): the header
-// with a way back to the shelves, and a centred column for the content
+// with a way to the shelves, a way back to wherever the reader came from
+// (the shelves, if from nowhere), and a centred column for the content
 export function InnerPage({
   width = 'md',
   children,
@@ -20,6 +28,7 @@ export function InnerPage({
     <main className='bg-paper min-h-screen text-ink'>
       <SiteHeader home={paths.library}>
         <ButtonLink to={paths.library} variant='pill'>
+          <LibraryBig size={15} />
           Your library
         </ButtonLink>
       </SiteHeader>
@@ -30,7 +39,7 @@ export function InnerPage({
           widths[width],
         )}
       >
-        <BackLink to={paths.library} />
+        <BackLink to={paths.library} returns />
         {children}
       </div>
     </main>

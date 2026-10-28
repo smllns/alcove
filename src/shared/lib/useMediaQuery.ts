@@ -1,5 +1,8 @@
 import { useSyncExternalStore } from 'react';
 
+// A phone's screen: narrower than Tailwind's sm
+export const PHONE = '(max-width: 639px)';
+
 // Whether a media query matches, kept up to date as it changes
 export function useMediaQuery(query: string) {
   return useSyncExternalStore(

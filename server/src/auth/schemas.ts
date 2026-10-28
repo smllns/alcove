@@ -1,11 +1,21 @@
 import { z } from 'zod';
 
 // Field rules, shared by sign-up and account settings
-export const nameField = z
+
+// Lowercase, and without the @ it's shown with, should it be typed too
+export const usernameField = z
   .string()
   .trim()
-  .min(1, 'Tell us what to call you.')
-  .max(60, 'Keep it under 60 characters.');
+  .toLowerCase()
+  .transform((name) => name.replace(/^@/, ''))
+  .pipe(
+    z
+      .string()
+      .regex(
+        /^[a-z0-9_]{3,20}$/,
+        'Use 3 to 20 letters, numbers or underscores.',
+      ),
+  );
 
 export const emailField = z
   .string()
@@ -21,7 +31,7 @@ export const newPasswordField = z
 export const currentPasswordField = z.string().min(1, 'Enter your password.');
 
 export const registerSchema = z.object({
-  name: nameField,
+  username: usernameField,
   email: emailField,
   password: newPasswordField,
 });

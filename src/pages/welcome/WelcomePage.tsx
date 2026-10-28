@@ -1,6 +1,7 @@
 import { cn } from '@/shared/lib/cn';
 import { pageWidthClass } from '@/shared/ui/surfaces';
 import { usePlaces } from '@/entities/place/queries';
+import { callName } from '@/entities/user/types';
 import { useAuth } from '@/features/auth';
 import { PlacesEditor, PlacesExample } from '@/features/places';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
@@ -39,7 +40,7 @@ export function WelcomePage() {
       <SiteHeader home={paths.library} />
 
       <div className={cn('pb-24 pt-4 sm:pt-8', pageWidthClass)}>
-        <Eyebrow rise={0}>Welcome, {user?.name}</Eyebrow>
+        <Eyebrow rise={0}>Welcome, {callName(user)}</Eyebrow>
         <PageTitle rise={80} className='mt-3 sm:mt-4'>
           Where do your books live?
         </PageTitle>

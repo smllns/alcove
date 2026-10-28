@@ -2,7 +2,7 @@ import { Router, type Request } from 'express';
 import { ObjectId } from 'mongodb';
 import { currentUser } from '../auth/middleware.js';
 import { HttpError } from '../lib/errors.js';
-import { parseBody } from '../lib/validation.js';
+import { parseBody, queryText } from '../lib/validation.js';
 import { getLists, ownLists } from '../lists/repository.js';
 import { warmListsOfWork } from '../lookup/lists.js';
 import { getPlaces, resolvePlace } from '../places/repository.js';
@@ -100,9 +100,7 @@ booksRouter.post('/', async (req, res) => {
 
 // The reader's books by a writer, e.g. the one of a book about to be added
 booksRouter.get('/by-writer', async (req, res) => {
-  const name = String(req.query.name ?? '')
-    .trim()
-    .slice(0, 200);
+  const name = queryText(req, 'name', 200);
   const found = name ? await booksByWriter(me(req), name) : [];
   res.json({ books: found.map(toPublicBook) });
 });

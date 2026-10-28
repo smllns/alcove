@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth';
 import { BookScene } from '@/features/book-scene';
 import { useTheme } from '@/shared/theme';
 import { ButtonLink } from '@/shared/ui/ButtonLink';
+import { ThemeToggle } from '@/shared/theme';
 import { SiteHeader } from '@/shared/ui/SiteHeader';
 import { LandingFooter } from './LandingFooter';
 import { LandingHero } from './LandingHero';
@@ -57,6 +58,7 @@ export function LandingPage() {
         className='pointer-events-none relative z-10 flex min-h-screen flex-col'
       >
         <SiteHeader className='site-header'>
+          <ThemeToggle />
           {status === 'signed-in' ? (
             <ButtonLink to={paths.library} variant='pill' arrow>
               Your library

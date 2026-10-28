@@ -118,7 +118,7 @@ export function PlacesView({ homes, books }: { homes: Home[]; books: Book[] }) {
         look={look}
         onLook={chooseLook}
       />
-      <div className='mx-auto w-full max-w-5xl'>
+      <div className='w-full'>
         {editing ? (
           <HomeEditor
             home={home.home.id}
@@ -136,7 +136,7 @@ export function PlacesView({ homes, books }: { homes: Home[]; books: Book[] }) {
         <UnplacedShelf
           books={arranged.unplaced}
           found={roomId ? undefined : (params.get('find') ?? undefined)}
-          className='mx-auto mt-16 w-full max-w-5xl'
+          className='mt-16 w-full'
         />
       )}
     </div>

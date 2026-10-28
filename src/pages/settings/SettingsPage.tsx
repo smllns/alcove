@@ -1,88 +1,80 @@
-import type { ReactNode } from 'react';
-import type { User } from '@/entities/user/types';
+import { useState } from 'react';
 import { useAuth } from '@/features/auth';
+import { paths } from '@/shared/config/paths';
+import { BackToTop } from '@/shared/ui/BackToTop';
 import { InnerPage } from '@/shared/ui/InnerPage';
-import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
+import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
+import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { DeleteAccount } from './DeleteAccount';
-import { EmailForm } from './EmailForm';
-import { LogoutButton } from './LogoutButton';
-import { NameForm } from './NameForm';
-import { PasswordForm } from './PasswordForm';
 import { PlacesSettings } from './PlacesSettings';
-import { SettingsSection } from './SettingsSection';
+import { ProfileGroup } from './ProfileGroup';
+import { rowLinkClass } from './rowLink';
+import { SettingsGroup } from './SettingsGroup';
+import { SettingsIndex } from './SettingsIndex';
+import { SignInGroup } from './SignInGroup';
+import { ThemeChoice } from './ThemeChoice';
 
-type Section = {
-  title: string;
-  description: string;
-  tone?: 'danger';
-  form: (user: User) => ReactNode;
-};
-
-// Top to bottom, from what changes most often to what can't be undone
-const sections: Section[] = [
-  {
-    title: 'Profile',
-    description: 'The name alcove greets you by.',
-    form: (user) => <NameForm user={user} />,
-  },
-  {
-    title: 'Places',
-    description:
-      'Your homes, their rooms, bookcases and shelves. Every book can be put in one of them.',
-    form: () => <PlacesSettings />,
-  },
-  {
-    title: 'Email',
-    description: 'Where you log in. We’ll ask for your password to change it.',
-    form: (user) => <EmailForm user={user} />,
-  },
-  {
-    title: 'Password',
-    description: 'Changing it signs you out everywhere else.',
-    form: () => <PasswordForm />,
-  },
-  {
-    title: 'Delete account',
-    description:
-      'Removes your account and your whole library. This can’t be undone.',
-    tone: 'danger',
-    form: () => <DeleteAccount />,
-  },
+// In the order they're shown, from what changes most often to what can't
+// be undone
+const groups = [
+  { id: 'profile', label: 'Profile' },
+  { id: 'appearance', label: 'Appearance' },
+  { id: 'places', label: 'Places' },
+  { id: 'sign-in', label: 'Sign-in' },
+  { id: 'leaving', label: 'Leaving', danger: true },
 ];
+// Each group rises in a beat after the one above
+const delay = (i: number) => 160 + i * 80;
 
+// The account's settings: on a wide screen, the title and an index of the
+// groups stay on the left as the groups go by on the right
 export function SettingsPage() {
   const { user } = useAuth();
+  // The title: the way back up shows once it's scrolled away
+  const [top, setTop] = useState<HTMLElement | null>(null);
   // Behind RequireAuth, so this only covers the moment of deleting the account
   if (!user) return null;
 
   return (
-    <InnerPage>
-      <Eyebrow rise={0}>Settings</Eyebrow>
-      <PageTitle rise={80} className='mt-3 sm:mt-4'>
-        Your account
-      </PageTitle>
-      <div
-        className='mt-4 mb-10 flex animate-rise flex-wrap items-center gap-x-5 gap-y-3 sm:mt-5 sm:mb-14'
-        style={{ animationDelay: '160ms' }}
-      >
-        <Lead>
-          Signed in as <span className='text-ink'>{user.email}</span>
-        </Lead>
-        <LogoutButton />
-      </div>
+    <InnerPage width='wide'>
+      <div className='grid gap-10 lg:grid-cols-[16rem_1fr] lg:gap-16 xl:gap-24'>
+        <div className='lg:sticky lg:top-10 lg:self-start'>
+          <Eyebrow rise={0}>Settings</Eyebrow>
+          <div ref={setTop}>
+            <PageTitle rise={80} size='sm' className='mt-3 sm:mt-4'>
+              Your account
+            </PageTitle>
+          </div>
+          <div
+            className='mt-8 animate-rise max-lg:hidden'
+            style={{ animationDelay: '160ms' }}
+          >
+            <SettingsIndex groups={groups} />
+          </div>
+        </div>
 
-      {sections.map((section, i) => (
-        <SettingsSection
-          key={section.title}
-          title={section.title}
-          description={section.description}
-          tone={section.tone}
-          // Each one rises in a beat after the one above
-          delay={240 + i * 80}
-        >
-          {section.form(user)}
-        </SettingsSection>
-      ))}
+        <div className='flex min-w-0 flex-col gap-10'>
+          <ProfileGroup user={user} delay={delay(0)} />
+          <SettingsGroup id='appearance' title='Appearance' delay={delay(1)}>
+            <ThemeChoice />
+          </SettingsGroup>
+          <SettingsGroup
+            id='places'
+            title='Places'
+            aside={
+              <TransitionLink to={paths.places} className={rowLinkClass}>
+                Open in Places →
+              </TransitionLink>
+            }
+            delay={delay(2)}
+          >
+            <PlacesSettings />
+          </SettingsGroup>
+          <SignInGroup user={user} delay={delay(3)} />
+          <DeleteAccount id='leaving' delay={delay(4)} />
+        </div>
+      </div>
+      <BackToTop after={top} />
     </InnerPage>
   );
 }

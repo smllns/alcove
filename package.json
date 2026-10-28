@@ -9,10 +9,17 @@
     "dev:api": "tsx watch --env-file-if-exists=.env.local --env-file-if-exists=server/.env server/src/index.ts",
     "build": "tsc -b && vite build && tsc -p server",
     "start": "NODE_ENV=production node --env-file-if-exists=server/.env server/dist/index.js",
-    "typecheck": "tsc -b && tsc -p server --noEmit && tsc -p api",
+    "typecheck": "tsc -b && tsc -p server --noEmit && tsc -p server/test && tsc -p api",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "disablePostinstall": "1"
+    }
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -48,10 +55,12 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "mongodb-memory-server": "^11.3.0",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.71.2",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
   }
 }

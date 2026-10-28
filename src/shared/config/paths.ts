@@ -6,6 +6,7 @@ export const paths = {
   register: '/register',
   library: '/library',
   places: '/library/places',
+  profile: '/library/profile',
   addBook: '/library/add',
   settings: '/settings',
   welcome: '/welcome',

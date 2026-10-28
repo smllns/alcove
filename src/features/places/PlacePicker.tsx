@@ -106,7 +106,10 @@ export function PlacePicker({
         )}
       >
         <div
-          className={cn('min-h-0 overflow-hidden', index % 2 && 'max-sm:pt-5')}
+          className={cn(
+            'min-h-0 overflow-hidden',
+            index % 2 === 1 && 'max-sm:pt-5',
+          )}
         >
           <Select
             label={label}

@@ -7,8 +7,16 @@ import { Collapse } from '@/shared/ui/Collapse';
 import { FormError } from '@/shared/ui/FormError';
 import { PasswordField } from '@/shared/ui/PasswordField';
 
-// Two steps: ask, then confirm with the password
-export function DeleteAccount() {
+// Set apart at the foot of the settings, in a thin red frame. Two steps:
+// ask, then confirm with the password.
+export function DeleteAccount({
+  id,
+  delay,
+}: {
+  // Where the index leads to (SettingsIndex)
+  id: string;
+  delay: number;
+}) {
   const { forgetUser } = useAuth();
   const leaveForHome = useLeaveForHome();
   const [confirming, setConfirming] = useState(false);
@@ -23,22 +31,40 @@ export function DeleteAccount() {
   };
 
   return (
-    <div className='flex flex-col'>
-      <Collapse open={!confirming}>
+    <section
+      id={id}
+      className='scroll-mt-28 animate-rise rounded-[24px] border border-danger/35 px-5 py-5 sm:px-6'
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className='flex flex-wrap items-center gap-x-6 gap-y-4'>
+        <div className='min-w-0 flex-1'>
+          <h2 className='font-serif text-xl tracking-[-0.01em] text-danger'>
+            Delete account
+          </h2>
+          <p className='mt-1 text-sm text-muted'>
+            Your account and your whole library. This can’t be undone.
+          </p>
+        </div>
         <Button
           variant='danger'
+          aria-expanded={confirming}
           onClick={() => setConfirming(true)}
-          className='self-start'
+          disabled={confirming}
+          className='shrink-0'
         >
-          Delete account
+          Delete
         </Button>
-      </Collapse>
+      </div>
 
       <Collapse open={confirming}>
-        <form onSubmit={onSubmit} noValidate className='flex flex-col gap-6'>
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className='flex flex-col gap-6 pt-6'
+        >
           <p className='text-sm leading-6 text-ink-soft'>
-            Your account and everything in your library will be gone for good.
-            Enter your password to confirm.
+            Everything in your library will be gone for good. Enter your
+            password to confirm.
           </p>
           <PasswordField
             label='Password'
@@ -67,6 +93,6 @@ export function DeleteAccount() {
           </div>
         </form>
       </Collapse>
-    </div>
+    </section>
   );
 }

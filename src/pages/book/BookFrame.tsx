@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { useBooks } from '@/entities/book/queries';
 import { cn } from '@/shared/lib/cn';
 import { pageWidthClass } from '@/shared/ui/surfaces';
 import { BackLink } from '@/shared/ui/BackLink';
@@ -25,7 +24,6 @@ export function BookFrame({
   backBeside?: boolean;
   children: ReactNode;
 }) {
-  const total = useBooks().data?.pages[0]?.total;
   return (
     <main className='bg-paper relative isolate min-h-screen text-ink'>
       {backdrop}
@@ -33,7 +31,7 @@ export function BookFrame({
       {/* Placed as on the shelves, so the tabs stay just where they were,
           and stick as they scroll by, all the way down */}
       <div className={cn('pb-24 pt-2 sm:pt-4', pageWidthClass)}>
-        <LibraryNav counts={{ all: total }} />
+        <LibraryNav />
         <div
           className={cn(
             'mx-auto w-full pt-8 sm:pt-10',

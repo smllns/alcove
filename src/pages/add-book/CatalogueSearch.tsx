@@ -7,6 +7,8 @@ import { RemoveButton } from '@/shared/ui/ListControls';
 import { Spinner } from '@/shared/ui/Spinner';
 import { SearchResult } from './SearchResult';
 import { FormError } from '@/shared/ui/FormError';
+import { textLinkClass } from '@/shared/ui/buttonStyles';
+import { cn } from '@/shared/lib/cn';
 
 type CatalogueSearchProps = {
   onPick: (work: CatalogueWork, isbnEdition?: CatalogueEdition) => void;
@@ -84,7 +86,7 @@ export function CatalogueSearch({ onPick, onManual }: CatalogueSearchProps) {
         <button
           type='button'
           onClick={onManual}
-          className='cursor-pointer text-ink underline-offset-4 hover:underline'
+          className={cn('text-ink', textLinkClass)}
         >
           Add it by hand
         </button>

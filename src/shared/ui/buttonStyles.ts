@@ -41,7 +41,7 @@ export const choiceClass = (chosen: boolean) =>
     choiceBase,
     chosen
       ? 'border-button bg-button text-button-text'
-      : 'border-line bg-surface/70 text-ink-soft hover:border-ink hover:text-ink',
+      : 'border-line bg-surface/85 text-ink-soft backdrop-blur-sm hover:border-ink hover:text-ink',
   );
 
 // The same in a colour of its own, set as --tone: filled with it once
@@ -63,3 +63,9 @@ export const softClass = (on = false, className?: string) =>
     on ? 'bg-ink/7 text-ink' : 'text-muted hover:bg-ink/5 hover:text-ink',
     className,
   );
+
+// Words in a line of text that lead somewhere or do something: a fine
+// underline, darkening along with them on hover. The colour of the words is
+// the caller's.
+export const textLinkClass =
+  'cursor-pointer underline decoration-line underline-offset-4 transition-colors duration-500 ease-soft hover:text-ink hover:decoration-ink';

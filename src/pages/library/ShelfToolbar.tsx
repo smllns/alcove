@@ -1,5 +1,5 @@
 import type { Ref } from 'react';
-import type { Shelf } from './useShelf';
+import type { Shelf } from '@/entities/book/useShelf';
 import { BookSearch } from './views/BookSearch';
 import { SearchResults } from './views/SearchResults';
 import { ShelfOrderMenu } from './views/ShelfOrderMenu';

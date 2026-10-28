@@ -1,6 +1,6 @@
 import { Columns3, LayoutGrid, List, Rows3, Sparkles } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useMediaQuery } from '@/shared/lib/useMediaQuery';
+import { PHONE, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { ChoiceCapsule } from '@/shared/ui/ChoiceCapsule';
 import { kindOf, type BookView, type ViewKind } from './views';
 
@@ -44,7 +44,7 @@ export function ViewSwitcher({
   const kind = kindOf(view);
   // Medium covers look just like large ones on a phone, so they're shown
   // as large there
-  const phone = useMediaQuery('(max-width: 639px)');
+  const phone = useMediaQuery(PHONE);
   const size = phone && view === 'grid-m' ? 'grid-l' : view;
   return (
     <div className='flex items-center gap-2'>

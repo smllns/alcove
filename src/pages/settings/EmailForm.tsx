@@ -8,6 +8,7 @@ import { PasswordField } from '@/shared/ui/PasswordField';
 import { TextField } from '@/shared/ui/TextField';
 import { SaveButton } from './SaveButton';
 
+// In its row of the settings, which says what it is (SettingRow)
 export function EmailForm({ user }: { user: User }) {
   const { replaceUser } = useAuth();
   const form = useForm(
@@ -25,6 +26,7 @@ export function EmailForm({ user }: { user: User }) {
         autoComplete='email'
         inputMode='email'
         required
+        labelHidden
         {...form.field('email')}
       />
       {/* Asked for only once there's something to confirm */}

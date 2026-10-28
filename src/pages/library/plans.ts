@@ -21,18 +21,6 @@ export const plans: Record<Exclude<SectionKey, 'all'>, Plan> = {
       { title: 'Not placed yet', detail: 'Books still waiting for a shelf' },
     ],
   },
-  loans: {
-    title: 'Who has what',
-    text: 'Books you’ve lent out and books you’ve borrowed, who has them and since when. The ones that are overdue come first.',
-    cards: [
-      { title: 'Lent to Anna', detail: 'The Secret History · since March' },
-      { title: 'Borrowed from Max', detail: 'Piranesi · back by June' },
-      {
-        title: 'Overdue',
-        detail: 'A gentle nudge when one’s been away too long',
-      },
-    ],
-  },
   lists: {
     title: 'Books, gathered your way',
     text: 'Every list you’ve made, with the books in it: to read this summer, the best of the year, the ones to lend. Add a book to one as you add it, or from its page.',
@@ -66,6 +54,21 @@ export const plans: Record<Exclude<SectionKey, 'all'>, Plan> = {
         detail: 'The doorstop and the slimmest one',
       },
       { title: 'Most quoted', detail: 'The books you underlined the most' },
+    ],
+  },
+  profile: {
+    title: 'Your corner of alcove',
+    text: 'What others see when they find you: your shelves, the lists you share, what you’re reading now. The people you follow, and the ones who follow you.',
+    cards: [
+      {
+        title: 'Followers',
+        detail: 'The readers who keep up with your shelves',
+      },
+      { title: 'Following', detail: 'Whose new books show up in your feed' },
+      {
+        title: 'As others see it',
+        detail: 'Your library from the outside, and what stays private',
+      },
     ],
   },
 };

@@ -1,12 +1,14 @@
 import { Router, type Request } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { HttpError } from '../lib/errors.js';
+import { queryText } from '../lib/validation.js';
 import { currentUser } from '../auth/middleware.js';
 import { shelvedWorks } from '../books/repository.js';
 import { cached } from './cache.js';
 import { listsOfWork } from './lists.js';
 import { similarWorks } from './similar.js';
 import { workAuthor } from './author.js';
+import { searchAuthors } from './authors.js';
 import { bookQuotes } from './wikiquote.js';
 import {
   cleanIsbn,
@@ -67,6 +69,19 @@ const workKeyOf = (req: Request) => {
     throw new HttpError(400, 'bad_work', 'That isn’t a book we know.');
   return workKey;
 };
+
+// Writers by name, for the search over everything
+lookupRouter.get('/authors', async (req, res) => {
+  const query = queryText(req, 'q', 100);
+  if (query.length < 2) {
+    res.json({ authors: [] });
+    return;
+  }
+  const authors = await cached(`authors1:${query.toLowerCase()}`, 7, () =>
+    searchAuthors(query),
+  );
+  res.json({ authors });
+});
 
 lookupRouter.get('/works/:workKey/editions', async (req, res) => {
   const workKey = workKeyOf(req);
@@ -137,12 +152,8 @@ lookupRouter.get('/works/:workKey/similar', async (req, res) => {
 // Lines from the book, from Wikiquote, to keep among the reader's own
 // quotes. Nothing found is an answer too; only a failure isn't kept.
 lookupRouter.get('/quotes', async (req, res) => {
-  const title = String(req.query.title ?? '')
-    .trim()
-    .slice(0, 300);
-  const author = String(req.query.author ?? '')
-    .trim()
-    .slice(0, 120);
+  const title = queryText(req, 'title', 300);
+  const author = queryText(req, 'author', 120);
   if (!title) {
     res.json({ quotes: [], source: null });
     return;

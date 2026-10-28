@@ -1,0 +1,77 @@
+/* How things move: the ease everything shares, and the animations named
+   for Tailwind (animate-rise, animate-arrive…) */
+
+/* Motion: one soft ease-out for every hover, so the whole app moves alike */
+@theme {
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* animate-fade-in: simply appear, softly, in place */
+  --animate-fade-in: fade-in 0.45s var(--ease-soft) both;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* animate-arrive: something found coming into a list, fading up a touch.
+     Stagger with an animation-delay. */
+  --animate-arrive: arrive 0.55s var(--ease-soft) both;
+  @keyframes arrive {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  /* animate-rise: fade up into place. Stagger with an animation-delay. */
+  --animate-rise: rise 1.1s var(--ease-soft) both;
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+
+  /* Switching between the sky and the grid or the list, one after the
+     other: the old view goes, quickly, and only then the new one comes.
+     Into the sky: the shelf sinks away, then the galaxy spreads out from
+     the middle. Out of it: the stars rush past as if flown through, then
+     the shelf comes up to meet you. */
+  --animate-sky-in: sky-in 0.55s var(--ease-soft) 0.2s both;
+  @keyframes sky-in {
+    from {
+      opacity: 0;
+      transform: scale(0.35);
+    }
+  }
+  --animate-sky-out: sky-out 0.2s cubic-bezier(0.5, 0, 0.75, 0) both;
+  @keyframes sky-out {
+    to {
+      opacity: 0;
+      transform: scale(1.8);
+    }
+  }
+  --animate-shelf-in: shelf-in 0.45s var(--ease-soft) 0.2s both;
+  @keyframes shelf-in {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.96);
+    }
+  }
+  --animate-shelf-out: shelf-out 0.2s cubic-bezier(0.4, 0, 1, 1) both;
+  @keyframes shelf-out {
+    to {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+  }
+
+  /* animate-pop: a menu or calendar opening, quick and small */
+  --animate-pop: pop 0.22s var(--ease-soft) both;
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
+}

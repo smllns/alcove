@@ -2,9 +2,10 @@ import { useLayoutEffect, useState } from 'react';
 import { useNavigationType } from 'react-router';
 import { cn } from '@/shared/lib/cn';
 import { scrollPageTo } from '@/shared/lib/pageScroll';
-import { useMediaQuery } from '@/shared/lib/useMediaQuery';
+import { PHONE, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { useBottomEdge } from '@/shared/lib/useBottomEdge';
 import { useBooks } from '@/entities/book/queries';
+import { callName } from '@/entities/user/types';
 import { useAuth } from '@/features/auth';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { BackToTop } from '@/shared/ui/BackToTop';
@@ -17,7 +18,7 @@ import { ComingSoon } from './ComingSoon';
 import { EmptyShelf } from './EmptyShelf';
 import { LibraryBooks } from './LibraryBooks';
 import { PlacesSection } from './places/PlacesSection';
-import { useShelf } from './useShelf';
+import { useShelf } from '@/entities/book/useShelf';
 import { useBookView } from './views/views';
 import { needsEveryBook } from './views/order';
 import { useShelfOrder } from './views/useShelfOrder';
@@ -34,7 +35,7 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
   const { user } = useAuth();
   const books = useBooks();
   const search = useShelfSearch();
-  const phone = useMediaQuery('(max-width: 639px)');
+  const phone = useMediaQuery(PHONE);
   const { view, arrived, leaving, left, choose, chooseKind } = useBookView();
 
   const shelfOrder = useShelfOrder();
@@ -82,12 +83,10 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
     >
       <LibraryHeader
         adding={tabbed}
-        // Over the sky, and over it still as it goes; staying put from one
-        // section to another (transitions-in-place.css)
-        className={cn(
-          'library-header',
-          (sky || leaving === 'universe') && 'relative z-10',
-        )}
+        // Over the sky (and over it still as it goes) and a room's lamp
+        // light; staying put from one section to another
+        // (transitions-in-place.css)
+        className='library-header relative z-10'
       />
 
       <div
@@ -110,7 +109,7 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
           />
         ) : tabbed ? (
           <>
-            <LibraryNav current={section} counts={{ all: total }} />
+            <LibraryNav current={section} />
             {section === 'all' ? (
               <>
                 <ShelfToolbar
@@ -158,7 +157,7 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
             <div className='flex flex-col items-center text-center'>
               <Eyebrow rise={0}>Your library</Eyebrow>
               <PageTitle rise={80} className='mt-3 sm:mt-4'>
-                Hello, {user?.name}.
+                Hello, {callName(user)}.
               </PageTitle>
             </div>
             <div className='mt-10 sm:mt-14'>

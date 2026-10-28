@@ -9,10 +9,15 @@ export const floatingClass =
 // order menu, the sky's zoom
 export const capsuleClass = `rounded-full p-1 ${floatingClass}`;
 
-// Panels that open over everything, like a menu or a calendar: more solid,
-// and lifted higher
-export const raisedClass =
-  'border border-line/70 bg-surface/95 shadow-[0_22px_44px_-22px_rgba(40,28,14,0.55),0_2px_8px_rgba(40,28,14,0.08)] backdrop-blur-xl';
+// Panels that open over everything, like a menu or a calendar: frosted
+// glass, what's under it blurred, and lifted higher
+const raisedShadow =
+  'shadow-[0_22px_44px_-22px_rgba(40,28,14,0.55),0_2px_8px_rgba(40,28,14,0.08)]';
+export const raisedClass = `border border-line/70 bg-surface/75 ${raisedShadow} backdrop-blur-xl backdrop-saturate-150`;
+
+// The same, quite solid, for panels big enough that the page showing
+// through would muddle them: a search, a drawer
+export const solidRaisedClass = `border border-line/70 bg-surface ${raisedShadow}`;
 
 // A large frosted sheet for text to sit on over a busy background (a
 // book's page, over the light of its cover): see-through enough to let the

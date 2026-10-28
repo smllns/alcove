@@ -10,18 +10,25 @@ import {
 import { requireUser } from './middleware.js';
 import { loginSchema, registerSchema } from './schemas.js';
 import { endSession, SESSION_COOKIE, startSession } from './sessions.js';
-import { createUser, findUserByEmail, toPublicUser } from './users.js';
+import {
+  createUser,
+  findUserByEmail,
+  toPublicUser,
+  usernameTaken,
+} from './users.js';
 
 export const authRouter = Router();
 
 authRouter.post('/register', passwordAttempts, async (req, res) => {
-  const { name, email, password } = parseBody(registerSchema, req.body);
+  const { username, email, password } = parseBody(registerSchema, req.body);
 
-  const user = await createUser({
-    name,
+  const { user, taken } = await createUser({
+    username,
     email,
     passwordHash: await hashPassword(password),
   });
+  if (taken === 'username')
+    throw usernameTaken('Someone has this one already. Try another.');
   if (!user) {
     throw new HttpError(
       409,

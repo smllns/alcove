@@ -46,8 +46,8 @@ export function PlacesSearch({
         }}
         onFocus={() => setOpen(true)}
         placeholder='Find a book'
-        // On a phone, folded to its icon until it's tapped open
-        className='w-56 max-sm:w-10 max-sm:overflow-hidden max-sm:focus-within:w-52'
+        // On a phone, a whole line of its own
+        className='w-56 max-sm:w-full'
       />
       <Popover
         open={open && Boolean(asked)}

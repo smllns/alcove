@@ -1,6 +1,7 @@
 import { useAuth } from '@/features/auth';
 import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
+import { ThemeToggle } from '@/shared/theme';
 import { SiteHeader } from '@/shared/ui/SiteHeader';
 import { paths } from '@/shared/config/paths';
 
@@ -10,7 +11,7 @@ export function NotFoundPage() {
   const home = user ? paths.library : paths.home;
   return (
     <main className='bg-paper flex min-h-screen flex-col text-ink'>
-      <SiteHeader home={home} />
+      <SiteHeader home={home}>{!user && <ThemeToggle />}</SiteHeader>
       <section className='flex flex-1 flex-col items-center justify-center px-6 pb-24 text-center'>
         <Eyebrow rise={0}>404</Eyebrow>
         <PageTitle rise={120} className='mt-5'>

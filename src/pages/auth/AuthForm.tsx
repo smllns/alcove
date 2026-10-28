@@ -1,6 +1,7 @@
 import { Button } from '@/shared/ui/Button';
 import { Collapse } from '@/shared/ui/Collapse';
 import { PasswordField } from '@/shared/ui/PasswordField';
+import { usernameField } from '@/entities/user/usernameField';
 import { TextField } from '@/shared/ui/TextField';
 import { Typewriter } from '@/shared/ui/Typewriter';
 import { authCopy, type AuthMode } from './authCopy';
@@ -13,8 +14,8 @@ type AuthFormProps = {
   typeDelay?: number;
 };
 
-// Email and password stay put between modes; Name and the password hint
-// open and close around them.
+// Email and password stay put between modes; the username and the
+// password hint open and close around them.
 export function AuthForm({ mode, typeDelay = 0 }: AuthFormProps) {
   const form = useAuthForm(mode);
   const registering = mode === 'register';
@@ -23,11 +24,10 @@ export function AuthForm({ mode, typeDelay = 0 }: AuthFormProps) {
     <form onSubmit={form.onSubmit} noValidate className='flex flex-col'>
       <Collapse open={registering}>
         <TextField
-          label='Name'
-          autoComplete='name'
+          {...usernameField}
           required={registering}
           className='pb-6 sm:pb-7'
-          {...form.field('name')}
+          {...form.field('username')}
         />
       </Collapse>
 

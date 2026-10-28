@@ -4,7 +4,12 @@ import { config } from './config.js';
 export type UserDoc = {
   _id: ObjectId;
   email: string;
-  name: string;
+  // What they'd like to be called, if they've said (it's optional)
+  name?: string;
+  // What others find them by and see them as (@name), always lowercase.
+  // Asked for on signing up; readers from before then choose one in
+  // settings.
+  username?: string;
   passwordHash: string;
   createdAt: Date;
   // When their uploads were last swept for ones no book uses
@@ -187,9 +192,15 @@ export async function pingDb() {
 }
 
 async function ensureIndexes(db: Db) {
-  await db
-    .collection<UserDoc>('users')
-    .createIndex({ email: 1 }, { unique: true });
+  await db.collection<UserDoc>('users').createIndexes([
+    { key: { email: 1 }, unique: true },
+    // Each taken once, among those who've chosen one
+    {
+      key: { username: 1 },
+      unique: true,
+      partialFilterExpression: { username: { $type: 'string' } },
+    },
+  ]);
   // Mongo deletes sessions on its own once expiresAt passes
   await db
     .collection<SessionDoc>('sessions')

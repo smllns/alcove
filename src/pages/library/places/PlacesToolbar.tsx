@@ -15,8 +15,8 @@ const looks: { value: PlacesLook; label: string; icon: ReactNode }[] = [
 
 // Over the places: the home shown, its name the title, the others to
 // switch to from it; a book to look for, the home shown to change, and how
-// the places are shown; on a phone, the title over the rest, the search
-// and the change of home folded to their icons
+// the places are shown; on a phone, the title over the rest, the search a
+// line of its own, the change of home folded to its icon
 export function PlacesToolbar({
   homes,
   home,
@@ -40,9 +40,9 @@ export function PlacesToolbar({
   onLook: (look: PlacesLook) => void;
 }) {
   return (
-    <div className='mx-auto mb-8 flex w-full max-w-5xl flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between'>
+    <div className='mb-8 flex w-full flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between'>
       <HomeTitle homes={homes} home={home} onHome={onHome} />
-      <div className='flex shrink-0 items-center gap-2'>
+      <div className='flex shrink-0 flex-wrap items-center justify-center gap-2 max-sm:w-full'>
         <PlacesSearch
           books={books}
           homes={homes.map(({ home: each }) => each)}

@@ -12,6 +12,8 @@ type TextFieldProps = ComponentProps<'input'> & {
   trailing?: ReactNode;
   // Shows a small * after the label, where most fields around are optional
   marked?: boolean;
+  // Only for screen readers, where what it is is plain beside it already
+  labelHidden?: boolean;
 };
 
 // Underlined input with a small caps label, in the editorial style of the site
@@ -21,6 +23,7 @@ export function TextField({
   hint,
   trailing,
   marked,
+  labelHidden,
   className,
   ...props
 }: TextFieldProps) {
@@ -30,7 +33,7 @@ export function TextField({
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <label htmlFor={id} className={labelClass}>
+      <label htmlFor={id} className={labelHidden ? 'sr-only' : labelClass}>
         {label}
         {marked && (
           <span

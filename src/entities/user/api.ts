@@ -1,10 +1,10 @@
 import { ApiError, request } from '@/shared/api/http';
-import type { User } from './types';
+import type { Reader, User } from './types';
 
 type UserResponse = { user: User };
 
 export type LoginInput = { email: string; password: string };
-export type RegisterInput = LoginInput & { name: string };
+export type RegisterInput = LoginInput & { username: string };
 
 // The signed-in user, or null for a guest
 export async function fetchCurrentUser() {
@@ -40,6 +40,14 @@ export const updateName = async (name: string) =>
     })
   ).user;
 
+export const updateUsername = async (username: string) =>
+  (
+    await request<UserResponse>('/account/username', {
+      method: 'PATCH',
+      body: { username },
+    })
+  ).user;
+
 export const updateEmail = async (input: { email: string; password: string }) =>
   (
     await request<UserResponse>('/account/email', {
@@ -56,3 +64,11 @@ export const updatePassword = (input: {
 
 export const deleteAccount = (password: string) =>
   request<void>('/account', { method: 'DELETE', body: { password } });
+
+// Readers by @username or name
+export const searchReaders = async (query: string) =>
+  (
+    await request<{ readers: Reader[] }>(
+      `/users/search?q=${encodeURIComponent(query)}`,
+    )
+  ).readers;

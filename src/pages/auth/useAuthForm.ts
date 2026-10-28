@@ -15,7 +15,7 @@ export function useAuthForm(mode: AuthMode) {
   const location = useLocation();
 
   return useForm(
-    { name: '', email: '', password: '' },
+    { username: '', email: '', password: '' },
     async (values) => {
       if (mode === 'login') {
         await login({ email: values.email, password: values.password });

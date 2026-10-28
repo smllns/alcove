@@ -1,9 +1,14 @@
 import { createContext } from 'react';
-import type { Theme } from './themeStorage';
+import type { Theme, ThemeChoice } from './themeStorage';
 
-export type ThemeContextValue = {
+type ThemeContextValue = {
+  // The one showing
   theme: Theme;
-  // `origin` is where the circular reveal starts, usually the toggle button
+  // What the reader chose: a theme, or their device's
+  choice: ThemeChoice;
+  // `origin` is where the circular reveal starts, usually what was pressed
+  choose: (choice: ThemeChoice, origin?: HTMLElement) => void;
+  // Over to the other one, as the reader's choice from then on
   toggleTheme: (origin?: HTMLElement) => void;
 };
 

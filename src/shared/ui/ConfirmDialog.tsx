@@ -1,6 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { Button } from './Button';
 import { FormError } from './FormError';
+import { Modal } from './Modal';
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -15,9 +16,8 @@ type ConfirmDialogProps = {
   tone?: 'danger' | 'default';
 };
 
-// A modal question with a way out. Built on <dialog>, so focus stays inside
-// and Escape cancels; a click on the dimmed page around it cancels too. It
-// comes and goes softly (.soft-dialog, index.css).
+// A modal question with a way out: Escape cancels, and so does a click on
+// the dimmed page around it. It comes and goes softly (Modal).
 export function ConfirmDialog({
   open,
   title,
@@ -29,31 +29,17 @@ export function ConfirmDialog({
   error = null,
   tone = 'danger',
 }: ConfirmDialogProps) {
-  const ref = useRef<HTMLDialogElement>(null);
   const cancel = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      dialog.showModal();
-      // Start on the safe choice, so a stray Enter doesn't destroy anything
-      cancel.current?.focus();
-    }
-    if (!open && dialog.open) dialog.close();
-  }, [open]);
-
   return (
-    <dialog
-      ref={ref}
-      onCancel={(e) => {
-        e.preventDefault();
+    <Modal
+      open={open}
+      onClose={() => {
         if (!busy) onCancel();
       }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !busy) onCancel();
-      }}
-      className='m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface p-0 text-ink shadow-[0_30px_60px_-30px_rgba(40,28,14,0.55)] soft-dialog'
+      // Start on the safe choice, so a stray Enter doesn't destroy anything
+      focus={cancel}
+      className='relative m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface shadow-[0_30px_60px_-30px_rgba(40,28,14,0.55)]'
     >
       <div className='flex flex-col gap-4 p-6 sm:p-8'>
         <h2 className='font-serif text-2xl leading-tight tracking-[-0.01em]'>
@@ -81,6 +67,6 @@ export function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 }

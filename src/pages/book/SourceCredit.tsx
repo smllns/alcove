@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
+import { textLinkClass } from '@/shared/ui/buttonStyles';
 
 const LICENCE = 'https://creativecommons.org/licenses/by-sa/4.0/';
 
@@ -25,12 +26,7 @@ export function SourceCredit({
 // A quiet link out, in a new tab
 function CreditLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a
-      href={href}
-      target='_blank'
-      rel='noreferrer'
-      className='underline decoration-line underline-offset-2 transition-colors duration-500 ease-soft hover:text-ink'
-    >
+    <a href={href} target='_blank' rel='noreferrer' className={textLinkClass}>
       {children}
     </a>
   );

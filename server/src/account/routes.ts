@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import { currentUser } from '../auth/middleware.js';
 import { endAllSessions, endOtherSessions } from '../auth/sessions.js';
-import { deleteUser, toPublicUser, updateUser } from '../auth/users.js';
+import {
+  deleteUser,
+  toPublicUser,
+  updateUser,
+  usernameTaken,
+} from '../auth/users.js';
 import { deleteAllBooks } from '../books/repository.js';
 import type { UserDoc } from '../db.js';
 import { HttpError } from '../lib/errors.js';
@@ -16,6 +21,7 @@ import {
   emailSchema,
   nameSchema,
   passwordSchema,
+  usernameSchema,
 } from './schemas.js';
 
 // Everything a signed-in reader can change about their own account.
@@ -40,6 +46,13 @@ accountRouter.patch('/name', async (req, res) => {
   const { name } = parseBody(nameSchema, req.body);
   const user = await updateUser(currentUser(req)._id, { name });
   res.json({ user: toPublicUser(user!) });
+});
+
+accountRouter.patch('/username', async (req, res) => {
+  const { username } = parseBody(usernameSchema, req.body);
+  const user = await updateUser(currentUser(req)._id, { username });
+  if (!user) throw usernameTaken('That username is taken.');
+  res.json({ user: toPublicUser(user) });
 });
 
 accountRouter.patch('/email', passwordAttempts, async (req, res) => {

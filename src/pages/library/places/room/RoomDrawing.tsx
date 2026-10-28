@@ -1,4 +1,4 @@
-import { pageScrollY, scrollPageTo } from '@/shared/lib/pageScroll';
+import { scrollPageToElement } from '@/shared/lib/pageScroll';
 import type { RoomBooks } from '../arrange';
 import type { Decor } from '../drawing/decor';
 import { detailOf, tagOf } from './bookcaseTags';
@@ -20,12 +20,7 @@ export function RoomDrawing({
 }) {
   const toDetail = (id: string) => {
     const detail = document.getElementById(detailOf(id));
-    if (detail)
-      scrollPageTo(
-        pageScrollY(detail) + detail.getBoundingClientRect().top - 112,
-        'smooth',
-        detail,
-      );
+    if (detail) scrollPageToElement(detail);
   };
   return (
     <div className='relative mx-auto mt-8 flex w-full max-w-2xl flex-col xl:max-w-4xl'>
