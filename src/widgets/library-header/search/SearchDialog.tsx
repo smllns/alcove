@@ -12,6 +12,7 @@ import { Modal } from '@/shared/ui/Modal';
 import { SmoothHeight } from '@/shared/ui/SmoothHeight';
 import { Spinner } from '@/shared/ui/Spinner';
 import { solidRaisedClass } from '@/shared/ui/surfaces';
+import type { ListOpenState } from '@/entities/list/types';
 import { SearchFound } from './SearchFound';
 import { useSearch, type SearchKind } from './useSearch';
 
@@ -19,12 +20,13 @@ const kinds: { value: SearchKind; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'books', label: 'Books' },
   { value: 'authors', label: 'Authors' },
+  { value: 'lists', label: 'Lists' },
   { value: 'people', label: 'Readers' },
 ];
 
 // One search over everything, opened over the page (the whole screen, on
 // a phone): the reader's own books, every book in the catalogue, other
-// readers (@name) and writers
+// readers (@name), writers and lists
 export function SearchDialog({
   open,
   onClose,
@@ -43,7 +45,7 @@ export function SearchDialog({
 
   // Somewhere found: the dialog goes, and then the page turns to it
   const next = useRef<(() => void) | null>(null);
-  const go = (to: string, state?: AddBookState) => {
+  const go = (to: string, state?: AddBookState | ListOpenState) => {
     next.current = () => void navigate(to, 'forward', { state });
     onClose();
   };
@@ -82,7 +84,7 @@ export function SearchDialog({
           enterKeyHint='search'
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder='Books, @readers, authors…'
+          placeholder='Books, @readers, authors, lists…'
           aria-label='Search'
           autoCapitalize='none'
           spellCheck={false}
@@ -130,8 +132,9 @@ export function SearchDialog({
             kind={kind}
             onKind={setKind}
             onBook={(id) => go(paths.book(id))}
-            onAdd={(work) => go(paths.addBook, { work })}
+            onWork={(work) => go(paths.work(work.workKey), { work })}
             onAuthor={booksBy}
+            onList={go}
           />
         </SmoothHeight>
       </div>

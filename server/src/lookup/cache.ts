@@ -69,3 +69,12 @@ async function store<T>(key: string, value: T, days: number, keptDays = days) {
   );
   return value;
 }
+
+// What's kept for each of `keys` that's still good, by key, without
+// working any of it out
+export async function peek<T>(keys: string[]) {
+  const hits = await lookupCache()
+    .find({ _id: { $in: keys }, expiresAt: { $gt: new Date() } })
+    .toArray();
+  return new Map(hits.map((hit) => [hit._id, hit.value as T]));
+}

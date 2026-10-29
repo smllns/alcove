@@ -58,9 +58,27 @@ export function useSkyGestures(
     return { x: e.clientX - box.left, y: e.clientY - box.top };
   };
 
+  // Fingers it's no longer sure of all forgotten. A phone doesn't always
+  // say a finger's gone (Control Center pulled down mid-touch, the app sent
+  // to the background, a dialog opened over it): one left behind would
+  // make every later touch a second finger, a pinch, so no tap would open
+  // a book again
+  const forget = () => {
+    pointers.current.clear();
+    start.current = null;
+    pressed.current = null;
+    setDragging(false);
+  };
+  useEffect(() => {
+    document.addEventListener('visibilitychange', forget);
+    return () => document.removeEventListener('visibilitychange', forget);
+  }, []);
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     // Buttons over the sky (zoom, fit) work as buttons, not as a drag
     if (e.button !== 0 || (e.target as Element).closest('button')) return;
+    // The first finger of a new touch: any still remembered are left over
+    if (e.isPrimary) forget();
     onGrab();
     pointers.current.set(e.pointerId, local(e));
     if (pointers.current.size === 1) {

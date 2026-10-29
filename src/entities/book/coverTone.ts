@@ -113,13 +113,15 @@ function useCoverTone(url: string | undefined) {
 }
 
 // The colour of a book's spine: its cover's, once known, or its cloth's,
-// with no picture to go by
-export function useSpineColour({
-  title,
-  cover,
-}: {
-  title: string;
-  cover?: { url: string };
-}) {
-  return useCoverTone(cover?.url) ?? clothFor(title);
+// with no picture to go by. Told what to be meanwhile (`pending`), it's
+// that while its cover's still being looked into, rather than its cloth.
+export function useSpineColour(
+  { title, cover }: { title: string; cover?: { url: string } },
+  pending?: string,
+) {
+  const src = cover?.url && sizedCover(cover.url, 'S');
+  const tone = useCoverTone(cover?.url);
+  if (tone) return tone;
+  if (pending && src && !tones.has(src)) return pending;
+  return clothFor(title);
 }

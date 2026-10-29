@@ -28,6 +28,11 @@ npm test           # the API and the client's logic (vitest)
   quotes, rating) kept apart from what's known about the book itself (about,
   author, lists it's in, what to read next), so a page for a book you don't
   own can reuse the second half.
+- **A book not on your shelves** (`/library/works/:key`, from the search,
+  read-next and the author's other books): the same page as a book of yours,
+  with only what the catalogue knows, with a band across the cover's corner
+  saying _Not added_ and _Add to my library_ under it. One you own leads
+  to your copy, its band saying _In library_.
 - **Lists** and **Stats**: placeholders for now (`pages/library/plans.ts`).
 - **Header**: a search over everything (⌘K): your own books, every book in
   Open Library (opening Add a book on the one chosen), readers (@name) and
@@ -145,58 +150,74 @@ server/src/
   index.ts        Connects to MongoDB, then listens
   app.ts          Express app: security headers, JSON-only writes, routes
   config.ts       Environment variables, validated at startup
-  db.ts           Mongo client, collection types, indexes
+  db.ts           Mongo client, collections, indexes
+  models/         The documents kept: books, lists, places
   auth/           Register, log in, log out, current user; sessions
   account/        Change username, name, email, password; delete the account
   books/          A reader's books and their copies: list (paged), add, edit
   places/         The tree of homes, rooms, bookcases and shelves
-  lists/          The reader's lists of books
+  lists/          The reader's lists of books, public ones, saved ones
   users/          Other readers, found by @username or name
   lookup/         Open Library, Wikipedia, Wikimedia and Wikiquote, cached
+                  (with the lists every reader sees, and readers' lists)
   uploads/        Cover photos in Vercel Blob
   lib/            Password hashing, rate limits, validation, error responses
 ```
 
 API, all under `/api`:
 
-| Method | Path                            | Body                               | Returns                                   |
-| ------ | ------------------------------- | ---------------------------------- | ----------------------------------------- |
-| GET    | `/health`                       |                                    | `{ ok }` if Mongo is up                   |
-| POST   | `/auth/register`                | `{ username, email, password }`    | `{ user }` + cookie                       |
-| POST   | `/auth/login`                   | `{ email, password }`              | `{ user }` + cookie                       |
-| POST   | `/auth/logout`                  |                                    | 204, cookie cleared                       |
-| GET    | `/auth/me`                      |                                    | `{ user }` or 401                         |
-| PATCH  | `/account/username`             | `{ username }`                     | `{ user }`, or 409 if taken               |
-| PATCH  | `/account/name`                 | `{ name }` (empty clears it)       | `{ user }`                                |
-| PATCH  | `/account/email`                | `{ email, password }`              | `{ user }`                                |
-| PATCH  | `/account/password`             | `{ currentPassword, newPassword }` | 204; other devices signed out             |
-| DELETE | `/account`                      | `{ password }`                     | 204, account and everything in it gone    |
-| GET    | `/books?after=`                 |                                    | `{ books, nextCursor, total }`, 48 a page |
-| POST   | `/books`                        | the book and the reader's copy     | `{ book }`                                |
-| GET    | `/books/by-writer?name=`        |                                    | `{ books }`                               |
-| GET    | `/books/:id`                    |                                    | `{ book }`                                |
-| PUT    | `/books/:id`                    | the book and the reader's copy     | `{ book }`                                |
-| DELETE | `/books/:id`                    |                                    | 204                                       |
-| GET    | `/places`                       |                                    | `{ homes, counts }`                       |
-| PUT    | `/places`                       | `{ homes }` (the whole tree)       | `{ homes, counts, created }`              |
-| GET    | `/lists`                        |                                    | every list, with counts                   |
-| POST   | `/lists`                        | `{ name }`                         | `{ list }` and every list                 |
-| PATCH  | `/lists/:id`                    | `{ name }`                         | every list                                |
-| DELETE | `/lists/:id`                    |                                    | every list                                |
-| GET    | `/lookup/search?q=`             | title, author or ISBN              | `{ results, isbnEdition }`                |
-| GET    | `/lookup/authors?q=`            |                                    | `{ authors }`, writers by name            |
-| GET    | `/lookup/works/:key/editions`   |                                    | `{ editions }`, best first                |
-| GET    | `/lookup/works/:key`            |                                    | `{ description, genres }`                 |
-| GET    | `/lookup/works/:key/ratings`    |                                    | `{ ratings }`                             |
-| GET    | `/lookup/works/:key/author`     |                                    | `{ author }`                              |
-| GET    | `/lookup/works/:key/lists`      |                                    | lists on Open Library it's in             |
-| GET    | `/lookup/works/:key/similar`    |                                    | books to read next                        |
-| GET    | `/lookup/quotes?title=&author=` |                                    | `{ quotes, source }` from Wikiquote       |
-| GET    | `/users/search?q=`              | `@username` or name                | `{ readers }`                             |
-| GET    | `/uploads/status`               |                                    | `{ enabled }`                             |
-| POST   | `/uploads/cover`                | `{ image }` (data URL)             | `{ url }`                                 |
-| POST   | `/uploads/cover/fetch`          | `{ url }`                          | the picture, for the browser to shrink    |
-| POST   | `/uploads/cover/discard`        | `{ url }`                          | 204                                       |
+| Method | Path                             | Body                                      | Returns                                      |
+| ------ | -------------------------------- | ----------------------------------------- | -------------------------------------------- |
+| GET    | `/health`                        |                                           | `{ ok }` if Mongo is up                      |
+| POST   | `/auth/register`                 | `{ username, email, password }`           | `{ user }` + cookie                          |
+| POST   | `/auth/login`                    | `{ email, password }`                     | `{ user }` + cookie                          |
+| POST   | `/auth/logout`                   |                                           | 204, cookie cleared                          |
+| GET    | `/auth/me`                       |                                           | `{ user }` or 401                            |
+| PATCH  | `/account/username`              | `{ username }`                            | `{ user }`, or 409 if taken                  |
+| PATCH  | `/account/name`                  | `{ name }` (empty clears it)              | `{ user }`                                   |
+| PATCH  | `/account/email`                 | `{ email, password }`                     | `{ user }`                                   |
+| PATCH  | `/account/password`              | `{ currentPassword, newPassword }`        | 204; other devices signed out                |
+| DELETE | `/account`                       | `{ password }`                            | 204, account and everything in it gone       |
+| GET    | `/books?after=`                  |                                           | `{ books, nextCursor, total }`, 48 a page    |
+| POST   | `/books`                         | the book and the reader's copy            | `{ book }`                                   |
+| GET    | `/books/by-writer?name=`         |                                           | `{ books }`                                  |
+| GET    | `/books/by-work/:key`            |                                           | `{ bookId }`, or null                        |
+| GET    | `/books/:id`                     |                                           | `{ book }`                                   |
+| PUT    | `/books/:id`                     | the book and the reader's copy            | `{ book }`                                   |
+| DELETE | `/books/:id`                     |                                           | 204                                          |
+| GET    | `/places`                        |                                           | `{ homes, counts }`                          |
+| PUT    | `/places`                        | `{ homes }` (the whole tree)              | `{ homes, counts, created }`                 |
+| GET    | `/lists`                         |                                           | every list, with counts                      |
+| POST   | `/lists`                         | `{ name, public? }` (public unless false) | `{ list }` and every list                    |
+| PATCH  | `/lists/:id`                     | `{ name?, public? }`                      | every list                                   |
+| DELETE | `/lists/:id`                     |                                           | every list                                   |
+| PATCH  | `/lists/:id/works`               | `{ add: [work], remove: [key] }`          | every list (catalogue books kept in it)      |
+| GET    | `/lists/shared?q=`               |                                           | `{ lists }`: other readers' public ones      |
+| GET    | `/lists/shared/:id`              |                                           | `{ list }`: a public list and its books      |
+| GET    | `/lists/saved`                   |                                           | `{ saved }`: other readers' lists kept       |
+| PUT    | `/lists/saved`                   | `{ kind, ref, name, books, works }`       | `{ saved }`                                  |
+| DELETE | `/lists/saved?kind=&ref=`        |                                           | `{ saved }`                                  |
+| GET    | `/lookup/search?q=`              | title, author or ISBN                     | `{ results, isbnEdition }`                   |
+| GET    | `/lookup/authors?q=`             |                                           | `{ authors }`, writers by name               |
+| GET    | `/lookup/works/:key/editions`    |                                           | `{ editions }`, best first                   |
+| GET    | `/lookup/works/:key/summary`     |                                           | `{ work }`: title, authors, cover            |
+| GET    | `/lookup/works/:key`             |                                           | `{ description, genres }`                    |
+| GET    | `/lookup/works/:key/ratings`     |                                           | `{ ratings }`                                |
+| GET    | `/lookup/works/:key/author`      |                                           | `{ author }`                                 |
+| GET    | `/lookup/works/:key/lists`       |                                           | lists on Open Library it's in                |
+| GET    | `/lookup/works/:key/featured`    |                                           | the lists every reader sees it's in          |
+| GET    | `/lookup/featured`               |                                           | `{ lists }`: those every reader sees         |
+| GET    | `/lookup/featured/:id`           |                                           | `{ list }`: one, with its books              |
+| GET    | `/lookup/lists?q=`               |                                           | `{ lists }`: readers' lists on Open Library  |
+| GET    | `/lookup/lists/:owner/:id/check` |                                           | `{ books }`: 0 if it can't be shown          |
+| GET    | `/lookup/lists/:owner/:id?page=` |                                           | `{ list }`: 40 of its books, `books`, `more` |
+| GET    | `/lookup/works/:key/similar`     |                                           | books to read next                           |
+| GET    | `/lookup/quotes?title=&author=`  |                                           | `{ quotes, source }` from Wikiquote          |
+| GET    | `/users/search?q=`               | `@username` or name                       | `{ readers }`                                |
+| GET    | `/uploads/status`                |                                           | `{ enabled }`                                |
+| POST   | `/uploads/cover`                 | `{ image }` (data URL)                    | `{ url }`                                    |
+| POST   | `/uploads/cover/fetch`           | `{ url }`                                 | the picture, for the browser to shrink       |
+| POST   | `/uploads/cover/discard`         | `{ url }`                                 | 204                                          |
 
 Errors look like `{ error: { code, message, fields? } }`; `fields` maps form
 fields to messages.

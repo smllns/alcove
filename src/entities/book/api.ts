@@ -5,9 +5,13 @@ import type {
   BookInput,
   CatalogueAuthor,
   CatalogueEdition,
-  CatalogueList,
   CatalogueRatings,
   CatalogueWork,
+  FeaturedBooks,
+  FeaturedHolding,
+  FeaturedList,
+  ReadersList,
+  ReadersListPage,
   SimilarBook,
 } from './types';
 
@@ -50,6 +54,52 @@ export const updateBook = async (id: string, input: BookInput) =>
 
 export const deleteBook = (id: string) =>
   request<void>(`/books/${id}`, { method: 'DELETE' });
+
+// The lists every reader sees, and one of them with its books
+export const fetchFeaturedLists = async () =>
+  (await request<{ lists: FeaturedList[] }>('/lookup/featured')).lists;
+export const fetchFeaturedList = async (id: string) =>
+  (await request<{ list: FeaturedBooks }>(`/lookup/featured/${id}`)).list;
+
+// Lists readers have made on Open Library, by name; and a page of one's
+// books (from 0)
+export const searchReadersLists = async (query: string) =>
+  (
+    await request<{ lists: ReadersList[] }>(
+      `/lookup/lists?q=${encodeURIComponent(query)}`,
+    )
+  ).lists;
+// Whether one of them can be shown here: how many books it holds, or 0
+export const checkReadersList = (owner: string, id: string) =>
+  request<{ books: number }>(`/lookup/lists/${owner}/${id}/check`);
+export const fetchReadersList = async (
+  owner: string,
+  id: string,
+  page: number,
+) =>
+  (
+    await request<{ list: ReadersListPage }>(
+      `/lookup/lists/${owner}/${id}?page=${page}`,
+    )
+  ).list;
+
+// The lists every reader sees that a work is in
+export const fetchWorkFeatured = async (workKey: string) =>
+  (
+    await request<{ lists: FeaturedHolding[] }>(
+      `/lookup/works/${workKey}/featured`,
+    )
+  ).lists;
+
+// A work from the catalogue in short, by its key
+export const fetchWorkSummary = async (workKey: string) =>
+  (await request<{ work: CatalogueWork }>(`/lookup/works/${workKey}/summary`))
+    .work;
+
+// The reader's own copy of a work, if they have one
+export const fetchOwnedWork = async (workKey: string) =>
+  (await request<{ bookId: string | null }>(`/books/by-work/${workKey}`))
+    .bookId;
 
 export const searchCatalogue = (query: string) =>
   request<{ results: CatalogueWork[]; isbnEdition: CatalogueEdition | null }>(
@@ -102,7 +152,7 @@ export const fetchSimilarBooks = (workKey: string) =>
 // Lists readers have made on Open Library that hold the book: the most
 // popular few
 export const fetchWorkLists = (workKey: string) =>
-  request<{ lists: CatalogueList[] }>(`/lookup/works/${workKey}/lists`);
+  request<{ lists: ReadersList[] }>(`/lookup/works/${workKey}/lists`);
 
 // Lines from the book, gathered on Wikiquote, and the page they're from
 export const fetchBookQuotes = (title: string, author: string) =>

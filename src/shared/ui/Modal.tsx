@@ -86,8 +86,16 @@ export function Modal({
     if (open) {
       // Opened again while going, it comes back from where it got to
       if (!dialog.open) {
+        // Taking the focus where it comes to rest, not out of sight: a
+        // phone would move the whole page to bring it into view. Come up
+        // from below, the panel itself takes it, not a field in it, so no
+        // keyboard pushes the page up while it travels; the field is
+        // tapped when wanted.
+        const below = fromBelow(motion);
+        gsap.set(box, home);
+        box.toggleAttribute('autofocus', below);
         dialog.showModal();
-        focus?.current?.focus();
+        if (!below) focus?.current?.focus();
         gsap.set(dim, { opacity: 0 });
         gsap.set(box, away(motion));
       }
@@ -112,6 +120,10 @@ export function Modal({
       .timeline({
         onComplete: () => {
           dialog.close();
+          // The page never scrolls the window itself (each page scrolls in a
+          // box of its own); one a phone moved for a keyboard goes back,
+          // or what's under it no longer takes a tap where it's seen
+          if (window.scrollY) window.scrollTo(0, 0);
           closed.current?.();
         },
       })
@@ -138,7 +150,12 @@ export function Modal({
         onClick={onClose}
         className='fixed inset-0 bg-ink/30 opacity-0 backdrop-blur-[2px]'
       />
-      <div ref={panel} {...pulls} className={cn('opacity-0', className)}>
+      <div
+        ref={panel}
+        tabIndex={-1}
+        {...pulls}
+        className={cn('opacity-0 outline-none', className)}
+      >
         {motion !== 'rise' && (
           // What it's pulled down by, on a phone
           <span

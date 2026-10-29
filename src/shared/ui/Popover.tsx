@@ -7,7 +7,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/shared/lib/cn';
-import { raisedClass } from './surfaces';
+import { raisedClass, solidRaisedClass } from './surfaces';
 
 const GAP = 6;
 const EDGE = 8;
@@ -21,18 +21,24 @@ type PopoverProps = {
   onClose: (how: 'escape' | 'outside') => void;
   // At least as wide as the anchor, unless a width is given
   width?: number;
+  // Set in the page right under its anchor (inside the same `relative`
+  // box), moving with it as the page does, rather than drawn over the
+  // page and following it: for an anchor nothing round it clips
+  inline?: boolean;
   className?: string;
   children: ReactNode;
 };
 
 // A panel floating by the field that opened it: a menu, a calendar. Drawn
 // over the whole page (so a collapsing section can't clip it), it follows
-// the field as the page scrolls, and closes on Escape or a click elsewhere.
+// the field as the page scrolls, or, `inline`, sits in the page under it;
+// either way it closes on Escape or a click elsewhere.
 export function Popover({
   open,
   anchor,
   onClose,
   width,
+  inline = false,
   className,
   children,
 }: PopoverProps) {
@@ -42,6 +48,19 @@ export function Popover({
   useLayoutEffect(() => {
     const el = panel.current;
     if (!open || !el) return;
+    if (inline) {
+      // Only kept on the screen from side to side: the page carries it up
+      // and down with its anchor
+      const fit = () => {
+        // Measured from the box it's set in, not as it pops in, scaled
+        const left = (el.offsetParent ?? el).getBoundingClientRect().left;
+        const over = left + el.offsetWidth - (innerWidth - EDGE);
+        el.style.left = `${over > 0 ? -Math.min(over, Math.max(left - EDGE, 0)) : 0}px`;
+      };
+      fit();
+      addEventListener('resize', fit);
+      return () => removeEventListener('resize', fit);
+    }
     const place = () => {
       const box = anchor.current?.getBoundingClientRect();
       if (!box) return;
@@ -69,7 +88,7 @@ export function Popover({
       removeEventListener('resize', place);
       sized.disconnect();
     };
-  }, [open, anchor, width]);
+  }, [open, anchor, width, inline]);
 
   useEffect(() => {
     if (!open) return;
@@ -84,7 +103,7 @@ export function Popover({
   }, [open, anchor, onClose]);
 
   if (!open) return null;
-  return createPortal(
+  const drawn = (
     <div
       ref={panel}
       onKeyDown={(e) => {
@@ -92,14 +111,19 @@ export function Popover({
         e.stopPropagation();
         onClose('escape');
       }}
+      style={inline ? { width } : undefined}
       className={cn(
-        'fixed z-50 flex animate-pop flex-col overflow-hidden rounded-2xl text-ink',
-        raisedClass,
+        'z-50 flex animate-pop flex-col overflow-hidden rounded-2xl text-ink',
+        inline
+          ? 'absolute left-0 top-full mt-1.5 max-w-[calc(100vw-1rem)]'
+          : 'fixed',
+        // In the page, nothing's blurred behind it there: solid instead
+        inline ? solidRaisedClass : raisedClass,
         className,
       )}
     >
       {children}
-    </div>,
-    document.body,
+    </div>
   );
+  return inline ? drawn : createPortal(drawn, document.body);
 }

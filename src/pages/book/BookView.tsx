@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { NotebookPen, Pencil, Trash2 } from 'lucide-react';
-import type { Book } from '@/entities/book/types';
+import type { Book, CatalogueWork } from '@/entities/book/types';
 import { RemoveBookDialog } from '@/features/remove-book';
 import { halves } from '@/shared/lib/halves';
 import { useGoBack } from '@/shared/lib/useGoBack';
@@ -8,13 +7,12 @@ import { cn } from '@/shared/lib/cn';
 import { useInView } from '@/shared/lib/useInView';
 import { BackLink } from '@/shared/ui/BackLink';
 import { BackToTop } from '@/shared/ui/BackToTop';
-import { Button } from '@/shared/ui/Button';
-import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Collapse } from '@/shared/ui/Collapse';
 import { RatingFigure } from '@/shared/ui/Rating';
 import { Stars } from '@/shared/ui/Stars';
 import { sheetClass } from '@/shared/ui/surfaces';
 import { AboutBook } from './AboutBook';
+import { AboutWork } from './AboutWork';
 import { BookHeading } from './BookHeading';
 import { BookLinks } from './BookLinks';
 import { BookLists } from './BookLists';
@@ -25,13 +23,22 @@ import { PassageQuotes } from './PassageQuotes';
 import { QuoteSuggestions } from './QuoteSuggestions';
 import { SameAuthor } from './SameAuthor';
 import { ReadNext } from './ReadNext';
+import { AddWork } from './AddWork';
+import { OwnBookActions } from './OwnBookActions';
 import { YourCopy } from './YourCopy';
 import { paths } from '@/shared/config/paths';
 
 // One book laid out: on a wide screen the cover stays beside everything
 // else as it scrolls by, and once the title has gone up out of sight, the
-// title comes with it, under the cover
-export function BookView({ book, editPath }: { book: Book; editPath: string }) {
+// title comes with it, under the cover. One on the reader's shelves
+// (`editPath`, its page for changing it) shows all they've made of it, and
+// ways to change it; one that isn't (`work`, from the catalogue) shows only
+// what the catalogue knows, and a way to add it.
+export function BookView({
+  book,
+  ...on
+}: { book: Book } & ({ editPath: string } | { work: CatalogueWork })) {
+  const owned = 'editPath' in on;
   const [removing, setRemoving] = useState(false);
   // A first review being written, from the button beside the cover
   const [reviewing, setReviewing] = useState(false);
@@ -49,7 +56,9 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
           with them */}
       <div
         ref={setTop}
-        className='flex flex-col items-center gap-6 lg:sticky lg:top-28 lg:items-stretch lg:self-start xl:top-7'
+        // Over the sheet beside it (under it, on a phone), for a menu
+        // opened from its buttons to show whole (AddToList)
+        className='relative z-10 flex flex-col items-center gap-6 lg:sticky lg:top-28 lg:items-stretch lg:self-start xl:top-7'
       >
         {/* Above the cover on a wide screen, level with the top of the
             sheet beside it (BookFrame has it above everything otherwise) */}
@@ -58,6 +67,7 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
         </div>
         <CoverShowcase
           book={book}
+          owned={owned}
           className='w-44 animate-rise sm:w-52 lg:w-full'
         />
         <div className='-mb-6 hidden lg:block'>
@@ -83,27 +93,20 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
           </Collapse>
         </div>
         <div
-          className='flex animate-rise flex-wrap justify-center gap-2.5 lg:justify-start'
+          className='flex animate-rise flex-wrap items-center justify-center gap-2.5 lg:justify-start'
           style={{ animationDelay: '120ms' }}
         >
-          <ButtonLink to={editPath} variant='pill'>
-            <Pencil size={14} />
-            Edit
-          </ButtonLink>
-          {!book.copy?.review && !reviewing && (
-            <Button variant='pill' onClick={() => setReviewing(true)}>
-              <NotebookPen size={14} />
-              Write a review
-            </Button>
+          {owned ? (
+            <OwnBookActions
+              book={book}
+              editPath={on.editPath}
+              reviewed={Boolean(book.copy?.review) || reviewing}
+              onReview={() => setReviewing(true)}
+              onRemove={() => setRemoving(true)}
+            />
+          ) : (
+            <AddWork work={on.work} />
           )}
-          <Button
-            variant='pill'
-            onClick={() => setRemoving(true)}
-            className='hover:border-danger hover:text-danger'
-          >
-            <Trash2 size={14} />
-            Remove
-          </Button>
         </div>
       </div>
 
@@ -119,23 +122,27 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
           className='flex animate-rise flex-col gap-10'
           style={{ animationDelay: '240ms' }}
         >
-          <AboutBook book={book} />
-          <BookPassages
-            book={book}
-            reviewing={reviewing}
-            onReviewStarted={() => setReviewing(false)}
-          />
-          <YourCopy book={book} />
-          <EditionFacts book={book} />
-          {/* The lines kept, the links and the lists it's in; then the
-              writer's other books and what to read next; last, more lines
-              to keep */}
-          <PassageQuotes book={book} />
-          <BookLinks book={book} />
+          {owned ? <AboutBook book={book} /> : <AboutWork book={book} />}
+          {owned && (
+            <>
+              <BookPassages
+                book={book}
+                reviewing={reviewing}
+                onReviewStarted={() => setReviewing(false)}
+              />
+              <YourCopy book={book} />
+              <EditionFacts book={book} />
+              {/* The lines kept and the links; then the lists it's in,
+                  the writer's other books and what to read next */}
+              <PassageQuotes book={book} />
+              <BookLinks book={book} />
+            </>
+          )}
           <BookLists book={book} />
           <SameAuthor book={book} />
           <ReadNext book={book} />
-          <QuoteSuggestions book={book} />
+          {/* Last, more lines to keep, for a copy to keep them in */}
+          {owned && <QuoteSuggestions book={book} />}
         </div>
       </div>
 
@@ -143,12 +150,14 @@ export function BookView({ book, editPath }: { book: Book; editPath: string }) {
           cover in view beside it */}
       <BackToTop after={top} className='lg:hidden' />
 
-      <RemoveBookDialog
-        book={book}
-        open={removing}
-        onClose={() => setRemoving(false)}
-        onRemoved={() => void toLibrary()}
-      />
+      {owned && (
+        <RemoveBookDialog
+          book={book}
+          open={removing}
+          onClose={() => setRemoving(false)}
+          onRemoved={() => void toLibrary()}
+        />
+      )}
     </article>
   );
 }

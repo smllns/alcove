@@ -5,21 +5,22 @@ import { queryText } from '../lib/validation.js';
 import { currentUser } from '../auth/middleware.js';
 import { shelvedWorks } from '../books/repository.js';
 import { cached } from './cache.js';
-import { listsOfWork } from './lists.js';
+import { listRouter } from './listRoutes.js';
+import { listsOfWork } from './workLists.js';
 import { similarWorks } from './similar.js';
 import { workAuthor } from './author.js';
 import { searchAuthors } from './authors.js';
+import { workSummary } from './work.js';
+import { featuredWith } from './featured.js';
 import { bookQuotes } from './wikiquote.js';
+import { editionByIsbn, workEditions } from './editions.js';
 import {
   cleanIsbn,
-  editionByIsbn,
   looksLikeIsbn,
   searchWorks,
   WORK_KEY,
-  workDetails,
-  workRatings,
-  workEditions,
 } from './openLibrary.js';
+import { workDetails, workRatings } from './workDoc.js';
 
 // Finding books to add: search the catalogue, then pick an edition.
 // Mounted behind requireUser.
@@ -42,6 +43,9 @@ lookupRouter.use(
       ),
   }),
 );
+
+// The lists every reader sees, and readers' lists on Open Library
+lookupRouter.use(listRouter);
 
 lookupRouter.get('/search', async (req, res) => {
   const query = String(req.query.q ?? '').trim();
@@ -97,6 +101,16 @@ const noneIfMissing = (err: unknown) => {
   throw err;
 };
 
+// A work in short (title, writers, cover), for its page opened directly
+lookupRouter.get('/works/:workKey/summary', async (req, res) => {
+  const workKey = workKeyOf(req);
+  res.json({
+    work: await cached(`worksummary1:${workKey}`, 7, () =>
+      workSummary(workKey),
+    ),
+  });
+});
+
 // What the book is about and its genres; nothing when the catalogue
 // doesn't say
 lookupRouter.get('/works/:workKey', async (req, res) => {
@@ -126,7 +140,12 @@ lookupRouter.get('/works/:workKey/author', async (req, res) => {
   res.json({ author });
 });
 
-// Lists on Open Library the book is in (lists.ts)
+// The lists every reader sees that the book is in
+lookupRouter.get('/works/:workKey/featured', async (req, res) => {
+  res.json({ lists: await featuredWith(workKeyOf(req)) });
+});
+
+// Lists on Open Library the book is in (workLists.ts)
 lookupRouter.get('/works/:workKey/lists', async (req, res) => {
   res.json(await listsOfWork(workKeyOf(req)));
 });

@@ -11,8 +11,10 @@ const IN_VIEW = 0.2;
 // with the browser's scroll anchoring held off so it doesn't scroll the
 // page after what's below. Only when where it folds back to (`at`'s top)
 // is above the screen does the page go up along with it, in the same
-// frames, so it closes up in view rather than out of sight above. A wheel
-// or touch from the reader leaves the page to them. Returns a stop.
+// frames, so it closes up in view rather than out of sight above. Told to
+// `hold` something (the button pressed under it, say), the page instead
+// keeps that where it is on the screen throughout. A wheel or touch from
+// the reader leaves the page to them. Returns a stop.
 export function foldMotion({
   at,
   closing,
@@ -20,8 +22,10 @@ export function foldMotion({
   ease,
   frame,
   done,
+  hold,
 }: {
   at: Element | null;
+  hold?: Element | null;
   closing: boolean;
   ms: number;
   ease: (t: number) => number;
@@ -35,8 +39,13 @@ export function foldMotion({
   const startY = box.scrollTop;
   const top = at?.getBoundingClientRect().top ?? 0;
   const limit = innerHeight * IN_VIEW;
-  let rise = closing && at && top < limit ? top - limit : 0;
-  const leave = () => (rise = 0);
+  let rise = !hold && closing && at && top < limit ? top - limit : 0;
+  const held = hold?.getBoundingClientRect().top;
+  let holding = held !== undefined;
+  const leave = () => {
+    rise = 0;
+    holding = false;
+  };
   addEventListener('wheel', leave, { passive: true });
   addEventListener('touchstart', leave, { passive: true });
 
@@ -54,6 +63,9 @@ export function foldMotion({
     const p = ease(t);
     frame?.(p);
     if (rise) box.scrollTo({ top: startY + rise * p, behavior: 'instant' });
+    const drift = holding ? hold!.getBoundingClientRect().top - held! : 0;
+    if (drift)
+      box.scrollTo({ top: box.scrollTop + drift, behavior: 'instant' });
     if (t < 1) id = requestAnimationFrame(step);
     else {
       stop();

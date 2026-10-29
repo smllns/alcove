@@ -1,11 +1,13 @@
 import type { CatalogueWork } from '@/entities/book/types';
+import type { ListOpenState } from '@/entities/list/types';
+import { ListsFound } from './ListsFound';
 import { AuthorRow, OwnBookRow, ReaderRow, WorkRow } from './ResultRows';
 import { SearchSection } from './SearchSection';
 import type { Found, SearchKind } from './useSearch';
 
 // How many of each are shown among everything found; looking for that
 // kind alone shows them all
-const FEW = { own: 4, works: 4, authors: 3, readers: 3 };
+const FEW = { own: 4, works: 4, authors: 3, lists: 3, readers: 3 };
 
 // What a search found, a section for each kind of thing, or a word on
 // what can be looked for while there's nothing asked yet
@@ -15,16 +17,19 @@ export function SearchFound({
   kind,
   onKind,
   onBook,
-  onAdd,
+  onWork,
   onAuthor,
+  onList,
 }: {
   found: Found;
   query: string;
   kind: SearchKind;
   onKind: (kind: SearchKind) => void;
   onBook: (id: string) => void;
-  onAdd: (work: CatalogueWork) => void;
+  // A book from the catalogue not on the shelves: its page
+  onWork: (work: CatalogueWork) => void;
   onAuthor: (name: string) => void;
+  onList: (to: string, state?: ListOpenState) => void;
 }) {
   const some = kind === 'all' && !found.readersOnly;
   // The first few, with a way to the rest when there are more
@@ -36,8 +41,8 @@ export function SearchFound({
   if (!found.asked)
     return (
       <p className='mx-auto max-w-sm animate-arrive px-6 py-14 text-center text-sm leading-6 text-muted'>
-        Your own books, every book there is, readers (start with @) and authors,
-        all from here.
+        Your own books, every book there is, readers (start with @), authors and
+        lists, all from here.
       </p>
     );
 
@@ -47,7 +52,8 @@ export function SearchFound({
   const authors = shown(found.authors, FEW.authors, 'authors');
   const nothing =
     !found.looking &&
-    [own, works, authors, readers].every((x) => !x.items.length);
+    [own, works, authors, readers].every((x) => !x.items.length) &&
+    !found.lists.some;
 
   return (
     <>
@@ -75,14 +81,14 @@ export function SearchFound({
         onMore={works.more}
       >
         {works.items.map((work, i) => {
-          const mine = found.owned.get(work.workKey);
+          const mine = found.owned.get(work.workKey)?.id;
           return (
             <WorkRow
               key={work.workKey}
               work={work}
               order={i}
               owned={Boolean(mine)}
-              onOpen={() => (mine ? onBook(mine) : onAdd(work))}
+              onOpen={() => (mine ? onBook(mine) : onWork(work))}
             />
           );
         })}
@@ -103,6 +109,12 @@ export function SearchFound({
           />
         ))}
       </SearchSection>
+      <ListsFound
+        found={found.lists}
+        few={some ? FEW.lists : undefined}
+        onSeeAll={some ? () => onKind('lists') : undefined}
+        onOpen={onList}
+      />
       <SearchSection
         title='Readers'
         loading={found.loading.readers}

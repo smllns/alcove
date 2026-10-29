@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { AuthorFound, Book, CatalogueWork } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
+import { ownBookLine } from '@/entities/book/ui/ownBookLine';
 import { handle, type Reader } from '@/entities/user/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
@@ -12,7 +13,7 @@ const rowClass =
 
 // A row found, fading in as it comes, and saying what it does on the
 // right as it's hovered (or all along, `noted`)
-function Row({
+export function Row({
   onClick,
   hint,
   noted = false,
@@ -58,45 +59,45 @@ function Row({
   );
 }
 
-// One of the reader's own books, and where it is
+// One of the reader's own books; `action`, what choosing it does, said as
+// it's hovered
 export function OwnBookRow({
   book,
   order,
   onOpen,
+  action = 'Open',
 }: {
   book: Book;
   order: number;
   onOpen: () => void;
+  action?: string;
 }) {
   return (
-    <Row onClick={onOpen} hint='Open' order={order}>
-      <BookLine
-        size='sm'
-        title={book.title}
-        byline={book.authors.join(', ')}
-        coverUrl={book.cover?.url}
-        bookId={book.id}
-      />
+    <Row onClick={onOpen} hint={action} order={order}>
+      <BookLine size='sm' {...ownBookLine(book)} />
     </Row>
   );
 }
 
-// A book in the catalogue: to add, or to open if it's on the shelves
+// A book in the catalogue: its page, or the reader's own copy's if it's on
+// the shelves
 export function WorkRow({
   work,
   owned,
   order,
   onOpen,
+  action = 'Open',
 }: {
   work: CatalogueWork;
   owned: boolean;
   order: number;
   onOpen: () => void;
+  action?: string;
 }) {
   return (
     <Row
       onClick={onOpen}
-      hint={owned ? 'On your shelves' : 'Add'}
+      hint={owned ? 'On your shelves' : action}
       noted={owned}
       order={order}
     >

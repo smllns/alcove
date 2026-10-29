@@ -4,7 +4,7 @@ import { currentUser } from '../auth/middleware.js';
 import { HttpError } from '../lib/errors.js';
 import { parseBody, queryText } from '../lib/validation.js';
 import { getLists, ownLists } from '../lists/repository.js';
-import { warmListsOfWork } from '../lookup/lists.js';
+import { warmListsOfWork } from '../lookup/workLists.js';
 import { getPlaces, resolvePlace } from '../places/repository.js';
 import { storedCoverSources, type BookDoc } from '../db.js';
 import { deleteCover, discardCover } from '../uploads/storage.js';
@@ -16,6 +16,7 @@ import {
   findBook,
   findSameBook,
   listBooks,
+  shelvedWorks,
   toPublicBook,
   updateBook,
 } from './repository.js';
@@ -103,6 +104,13 @@ booksRouter.get('/by-writer', async (req, res) => {
   const name = queryText(req, 'name', 200);
   const found = name ? await booksByWriter(me(req), name) : [];
   res.json({ books: found.map(toPublicBook) });
+});
+
+// The reader's own copy of a work from the catalogue, if they have it
+booksRouter.get('/by-work/:workKey', async (req, res) => {
+  const workKey = String(req.params.workKey);
+  const owned = await shelvedWorks(me(req), [workKey]);
+  res.json({ bookId: owned.get(workKey) ?? null });
 });
 
 booksRouter.get('/:id', async (req, res) => {

@@ -9,13 +9,11 @@ import { Fold } from '@/shared/ui/Fold';
 import { FormError } from '@/shared/ui/FormError';
 import { AddButton } from '@/shared/ui/ListControls';
 import { SmoothHeight } from '@/shared/ui/SmoothHeight';
+import { aboutTextClass } from './aboutText';
 import { BookSection } from './BookSection';
 import { EditingHint } from '@/shared/ui/EditingHint';
 import { InlineEditor } from '@/shared/ui/InlineEditor';
 import { useWriteInPlace } from '@/shared/lib/useWriteInPlace';
-
-const aboutText =
-  'whitespace-pre-line font-serif text-[17px] leading-relaxed text-ink sm:text-lg';
 
 // What the book is about, in its own paragraphs, folded to its first lines
 // when it's long; changing it is for the book's edit page. With nothing
@@ -48,11 +46,11 @@ export function AboutBook({ book }: { book: Book }) {
               initial={writing}
               label='What it’s about'
               placeholder='The story in a few lines, ideally without spoilers.'
-              className={aboutText}
+              className={aboutTextClass}
               onDone={done}
             />
           ) : description ? (
-            <Fold className={aboutText}>{description}</Fold>
+            <Fold className={aboutTextClass}>{description}</Fold>
           ) : (
             <div>
               <p className='text-[15px] text-muted'>

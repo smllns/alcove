@@ -1,11 +1,7 @@
 import { cached } from './cache.js';
 import { cleanDescription } from './description.js';
-import {
-  firstAuthor,
-  fromOpenLibrary,
-  workDoc,
-  yearOf,
-} from './openLibrary.js';
+import { fromOpenLibrary, yearOf } from './openLibrary.js';
+import { firstAuthor, workDoc } from './workDoc.js';
 import { articleOnItem, articleOnWriter } from './wikipedia.js';
 
 // Who wrote a book, from Open Library: their name, years, picture and a

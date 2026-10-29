@@ -1,14 +1,20 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { useLocation, useMatches, useNavigationType } from 'react-router';
+import { notePage } from '@/shared/lib/pageBefore';
+import type { SamePage } from '@/shared/lib/pageScroll';
 
 // Where each page in the history was left scrolled to, by its entry
 const positions = new Map<string, number>();
 
 // The page each address belongs to: its own route, unless the route says
-// it's one page with others (the library's sections, signing in and up)
+// it's one page with others (the library's sections, signing in and up),
+// or it came in place of another as the same page still (SamePage)
 function usePage() {
   const matches = useMatches();
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
+  notePage(pathname);
+  const same = (state as SamePage | null)?.page;
+  if (same) return same;
   const shared = matches.findLast(
     (m) => (m.handle as { page?: string } | undefined)?.page,
   );

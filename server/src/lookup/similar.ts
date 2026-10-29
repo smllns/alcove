@@ -1,12 +1,11 @@
 import {
-  firstAuthor,
   searchDocs,
   SEARCH_FIELDS,
-  workDoc,
   toWork,
   type SearchDoc,
   type WorkResult,
 } from './openLibrary.js';
+import { firstAuthor, workDoc } from './workDoc.js';
 
 // Books to read next, from Open Library: other books by the same author,
 // and books on the same themes. The catalogue's subjects are tagged by

@@ -112,8 +112,31 @@ export type AuthorFound = {
   workCount: number;
 };
 
-// A list a reader made on Open Library: its name, its page, how many books
-export type CatalogueList = { name: string; url: string; books: number };
+// One of the lists every reader sees under their own, and its books.
+// Mirrors featured.ts on the server.
+export type FeaturedList = { id: string; name: string };
+// One holding a book, with how many books it holds
+export type FeaturedHolding = FeaturedList & { books: number };
+export type FeaturedBooks = FeaturedList & { works: CatalogueWork[] };
+
+// A list a reader made on Open Library (found by its name, or holding a
+// book): whose it is there, its id, its name, how many books it holds;
+// found, whether its books can be shown here, once that's known
+export type ReadersList = {
+  owner: string;
+  id: string;
+  name: string;
+  books: number;
+  readable?: boolean;
+};
+
+// A page of a reader's list's books (ReadersList), whether there are more,
+// and how many it holds, when Open Library says
+export type ReadersListPage = {
+  works: CatalogueWork[];
+  more: boolean;
+  books?: number;
+};
 
 // Who wrote a book, as the catalogue knows them. `wikipedia`: the article
 // the lines about them come from, when they do, to credit.

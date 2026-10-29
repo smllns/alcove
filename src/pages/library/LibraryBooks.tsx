@@ -21,13 +21,15 @@ const nothingMatches = (search: string) =>
 
 // The books, the way the reader chose to see them. The grid and the list
 // show only what a search found; the sky keeps every star in its place and
-// lights up the finds.
+// lights up the finds. Unless the finds are listed under the search (on a
+// phone, the keyboard hiding most of the page): then every book stays as
+// it was.
 export function LibraryBooks({
   shelf,
   search,
   view,
   skyInset,
-  skyLightsFinds = true,
+  findsListed = false,
   viewEased = false,
   arrangement = usual,
 }: {
@@ -36,22 +38,23 @@ export function LibraryBooks({
   view: BookView;
   // How far down the controls over the sky reach
   skyInset: number;
-  // Whether the sky lights up what a search finds (on a phone the finds
-  // are listed instead)
-  skyLightsFinds?: boolean;
+  // What a search finds is listed under it, not shown here
+  findsListed?: boolean;
   // The view itself came in by a transition
   viewEased?: boolean;
   // How the grid and the list are ordered, and what fades back in them
   arrangement?: Arrangement;
 }) {
   const universe = view === 'universe';
-  const { all, found, complete } = shelf;
+  const { all, complete } = shelf;
+  // What's looked for here, and what that finds
+  const sought = findsListed ? '' : search;
+  const found = findsListed ? all : shelf.found;
 
   // The stars to light up: everything a search found
   const lit = useMemo(
-    () =>
-      search && skyLightsFinds ? new Set(found.map((book) => book.id)) : null,
-    [search, skyLightsFinds, found],
+    () => (sought ? new Set(found.map((book) => book.id)) : null),
+    [sought, found],
   );
   // What the grid and the list show, easing over from one search to the next
   const { order, reversed, fade } = arrangement;
@@ -59,7 +62,7 @@ export function LibraryBooks({
     () => ordered(found, order, reversed),
     [found, order, reversed],
   );
-  const shown = useEasedResults(sorted, search, { ease: !universe });
+  const shown = useEasedResults(sorted, sought, { ease: !universe });
   const faded = (book: Book) => fadesBack(book, fade);
 
   if (universe)
@@ -68,13 +71,7 @@ export function LibraryBooks({
         books={all}
         lit={lit}
         eased={viewEased}
-        notice={
-          search &&
-          skyLightsFinds &&
-          complete &&
-          !found.length &&
-          nothingMatches(search)
-        }
+        notice={sought && complete && !found.length && nothingMatches(sought)}
         insetTop={skyInset}
       />
     );
@@ -98,7 +95,7 @@ export function LibraryBooks({
         size={size}
         rise={rise}
         faded={faded}
-        {...paging}
+        paging={paging}
       />
     );
   return (

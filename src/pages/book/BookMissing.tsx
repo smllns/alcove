@@ -4,12 +4,19 @@ import { FormError } from '@/shared/ui/FormError';
 import { PageTitle } from '@/shared/ui/PageHeading';
 import { paths } from '@/shared/config/paths';
 
-// A book that isn't there (taken off the shelves, say), or that didn't load
-export function BookMissing({ error }: { error: Error }) {
+// A book that isn't there (taken off the shelves, say; `gone` says so), or
+// that didn't load
+export function BookMissing({
+  error,
+  gone = 'This book isn’t on your shelves.',
+}: {
+  error: Error;
+  gone?: string;
+}) {
   if (error instanceof ApiError && error.status === 404)
     return (
       <div className='animate-rise'>
-        <PageTitle>This book isn’t on your shelves.</PageTitle>
+        <PageTitle>{gone}</PageTitle>
         <ButtonLink to={paths.library} arrow className='mt-10'>
           Back to your books
         </ButtonLink>

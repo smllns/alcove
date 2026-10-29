@@ -33,7 +33,7 @@ export function BackToTop({
         'fixed bottom-6 right-6 z-20 transition-[opacity,translate,bottom] duration-500 ease-soft sm:bottom-8 sm:right-8',
         // Over a bar floating at the foot of the screen, when there's one
         // (data-floating-bar)
-        '[:root:has([data-floating-bar])_&]:bottom-24 sm:[:root:has([data-floating-bar])_&]:bottom-28',
+        '[:root:has([data-floating-bar])_&]:bottom-24',
         far ? 'opacity-100' : 'pointer-events-none translate-y-3 opacity-0',
         className,
       )}

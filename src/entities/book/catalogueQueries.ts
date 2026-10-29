@@ -1,22 +1,24 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { keepWhileTyping } from '@/shared/lib/keepWhileTyping';
+import { searchable } from './matches';
 import {
   fetchBookQuotes,
   fetchEditions,
   fetchSimilarBooks,
   fetchWorkAuthor,
   fetchWorkDetails,
-  fetchWorkLists,
   fetchWorkRatings,
+  fetchWorkSummary,
   searchAuthors,
   searchCatalogue,
 } from './api';
+import type { CatalogueAuthor, CatalogueWork } from './types';
 
 // What's asked of the book catalogues (Open Library, Wikiquote) about books
 // in general, rather than the reader's own: finding a book, its editions,
 // what it's about, how it's rated, lines from it, who wrote it, books like
-// it
+// it (and the lists of books, catalogueListQueries)
 
 const catalogueKeys = {
   search: (query: string) => ['catalogue', 'search', query] as const,
@@ -26,7 +28,6 @@ const catalogueKeys = {
   ratings: (workKey: string) => ['catalogue', 'ratings', workKey] as const,
   similar: (workKey: string) => ['catalogue', 'similar', workKey] as const,
   author: (workKey: string) => ['catalogue', 'author', workKey] as const,
-  lists: (workKey: string) => ['catalogue', 'lists', workKey] as const,
   quotes: (title: string, author: string) =>
     ['catalogue', 'quotes', title, author] as const,
 };
@@ -60,6 +61,16 @@ export const useEditions = (workKey: string | undefined) =>
     staleTime: 30 * 60 * 1000,
   });
 
+// A work in short, for its page: there at once when the page before had it
+// (`known`), asked for when the page is opened straight from its address
+export const useWorkSummary = (workKey: string, known?: CatalogueWork) =>
+  useQuery({
+    queryKey: ['catalogue', 'work', workKey],
+    queryFn: () => fetchWorkSummary(workKey),
+    initialData: known?.workKey === workKey ? known : undefined,
+    staleTime: Infinity,
+  });
+
 // What the catalogue says the book is about, and its genres. Asked once
 // per book: it doesn't change.
 const workDetailsQuery = (workKey: string) => ({
@@ -82,14 +93,37 @@ export const useWorkRatings = (workKey: string | undefined) =>
     staleTime: 60 * 60 * 1000,
   });
 
-// Who wrote the book. Asked once per book: it hardly changes.
-export const useWorkAuthor = (workKey: string | undefined) =>
-  useQuery({
+// A writer's name as names are matched: no case, accents, spaces or dots,
+// so "J. R. R. Tolkien" is "J.R.R. Tolkien"
+const nameKey = (name: string) => [
+  'catalogue',
+  'author-by-name',
+  searchable(name).replace(/[^\p{L}\p{N}]/gu, ''),
+];
+
+// Who wrote the book, asked once per book: it hardly changes. Kept by the
+// writer's name too (theirs as the book has it, and as the catalogue does),
+// so another book of theirs opened next shows them at once, while its own
+// answer is asked for (in case the catalogue tells it differently)
+export function useWorkAuthor(workKey: string | undefined, name?: string) {
+  const client = useQueryClient();
+  const query = useQuery({
     queryKey: catalogueKeys.author(workKey ?? ''),
     queryFn: () => fetchWorkAuthor(workKey!),
     enabled: Boolean(workKey),
     staleTime: Infinity,
+    placeholderData: () =>
+      name ? client.getQueryData<CatalogueAuthor>(nameKey(name)) : undefined,
   });
+  // Remembered by name whenever it's known, asked now or long ago
+  const author = query.isPlaceholderData ? undefined : query.data;
+  useEffect(() => {
+    if (!author) return;
+    for (const each of [name, author.name])
+      if (each) client.setQueryData(nameKey(each), author);
+  }, [author, name, client]);
+  return query;
+}
 
 // Books to read next. Asked again each time the page opens (the server
 // keeps the catalogue's answer), so those added since show as on the
@@ -99,15 +133,6 @@ export const useSimilarBooks = (workKey: string | undefined) =>
     queryKey: catalogueKeys.similar(workKey ?? ''),
     queryFn: () => fetchSimilarBooks(workKey!),
     enabled: Boolean(workKey),
-  });
-
-// Lists on Open Library the book is in; the server keeps them for days
-export const useWorkLists = (workKey: string | undefined) =>
-  useQuery({
-    queryKey: catalogueKeys.lists(workKey ?? ''),
-    queryFn: () => fetchWorkLists(workKey!),
-    enabled: Boolean(workKey),
-    staleTime: 60 * 60 * 1000,
   });
 
 // Lines from the book to offer the reader; they hardly change

@@ -82,4 +82,22 @@ describe('a reader’s books', () => {
       expect.arrayContaining(['title', 'authors']),
     );
   });
+
+  it('tells whether the reader has a work from the catalogue', async () => {
+    const { cookie } = await signUp();
+    const added = await api('/books', {
+      method: 'POST',
+      cookie,
+      body: {
+        ...book('The Left Hand of Darkness'),
+        openLibrary: { work: 'OL59863W' },
+      },
+    });
+    expect((await api('/books/by-work/OL59863W', { cookie })).body.bookId).toBe(
+      added.body.book.id,
+    );
+    expect(
+      (await api('/books/by-work/OL1W', { cookie })).body.bookId,
+    ).toBeNull();
+  });
 });

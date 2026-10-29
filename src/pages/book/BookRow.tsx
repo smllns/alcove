@@ -6,8 +6,8 @@ import { Labelled } from './Labelled';
 
 // A row of books to read: their covers, swiped along, or where the page has
 // room for them all side by side, simply laid out in a row. One on the
-// reader's shelves already opens its own page; any other, the page for
-// adding it, found already.
+// reader's shelves already opens its own page; any other, its page from
+// the catalogue.
 export function BookRow({
   label,
   books,
@@ -43,7 +43,7 @@ function NextBook({ book, marked }: { book: SimilarBook; marked: boolean }) {
     : { work: book };
   return (
     <TransitionLink
-      to={book.bookId ? paths.book(book.bookId) : paths.addBook}
+      to={book.bookId ? paths.book(book.bookId) : paths.work(book.workKey)}
       state={state}
       className='group block'
     >

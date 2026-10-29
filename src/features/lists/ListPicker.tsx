@@ -1,5 +1,4 @@
-import { sameListName, tidyListName } from '@/entities/list/names';
-import { useCreateList, useLists } from '@/entities/list/queries';
+import { useListChoice } from './useListChoice';
 import { cn } from '@/shared/lib/cn';
 import { choiceClass } from '@/shared/ui/buttonStyles';
 import { labelClass } from '@/shared/ui/fieldStyles';
@@ -16,22 +15,10 @@ export function ListPicker({
   value: string[];
   onChange: (lists: string[]) => void;
 }) {
-  const lists = useLists().data?.lists ?? [];
-  const create = useCreateList();
-  const chosen = new Set(value);
-
-  const toggle = (id: string) =>
-    onChange(chosen.has(id) ? value.filter((v) => v !== id) : [...value, id]);
-
-  const addNew = async (typed: string) => {
-    const name = tidyListName(typed);
-    if (!name) return;
-    // One by that name already is the one meant, and is simply chosen;
-    // the server says the same of one this page hasn't heard of yet
-    const known = lists.find((list) => sameListName(list.name, name));
-    const { id } = known ?? (await create.mutateAsync(name)).list;
-    if (!chosen.has(id)) onChange([...value, id]);
-  };
+  const { lists, chosen, toggle, addNew, failed } = useListChoice(
+    value,
+    onChange,
+  );
 
   return (
     // A fieldset grows to its widest pill unless told otherwise
@@ -64,7 +51,7 @@ export function ListPicker({
           {lists.length ? 'New list' : 'Start a list'}
         </AddOwnPill>
       </div>
-      <FormError message={create.error?.message} small className='mt-2' />
+      <FormError message={failed} small className='mt-2' />
     </fieldset>
   );
 }

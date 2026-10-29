@@ -7,6 +7,7 @@
 @import './universe.css';
 @import './stars.css';
 @import './places.css';
+@import './lists.css';
 @import './room.css';
 
 :root {

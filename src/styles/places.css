@@ -1,6 +1,6 @@
 /* The places view of the library (pages/library/places): a home drawn as
    an architect's section, its bookcases in it, the books on them as spines
-   (spines.css). Nothing in it moves by itself; only a book pointed at, a
+   (MiniSpine). Nothing in it moves by itself; only a book pointed at, a
    lamp coming on, and a room opening from the drawing of its home. */
 
 /* A home drawn as an architect's section through it: what's cut through
@@ -39,7 +39,6 @@
 .mini-spine {
   background-color: color-mix(in oklab, var(--tone) 45%, var(--bg-mid));
 }
-
 /* A room of the home, cut open. Pointed at, its lamp comes on. */
 .house-room {
   position: relative;

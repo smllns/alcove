@@ -1,14 +1,14 @@
 import type { Book } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
+import { ownBookLine } from '@/entities/book/ui/ownBookLine';
 import { Spinner } from '@/shared/ui/Spinner';
-import { cn } from '@/shared/lib/cn';
-import { raisedClass } from '@/shared/ui/surfaces';
 import { BookLink } from './BookLink';
+import { FoundPanel, foundRowClass } from './FoundPanel';
 
-// What a search found, as a list dropping down under the search field. For
-// the sky on a phone, where the keyboard leaves too little of it in view
-// to watch the finds light up; picking one opens the book, its cover
-// flying over from the list.
+// What a search found, as a list dropping down under the search field. On
+// a phone, where the keyboard leaves too little of the page in view to
+// watch the finds light up in the sky or the grid narrow down; picking one
+// opens the book, its cover flying over from the list.
 export function SearchResults({
   books,
   search,
@@ -19,27 +19,13 @@ export function SearchResults({
   loading: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        'absolute inset-x-0 top-full z-20 mt-2 max-h-[min(50dvh,26rem)] animate-rise overflow-y-auto overscroll-contain rounded-3xl p-1.5',
-        raisedClass,
-      )}
-    >
+    <FoundPanel>
       {books.length ? (
         <ul>
           {books.map((book) => (
             <li key={book.id}>
-              <BookLink
-                id={book.id}
-                className='flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-colors duration-300 ease-soft hover:bg-ink/4 active:bg-ink/6'
-              >
-                <BookLine
-                  size='sm'
-                  title={book.title}
-                  byline={book.authors.join(', ')}
-                  coverUrl={book.cover?.url}
-                  bookId={book.id}
-                />
+              <BookLink id={book.id} className={foundRowClass}>
+                <BookLine size='sm' {...ownBookLine(book)} />
               </BookLink>
             </li>
           ))}
@@ -53,6 +39,6 @@ export function SearchResults({
           Nothing on your shelves matches “{search}”.
         </p>
       )}
-    </div>
+    </FoundPanel>
   );
 }

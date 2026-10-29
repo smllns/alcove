@@ -1,0 +1,140 @@
+/* The lists' pages (pages/library/lists): their piles drawn as the house
+   is (places.css), the lamp a list stands by, and its covers folding */
+
+/* A book in a list's pile: its colour plainer, the pile being all there
+   is; taking its cover's colour softly, from paper, as it's found
+   (MiniSpine's `pending`) */
+.list-spine {
+  --spine-pending: color-mix(in oklab, var(--ink) 10%, var(--bg-mid));
+  background-color: color-mix(in oklab, var(--tone) 86%, var(--bg-mid));
+  box-shadow:
+    inset 0 -1.5px 0 rgb(0 0 0 / 0.12),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+  transition: background-color 0.9s var(--ease-soft);
+}
+
+/* A list's covers with more to come (WorkGrid): its last row fading out
+   halfway down, the fading going softly as the last are shown */
+@property --grid-fade {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+.work-grid-fold {
+  --grid-fade: 0px;
+  mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - var(--grid-fade)),
+    transparent 100%
+  );
+  transition: --grid-fade 0.7s var(--ease-soft);
+}
+.work-grid-fold[data-folded] {
+  --grid-fade: 9rem;
+}
+
+/* On the floor of the lists, drawn as the house is, gone a little further
+   into the paper */
+.list-pile .list-spine {
+  background-color: color-mix(in oklab, var(--tone) 64%, var(--bg-mid));
+}
+
+/* Beside a list's pile, how many books it holds as a drawing gives a
+   height: a fine line the pile's height, ticked across at both ends, the
+   number along it (turned to read upward) */
+.list-dim {
+  position: absolute;
+  /* Physical sides: it's written upward, so its own block runs across */
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  margin-left: 1.25rem;
+  display: flex;
+  justify-content: center;
+  padding-right: 5px;
+  border-right: 0.8px solid var(--fine);
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.list-dim::before,
+.list-dim::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  width: 9px;
+  height: 0.8px;
+  background: var(--fine);
+  rotate: -45deg;
+}
+.list-dim::before {
+  top: 0;
+}
+.list-dim::after {
+  bottom: 0;
+}
+
+/* A list's lamp lit (the room lamp's look, places.css) */
+.list-lamp[data-lit] .lamp-shade {
+  fill: color-mix(in oklab, var(--bulb, var(--gold)) 55%, transparent);
+}
+.list-lamp[data-lit] .lamp-bulb {
+  opacity: 1;
+}
+
+/* A list's standing lamp (ListLamp): drawn as large as its pile, yet in
+   the same fine line as in a room, its bulb up in its shade; coming on
+   as a room's lamp does once the list's page has opened (ListFrame), its
+   shade filling slowly with light and its bulb showing first, then its
+   light spreading round it, over the page (behind the sheet beside it),
+   and a little falling over the whole page from above (.room-wash,
+   room.css) */
+.list-lamp :is(path, circle, rect) {
+  vector-effect: non-scaling-stroke;
+}
+.list-lamp .lamp-bulb {
+  translate: 0 -3px;
+  transition: opacity 1.2s cubic-bezier(0.45, 0, 0.25, 1);
+}
+.list-lamp .lamp-shade {
+  transition: fill 1.6s cubic-bezier(0.45, 0, 0.25, 1);
+}
+.list-page .room-wash {
+  z-index: -1;
+}
+.list-page[data-lit] .room-wash {
+  opacity: 1;
+}
+.list-lamp-glow {
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  width: 40rem;
+  height: 40rem;
+  translate: -50% -50%;
+  pointer-events: none;
+  background: radial-gradient(circle closest-side, var(--light), transparent);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 1.6s cubic-bezier(0.45, 0, 0.25, 1) 0.15s;
+}
+:root[data-theme='dark'] .list-lamp-glow {
+  mix-blend-mode: normal;
+}
+.list-lamp[data-lit] .list-lamp-glow {
+  opacity: 1;
+}
+/* Lit already as it's first drawn (the page turned before the list came),
+   it still comes on, from off */
+@starting-style {
+  .list-lamp[data-lit] .lamp-shade {
+    fill: transparent;
+  }
+  .list-lamp[data-lit] :is(.lamp-bulb, .list-lamp-glow),
+  .list-page[data-lit] .room-wash {
+    opacity: 0;
+  }
+}

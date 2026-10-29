@@ -1,45 +1,10 @@
-import type { CSSProperties } from 'react';
 import { cn } from '@/shared/lib/cn';
 import type { Book } from '@/entities/book/types';
-import { useSpineColour } from '@/entities/book/coverTone';
-import { spineSize } from '@/entities/book/spine';
+import { MiniSpine } from '@/entities/book/ui/MiniSpine';
 import type { UnitBooks } from '../arrange';
 
-// How much smaller than in its room a book is in the plan of the home
-const SCALE = 1 / 2.5;
 // The most books a shelf shows in the plan
 const SHOWN = 28;
-
-// A book drawn small, in its cover's colour, quietened into the drawing
-// (styles/places.css)
-function MiniSpine({
-  book,
-  lying,
-  grow = 1,
-}: {
-  book: Book;
-  lying?: boolean;
-  grow?: number;
-}) {
-  const colour = useSpineColour(book);
-  const { width, height } = spineSize(book);
-  const [w, h] = [
-    Math.max(2, Math.round(width * SCALE * grow)),
-    Math.round(height * SCALE * grow),
-  ];
-  return (
-    <span
-      className='mini-spine block shrink-0 rounded-[1px]'
-      style={
-        {
-          width: lying ? h : w,
-          height: lying ? w : h,
-          '--tone': colour,
-        } as CSSProperties
-      }
-    />
-  );
-}
 
 // Books lying one on another, as many as show; `grow` times as large
 export function MiniPile({

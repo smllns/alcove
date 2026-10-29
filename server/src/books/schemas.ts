@@ -11,7 +11,7 @@ import { DESCRIPTION_MAX } from '../lookup/description.js';
 import { copySchema } from './copy.js';
 
 // Covers may only come from the catalogue or our own upload storage
-const coverHost = (url: string) => {
+export const coverHost = (url: string) => {
   const { protocol, hostname } = new URL(url);
   return (
     protocol === 'https:' &&

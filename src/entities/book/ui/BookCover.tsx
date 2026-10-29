@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { clothFor, sizedCover, type CoverSize } from '../coverImage';
 import { useCoverPicture } from '../useCoverPicture';
@@ -13,6 +14,9 @@ type BookCoverProps = {
   bookId?: string;
   // The cover on the book's own page, the one that flies home from it
   home?: boolean;
+  // Laid over the picture, part of the cover (flying with it, cut off at
+  // its edges): a band across its corner, say
+  children?: ReactNode;
 };
 
 // A cover at a fixed 2:3 shape. Fades in once loaded; books without a
@@ -25,6 +29,7 @@ export function BookCover({
   className,
   bookId,
   home,
+  children,
 }: BookCoverProps) {
   const src = url && sizedCover(url, size);
   const { known, load, picture } = useCoverPicture(src);
@@ -68,6 +73,7 @@ export function BookCover({
           )}
         </div>
       )}
+      {children}
     </div>
   );
 }

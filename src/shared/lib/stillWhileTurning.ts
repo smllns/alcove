@@ -20,6 +20,8 @@ let ended: Promise<unknown> = Promise.resolve();
 export const turnBegun = () => begun;
 // For something to wait for the page to have turned (usePageTurned)
 export const turnEnded = () => ended;
+// Whether a page is turning right now
+export const isTurning = () => turning > 0;
 
 // Keeps `animation` still whenever a page turns; the returned function
 // lets it go for good (as it's cancelled)

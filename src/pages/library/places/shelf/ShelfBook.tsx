@@ -2,6 +2,7 @@ import type { Book } from '@/entities/book/types';
 import { BookCover } from '@/entities/book/ui/BookCover';
 import { cn } from '@/shared/lib/cn';
 import { useLongPress } from '@/shared/lib/useLongPress';
+import { PickMark } from '@/shared/ui/PickMark';
 import { raisedClass } from '@/shared/ui/surfaces';
 import { BookLink } from '../../views/BookLink';
 import { useArrangingHere } from './arranging';
@@ -63,17 +64,7 @@ export function ShelfBook({ book }: { book: Book }) {
               : 'group-hover:-translate-y-1.5',
           )}
         />
-        {arranging?.on && (
-          <span
-            aria-hidden
-            className={cn(
-              'absolute bottom-1.5 right-1.5 size-4 rounded-full border-[1.5px] border-white transition-colors duration-300 ease-soft',
-              picked
-                ? 'bg-ink shadow-[inset_0_0_0_2.5px_white]'
-                : 'bg-black/25',
-            )}
-          />
-        )}
+        {arranging?.on && <PickMark picked={picked} />}
       </BookLink>
       <div
         aria-hidden

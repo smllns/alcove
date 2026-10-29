@@ -17,6 +17,7 @@ import {
 import { ComingSoon } from './ComingSoon';
 import { EmptyShelf } from './EmptyShelf';
 import { LibraryBooks } from './LibraryBooks';
+import { ListsSection } from './lists/ListsSection';
 import { PlacesSection } from './places/PlacesSection';
 import { useShelf } from '@/entities/book/useShelf';
 import { useBookView } from './views/views';
@@ -40,13 +41,14 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
 
   const shelfOrder = useShelfOrder();
   // The sky shows every book, and any order but the newest first needs
-  // them all, as do the places, to find the books not yet in one
+  // them all, as do the places (to find the books not yet in one) and the lists
   const shelf = useShelf(
     books,
     search.query,
     view === 'universe' ||
       needsEveryBook(shelfOrder.arrangement) ||
-      section === 'places',
+      section === 'places' ||
+      section === 'lists',
   );
   const { all } = shelf;
   const total = books.data?.pages[0]?.total ?? 0;
@@ -63,9 +65,6 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
   // The top of another section (the places, a home or a room in them), for
   // the way back up to show once it's scrolled away
   const [sectionTop, setSectionTop] = useState<HTMLElement | null>(null);
-  // On a phone the keyboard hides most of the sky, so a search over it
-  // lists what it finds rather than lighting the stars up
-  const listFinds = sky && phone;
   // Another section, chosen, starts at its top, already there as the page
   // turns to it; gone back to, it's where it was left (app/PageScroll)
   const arrival = useNavigationType();
@@ -116,7 +115,10 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
                   edge={toolbar}
                   search={search}
                   shelf={shelf}
-                  listFinds={listFinds}
+                  // On a phone the keyboard hides most of the page, so a
+                  // search lists what it finds under it rather than
+                  // lighting up stars or narrowing the grid
+                  listFinds={phone}
                   view={view}
                   onView={choose}
                   onViewKind={chooseKind}
@@ -136,7 +138,7 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
                       view={shown}
                       viewEased={arrived !== 'load'}
                       skyInset={skyInset}
-                      skyLightsFinds={!listFinds}
+                      findsListed={phone}
                     />
                   )}
                 </ViewStage>
@@ -146,6 +148,8 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
                 <span ref={setSectionTop} aria-hidden className='block' />
                 {section === 'places' ? (
                   <PlacesSection shelf={shelf} total={total} />
+                ) : section === 'lists' ? (
+                  <ListsSection shelf={shelf} />
                 ) : (
                   <ComingSoon section={section} />
                 )}

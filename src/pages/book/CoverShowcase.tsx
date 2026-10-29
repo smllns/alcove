@@ -5,6 +5,7 @@ import { liftedCover } from '@/entities/book/coverImage';
 import type { Book } from '@/entities/book/types';
 import { BookCover } from '@/entities/book/ui/BookCover';
 import { cn } from '@/shared/lib/cn';
+import { CoverSticker } from './CoverSticker';
 import { reducedMotionNow } from '@/shared/lib/motion';
 import { setPageTransition } from '@/shared/lib/pageTransition';
 import { useSwipeAway } from '@/shared/lib/useSwipeAway';
@@ -18,9 +19,12 @@ import { floatingClass } from '@/shared/ui/surfaces';
 // anywhere, or Escape, or swiped off up or down, as photos are on a phone).
 export function CoverShowcase({
   book,
+  owned = false,
   className,
 }: {
   book: Book;
+  // On the reader's shelves, or not: a sticker on the cover's corner says
+  owned?: boolean;
   className?: string;
 }) {
   const [zoomed, setZoomed] = useState(false);
@@ -63,7 +67,9 @@ export function CoverShowcase({
         !big &&
           'group-hover:shadow-[0_44px_64px_-26px_rgb(var(--shade)/calc(0.6*var(--shade-k))),0_6px_16px_rgb(var(--shade)/calc(0.16*var(--shade-k)))]',
       )}
-    />
+    >
+      {!big && <CoverSticker owned={owned} />}
+    </BookCover>
   );
 
   return (

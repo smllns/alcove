@@ -12,9 +12,10 @@ import {
   fetchBook,
   fetchBooks,
   fetchBooksByWriter,
+  fetchOwnedWork,
   fetchUploadsEnabled,
-  updateBook,
   type BooksPage,
+  updateBook,
 } from './api';
 import type { Book, BookInput, CopyDetails } from './types';
 
@@ -23,7 +24,15 @@ export const bookKeys = {
   shelf: ['books', 'shelf'] as const,
   book: (id: string) => ['books', 'one', id] as const,
   byWriter: (name: string) => ['books', 'by-writer', name] as const,
+  byWork: (workKey: string) => ['books', 'by-work', workKey] as const,
 };
+
+// The reader's own copy of a work from the catalogue: its id, or null
+export const useOwnedWork = (workKey: string) =>
+  useQuery({
+    queryKey: bookKeys.byWork(workKey),
+    queryFn: () => fetchOwnedWork(workKey),
+  });
 
 // Changes the books already loaded onto the shelf, before the refetch
 // comes back with the same

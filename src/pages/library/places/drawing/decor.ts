@@ -31,6 +31,10 @@ export type Decor = {
 type Light = 'warm' | 'rose' | 'mint' | 'lavender' | 'sky';
 const lights: Light[] = ['warm', 'warm', 'rose', 'mint', 'lavender', 'sky'];
 
+// A lamp's light picked by `key` (a list's, say): the same each time
+export const lightOf = (key: string) =>
+  lights[Math.floor(seedOf(`${key}:light`) * lights.length)];
+
 // How many, given a seed: none below the first share, one below the
 // second, otherwise two
 const howMany = (seed: number, [none, one]: [number, number]) =>

@@ -1,16 +1,11 @@
-import type { BookFormat } from '../db.js';
 import { HttpError } from '../lib/errors.js';
-import { cleanDescription } from './description.js';
-import { genresOf } from './genres.js';
-import { bookFormat, isDigital } from './format.js';
-import { cached } from './cache.js';
 import { contact, HEADERS } from './agent.js';
 import { throttle } from './throttle.js';
 
 // Open Library (openlibrary.org): an open catalogue of books from the
 // Internet Archive. No key needed. They ask for a User-Agent naming the app
 // and a contact, and give requests that carry one 3 a second instead of 1.
-export const BASE = 'https://openlibrary.org';
+const BASE = 'https://openlibrary.org';
 const nextTurn = throttle(contact ? 3 : 1);
 
 // A book in general, across all its editions
@@ -24,21 +19,7 @@ export type WorkResult = {
   editionCount: number;
 };
 
-// One specific printing
-export type EditionResult = {
-  editionKey: string;
-  title: string;
-  subtitle?: string;
-  isbn?: string;
-  publisher?: string;
-  publishedYear?: number;
-  pages?: number;
-  language?: string;
-  format?: BookFormat;
-  coverUrl?: string;
-};
-
-const coverUrl = (id: number | undefined) =>
+export const coverUrl = (id: number | undefined) =>
   id && id > 0 ? `https://covers.openlibrary.org/b/id/${id}-L.jpg` : undefined;
 
 const unavailable = () =>
@@ -46,6 +27,15 @@ const unavailable = () =>
     502,
     'lookup_unavailable',
     'The book catalogue isn’t answering. Try again in a moment.',
+  );
+
+// Answered with a failure on its side: something it can't give
+export const REFUSED = 'lookup_refused';
+const refused = () =>
+  new HttpError(
+    502,
+    REFUSED,
+    'The book catalogue couldn’t give that. Try again in a moment.',
   );
 
 // Over their limit anyway, e.g. with several servers sharing it
@@ -71,6 +61,9 @@ export async function fromOpenLibrary<T>(
   if (res.status === 404)
     throw new HttpError(404, 'not_found', 'Nothing found.');
   if (res.status === 429) throw busy();
+  // Answered, but with a failure of its own: it won't give that, as
+  // against not answering at all
+  if (res.status >= 500) throw refused();
   if (!res.ok) throw unavailable();
   return res.json() as Promise<T>;
 }
@@ -147,104 +140,4 @@ export async function searchWorks(query: string): Promise<WorkResult[]> {
   ]);
   if (!byTitle.length && !byAuthor.length) return search({ q: query });
   return popularity(byAuthor) > popularity(byTitle) ? byAuthor : byTitle;
-}
-
-type EditionDoc = {
-  key: string;
-  title: string;
-  subtitle?: string;
-  isbn_13?: string[];
-  isbn_10?: string[];
-  publishers?: string[];
-  publish_date?: string;
-  number_of_pages?: number;
-  covers?: number[];
-  languages?: { key: string }[];
-  physical_format?: string;
-};
-
-const toEdition = (doc: EditionDoc): EditionResult => ({
-  editionKey: doc.key.replace('/books/', ''),
-  title: doc.title,
-  subtitle: doc.subtitle ?? undefined,
-  isbn: doc.isbn_13?.[0] ?? doc.isbn_10?.[0],
-  publisher: doc.publishers?.[0],
-  publishedYear: yearOf(doc.publish_date),
-  pages: doc.number_of_pages,
-  language: doc.languages?.[0]?.key.replace('/languages/', ''),
-  format: bookFormat(doc.physical_format),
-  coverUrl: coverUrl(doc.covers?.[0]),
-});
-
-// Most useful first: English, with a cover, with an ISBN, then newest
-const usefulness = (e: EditionResult) =>
-  (e.language === 'eng' ? 8 : 0) +
-  (e.coverUrl ? 4 : 0) +
-  (e.isbn ? 2 : 0) +
-  (e.pages ? 1 : 0);
-
-export async function workEditions(workKey: string): Promise<EditionResult[]> {
-  const data = await fromOpenLibrary<{ entries: EditionDoc[] }>(
-    `/works/${workKey}/editions.json?limit=60`,
-  );
-  // Ours is a library of physical books, so e-books and audiobooks go
-  return data.entries
-    .filter((doc) => !isDigital(doc.physical_format))
-    .map(toEdition)
-    .sort(
-      (a, b) =>
-        usefulness(b) - usefulness(a) ||
-        (b.publishedYear ?? 0) - (a.publishedYear ?? 0),
-    );
-}
-
-export async function editionByIsbn(isbn: string): Promise<EditionResult> {
-  return toEdition(
-    await fromOpenLibrary<EditionDoc>(`/isbn/${cleanIsbn(isbn)}.json`),
-  );
-}
-
-// A work as the catalogue keeps it: what several lookups about one book
-// (what it's about, who wrote it, books like it) all start from
-type WorkDoc = {
-  title?: string;
-  description?: string | { value?: string };
-  subjects?: string[];
-  authors?: { author?: { key?: string } }[];
-};
-
-// Asked of the catalogue once, then kept for all of them
-export const workDoc = (workKey: string) =>
-  cached(`work1:${workKey}`, 30, () =>
-    fromOpenLibrary<WorkDoc>(`/works/${workKey}.json`),
-  );
-
-// The key of a work's first author, if it names one
-export const firstAuthor = (work: WorkDoc) =>
-  work.authors?.[0]?.author?.key?.replace('/authors/', '');
-
-// What the book is about, if the catalogue says, and the genres its
-// subjects point to
-export async function workDetails(workKey: string) {
-  const { description, subjects } = await workDoc(workKey);
-  return {
-    description:
-      cleanDescription(
-        typeof description === 'string' ? description : description?.value,
-      ) ?? null,
-    genres: genresOf(subjects),
-  };
-}
-
-type RatingsDoc = { summary?: { average?: number | null; count?: number } };
-
-// How the catalogue's readers rate the book: the average out of five and
-// how many rated it; none when nobody has
-export async function workRatings(workKey: string) {
-  const { summary } = await fromOpenLibrary<RatingsDoc>(
-    `/works/${workKey}/ratings.json`,
-  );
-  return summary?.average && summary.count
-    ? { average: Math.round(summary.average * 10) / 10, count: summary.count }
-    : null;
 }

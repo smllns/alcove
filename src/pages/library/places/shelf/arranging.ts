@@ -2,9 +2,10 @@ import { createContext, useContext, useState } from 'react';
 
 // Books in a room picked out, to move elsewhere together: on once
 // arranging is (the room's Arrange, or a book held on), each book then
-// picked or let go by a tap rather than opened
-export function useArranging() {
-  const [on, setOn] = useState(false);
+// picked or let go by a tap rather than opened. On from the first, if
+// `initial`.
+export function useArranging(initial = false) {
+  const [on, setOn] = useState(initial);
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   const set = (change: (ids: Set<string>) => void) =>
     setPicked((now) => {

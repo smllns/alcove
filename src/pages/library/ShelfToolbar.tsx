@@ -26,7 +26,8 @@ export function ShelfToolbar({
   search: ReturnType<typeof useShelfSearch>;
   shelf: Shelf;
   // List what a search finds under the field, to open one, rather than
-  // lighting the stars up (on a phone, behind the keyboard)
+  // lighting the stars up or narrowing the grid (on a phone, behind the
+  // keyboard)
   listFinds: boolean;
   view: BookView;
   onView: (view: BookView) => void;

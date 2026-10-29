@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react';
-import type { Ref } from 'react';
+import { useEffect, useRef, type Ref } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { smallInputText } from '@/shared/ui/fieldStyles';
 import { RemoveButton } from '@/shared/ui/ListControls';
@@ -14,6 +14,9 @@ export function BookSearch({
   found,
   placeholder = 'Search your books',
   onFocus,
+  onBlur,
+  grows = true,
+  focus = false,
   ref,
   className,
 }: {
@@ -23,25 +26,40 @@ export function BookSearch({
   found?: number;
   placeholder?: string;
   onFocus?: () => void;
+  onBlur?: () => void;
+  // Wider while typed in, beside the shelf's view choices; not where it
+  // has the width it needs all along
+  grows?: boolean;
+  // The cursor in it as it opens, the page not jumping to it
+  focus?: boolean;
   ref?: Ref<HTMLLabelElement>;
   className?: string;
 }) {
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (focus) input.current?.focus({ preventScroll: true });
+    // Only as it opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <label
       ref={ref}
       className={cn(
-        'flex h-10 animate-rise items-center gap-2 rounded-full pl-3.5 pr-1 transition-[border-color,width] duration-500 ease-soft focus-within:border-ink/40 sm:focus-within:w-80',
+        'flex h-10 animate-rise cursor-text items-center gap-2 rounded-full pl-3.5 pr-1 transition-[border-color,width] duration-500 ease-soft hover:border-ink/40 focus-within:border-ink/40',
+        grows && 'sm:focus-within:w-80',
         floatingClass,
         className,
       )}
     >
       <Search size={15} className='shrink-0 text-muted' />
       <input
+        ref={input}
         type='search'
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => e.key === 'Escape' && onChange('')}
         onFocus={onFocus}
+        onBlur={onBlur}
         placeholder={placeholder}
         aria-label={placeholder}
         className={cn(

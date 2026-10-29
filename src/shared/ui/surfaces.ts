@@ -15,6 +15,10 @@ const raisedShadow =
   'shadow-[0_22px_44px_-22px_rgba(40,28,14,0.55),0_2px_8px_rgba(40,28,14,0.08)]';
 export const raisedClass = `border border-line/70 bg-surface/75 ${raisedShadow} backdrop-blur-xl backdrop-saturate-150`;
 
+// The same, the page under it barely showing: for what a search finds,
+// dropping down over books it would otherwise muddle
+export const denseRaisedClass = `border border-line/70 bg-surface/94 ${raisedShadow} backdrop-blur-xl backdrop-saturate-150`;
+
 // The same, quite solid, for panels big enough that the page showing
 // through would muddle them: a search, a drawer
 export const solidRaisedClass = `border border-line/70 bg-surface ${raisedShadow}`;

@@ -4,7 +4,8 @@ import { cn } from '@/shared/lib/cn';
 import { QuietButton } from './ListControls';
 
 // "Read more" under something folded away, with an arrow saying which way
-// it goes: down to open out the rest, turned up to fold it back
+// it goes: down to open out the rest, turned up to fold it back; its words
+// fading in afresh as they change
 export function MoreToggle({
   open,
   onClick,
@@ -18,7 +19,9 @@ export function MoreToggle({
 }) {
   return (
     <QuietButton onClick={onClick} className={className}>
-      {children}
+      <span key={String(open)} className='animate-fade-in'>
+        {children}
+      </span>
       <ChevronDown
         size={15}
         aria-hidden
