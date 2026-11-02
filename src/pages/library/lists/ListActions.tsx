@@ -67,7 +67,6 @@ export function ListActions({
                 ? onOpen(to === 'public')
                 : change.mutate({ id: list.id, public: to === 'public' })
             }
-            tips={false}
             words
           />
           <span className='text-xs text-muted'>

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   copyConditions,
   copyStatuses,
+  nonPhysicalWays,
   readingStates,
   type ReadingState,
 } from '../db.js';
@@ -47,6 +48,7 @@ const readingDates = (
 // The reader's own copy
 export const copySchema = z
   .object({
+    nonPhysical: maybe(z.enum(nonPhysicalWays)),
     place: maybe(placeRefSchema),
     // When the reader put it there, as their own screen has it (books put
     // somewhere together, one a moment after the other, to keep their
@@ -92,9 +94,23 @@ export const copySchema = z
       status === 'shelf' || !since || !due || due >= since,
     { path: ['due'], message: 'Due back can’t come before the loan began.' },
   )
-  // Loan details mean nothing for a book that's at home
-  .transform(({ person, since, due, reading, started, finished, ...copy }) => ({
-    ...copy,
-    ...(copy.status !== 'shelf' && { person, since, due }),
-    ...readingDates(reading, started, finished),
-  }));
+  // Loan details mean nothing for a book that's at home, and a place,
+  // a loan or a condition nothing for one that isn't on the shelves
+  .transform(({ person, since, due, reading, started, finished, ...copy }) => {
+    const dates = readingDates(reading, started, finished);
+    if (copy.nonPhysical)
+      return {
+        ...copy,
+        status: 'shelf' as const,
+        place: undefined,
+        placedAt: undefined,
+        location: undefined,
+        condition: undefined,
+        ...dates,
+      };
+    return {
+      ...copy,
+      ...(copy.status !== 'shelf' && { person, since, due }),
+      ...dates,
+    };
+  });

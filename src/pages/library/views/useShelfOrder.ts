@@ -4,37 +4,44 @@ import { readStored, store } from '@/shared/lib/storage';
 import {
   fades,
   orders,
+  shows,
   usual,
   type Arrangement,
   type ShelfFade,
   type ShelfOrder,
+  type ShelfShow,
 } from './order';
 
 const KEY = 'alcove.books-order';
 
-// What's stored: "title none reversed"; anything unknown falls back
+// What's stored: "title none reversed all"; anything unknown falls back
+
+// One of `options` by its stored value, or else `fallback`
+const known = <T extends string>(
+  options: { value: T }[],
+  value: string | undefined,
+  fallback: T,
+) => options.find((option) => option.value === value)?.value ?? fallback;
 
 function read(): Arrangement {
   const saved = (readStored(KEY) ?? '').split(' ');
   return {
-    order: orders.some((o) => o.value === saved[0])
-      ? (saved[0] as ShelfOrder)
-      : usual.order,
+    order: known(orders, saved[0], usual.order),
     reversed: saved[2] === 'reversed',
-    fade: fades.some((f) => f.value === saved[1])
-      ? (saved[1] as ShelfFade)
-      : usual.fade,
+    fade: known(fades, saved[1], usual.fade),
+    show: known(shows, saved[3], usual.show),
   };
 }
 
-// The chosen order and fade, remembered in this browser. A new order, or
-// the same one turned round, glides each book over to its new place.
+// The chosen order, fade and books shown, remembered in this browser. A
+// new order, or the same one turned round, glides each book over to its
+// new place; other books shown come in over those before.
 export function useShelfOrder() {
   const [choice, setArrangement] = useState(read);
   const save = (next: Arrangement) => {
     store(
       KEY,
-      `${next.order} ${next.fade} ${next.reversed ? 'reversed' : 'usual'}`,
+      `${next.order} ${next.fade} ${next.reversed ? 'reversed' : 'usual'} ${next.show}`,
     );
     return next;
   };
@@ -45,5 +52,9 @@ export function useShelfOrder() {
       easeChange(() => setArrangement(save({ ...choice, order, reversed })));
     },
     setFade: (fade: ShelfFade) => setArrangement(save({ ...choice, fade })),
+    setShow: (show: ShelfShow) => {
+      if (show === choice.show) return;
+      easeChange(() => setArrangement(save({ ...choice, show })), 'swap');
+    },
   };
 }

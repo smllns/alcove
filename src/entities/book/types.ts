@@ -1,6 +1,8 @@
 import type { PlaceRef } from '@/entities/place/types';
 
-// A physical copy on the reader's shelves. Mirrors toPublicBook on the server.
+// One of the reader's books: a physical copy on their shelves, or one they
+// read without having it (copy.nonPhysical). Mirrors toPublicBook on the
+// server.
 export type Book = {
   id: string;
   title: string;
@@ -45,6 +47,11 @@ export type BookCover = {
 export type CopyStatus = 'shelf' | 'lent' | 'borrowed';
 export type CopyCondition = 'new' | 'good' | 'worn' | 'battered';
 export type ReadingState = 'read' | 'reading' | 'unread';
+// How a book not on the reader's shelves was read: on a screen, listened
+// to, borrowed and given back, from a library, or once their own and since
+// sold, given away or lost. Mirrors the server.
+export type NonPhysicalWay =
+  'ebook' | 'audiobook' | 'borrowed' | 'library' | 'gone';
 
 // How the book is bound: in boards, in paper, or pocket-sized. Mirrors the
 // server.
@@ -53,6 +60,9 @@ export type BookFormat = 'hardcover' | 'paperback' | 'pocket';
 // The reader's own copy. Mirrors CopyDetails on the server; dates are
 // calendar days, YYYY-MM-DD.
 export type CopyDetails = {
+  // Set for a book that isn't on the shelves at all, how it was read
+  // instead: it has no place, loan or condition
+  nonPhysical?: NonPhysicalWay;
   place?: PlaceRef;
   // When it was put there (a moment), for those put there last to stand
   // last
@@ -117,7 +127,10 @@ export type AuthorFound = {
 export type FeaturedList = { id: string; name: string };
 // One holding a book, with how many books it holds
 export type FeaturedHolding = FeaturedList & { books: number };
-export type FeaturedBooks = FeaturedList & { works: CatalogueWork[] };
+export type FeaturedBooks = FeaturedList & {
+  description?: string;
+  works: CatalogueWork[];
+};
 
 // A list a reader made on Open Library (found by its name, or holding a
 // book): whose it is there, its id, its name, how many books it holds;
@@ -131,8 +144,11 @@ export type ReadersList = {
 };
 
 // A page of a reader's list's books (ReadersList), whether there are more,
-// and how many it holds, when Open Library says
+// and how many it holds, when Open Library says; the first, with what the
+// list's called and what its maker says of it, when Open Library tells
 export type ReadersListPage = {
+  name?: string;
+  description?: string;
   works: CatalogueWork[];
   more: boolean;
   books?: number;

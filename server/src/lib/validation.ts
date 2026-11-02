@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { z } from 'zod';
 import { HttpError } from './errors.js';
+import { tidyName } from './text.js';
 
 // Turns a failed zod parse into a 400 with the first problem per field
 function validationError(error: z.ZodError) {
@@ -47,7 +48,7 @@ export const maybe = <T extends z.ZodType>(schema: T) =>
 export const nameOf = (what: string) =>
   z
     .string()
-    .transform((name) => name.trim().replace(/\s+/g, ' '))
+    .transform(tidyName)
     .pipe(
       z
         .string()
@@ -55,11 +56,13 @@ export const nameOf = (what: string) =>
         .max(60, 'Keep it under 60 characters.'),
     );
 
+// Text no longer than `max`, its ends trimmed
+export const boundedText = (max: number) =>
+  z.string().trim().max(max, `Keep it under ${max} characters.`);
+
 // Text that may be left out; empty counts as left out
 export const optionalText = (max: number) =>
-  maybe(
-    z.string().trim().max(max, `Keep it under ${max} characters.`),
-  ).transform((value) => value || undefined);
+  maybe(boundedText(max)).transform((value) => value || undefined);
 
 // A list that may be missing or null, without its blank entries
 export const list = <T extends z.ZodType>(

@@ -32,6 +32,8 @@ export function Eyebrow({ children, className, rise }: TextProps) {
 }
 
 const titleSizes = {
+  // Short, heading a page that's soon into its own headings (the stats)
+  xs: 'text-[2rem] sm:text-[2.25rem]',
   // Beside something on a wide screen (settings, over its index)
   sm: 'text-[2.5rem] sm:text-5xl lg:text-[2.6rem]',
   md: 'text-[2.75rem] sm:text-6xl',

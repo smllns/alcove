@@ -1,4 +1,5 @@
 import type { Ref } from 'react';
+import { nonPhysicalLabel } from '@/entities/book/nonPhysical';
 import type { Book } from '@/entities/book/types';
 import { readingState } from '@/entities/book/reading';
 import { cn } from '@/shared/lib/cn';
@@ -18,7 +19,8 @@ const seriesLine = (series: Book['series']) =>
 // The book's title, who wrote it (with the first lines about them, and how
 // many more of theirs the reader has: AuthorByline), and at a glance where the
 // reader is with it: labels taped on for whether it's been read and
-// whether it's out on loan, and the ratings.
+// whether it's out on loan (or how it was read, for one not on the
+// shelves), and the ratings.
 // `ref`: the title, to tell when it's been scrolled out of sight.
 export function BookHeading({
   book,
@@ -28,7 +30,10 @@ export function BookHeading({
   ref?: Ref<HTMLDivElement>;
 }) {
   const reading = book.copy?.reading && readingState(book.copy.reading);
-  const status = [loanLine(book.copy)].filter(Boolean);
+  const away = book.copy?.nonPhysical;
+  const status = [away && nonPhysicalLabel(away), loanLine(book.copy)].filter(
+    Boolean,
+  );
   const series = seriesLine(book.series);
 
   return (

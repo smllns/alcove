@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { handKeyboardTo, keyboardHeld } from '@/shared/lib/keyboard';
 import { cn } from '@/shared/lib/cn';
 import { gsap } from '@/shared/lib/gsap';
 import { reducedMotionNow } from '@/shared/lib/motion';
@@ -90,12 +91,19 @@ export function Modal({
         // phone would move the whole page to bring it into view. Come up
         // from below, the panel itself takes it, not a field in it, so no
         // keyboard pushes the page up while it travels; the field is
-        // tapped when wanted.
+        // tapped when wanted. Unless the keyboard's up for it already
+        // (holdKeyboard, in the tap that opened it): then the field takes
+        // it over at once.
         const below = fromBelow(motion);
+        const held = keyboardHeld();
         gsap.set(box, home);
-        box.toggleAttribute('autofocus', below);
+        // Its field given the focus as it opens, so the keyboard held for
+        // it is never let go
+        box.toggleAttribute('autofocus', below && !held);
+        focus?.current?.toggleAttribute('autofocus', held);
         dialog.showModal();
-        if (!below) focus?.current?.focus();
+        handKeyboardTo(focus?.current, held);
+        if (!held && !below) focus?.current?.focus();
         gsap.set(dim, { opacity: 0 });
         gsap.set(box, away(motion));
       }

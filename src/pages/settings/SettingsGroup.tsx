@@ -3,7 +3,7 @@ import { sheetClass } from '@/shared/ui/surfaces';
 
 // One group of settings: its name, and under it a sheet of the settings
 // themselves (SettingRow), as a room's shelves sit on theirs. `id`: where
-// the index leads to (SettingsIndex). `aside`: a word or a link on the
+// the index leads to (PageContents). `aside`: a word or a link on the
 // right of the name.
 export function SettingsGroup({
   id,

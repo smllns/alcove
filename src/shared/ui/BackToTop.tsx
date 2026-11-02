@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { scrollToTop } from '@/shared/lib/motion';
+import { useScrolledPast } from '@/shared/lib/useScrolledPast';
 import { IconButton } from './IconButton';
 import { Tooltip } from './Tooltip';
 
@@ -14,16 +14,7 @@ export function BackToTop({
   after: Element | null;
   className?: string;
 }) {
-  const [far, setFar] = useState(false);
-
-  useEffect(() => {
-    if (!after) return;
-    const observer = new IntersectionObserver(([entry]) =>
-      setFar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
-    );
-    observer.observe(after);
-    return () => observer.disconnect();
-  }, [after]);
+  const far = useScrolledPast(after);
 
   return (
     <Tooltip

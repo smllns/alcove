@@ -22,6 +22,9 @@ type SelectProps<T extends string> = {
   hint?: string;
   // A box to narrow a long list down by typing; on by default past a dozen
   searchable?: boolean;
+  // Its options opening in the page under it, rather than over the page:
+  // inside a dialog, which nothing drawn over the page can reach
+  inline?: boolean;
   className?: string;
 };
 
@@ -39,6 +42,7 @@ export function Select<T extends string>({
   error,
   hint,
   searchable = options.length > 12,
+  inline = false,
   className,
 }: SelectProps<T>) {
   const id = useId();
@@ -109,7 +113,14 @@ export function Select<T extends string>({
   };
 
   return (
-    <div className={cn('flex min-w-0 flex-col gap-2', className)}>
+    <div
+      className={cn(
+        'flex min-w-0 flex-col gap-2',
+        // The box its options open under, `inline`
+        inline && 'relative',
+        className,
+      )}
+    >
       <span id={`${id}-label`} className={labelClass}>
         {label}
       </span>
@@ -153,6 +164,7 @@ export function Select<T extends string>({
         open={open}
         anchor={trigger}
         onClose={(how) => (how === 'escape' ? close() : setOpen(false))}
+        inline={inline}
         className='min-w-56'
       >
         {searchable && (

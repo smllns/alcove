@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useReadingAt } from '@/shared/lib/useReadingAt';
+import { PageContents } from '@/shared/ui/PageContents';
 import { useAuth } from '@/features/auth';
 import { paths } from '@/shared/config/paths';
 import { BackToTop } from '@/shared/ui/BackToTop';
@@ -10,7 +12,6 @@ import { PlacesSettings } from './PlacesSettings';
 import { ProfileGroup } from './ProfileGroup';
 import { rowLinkClass } from './rowLink';
 import { SettingsGroup } from './SettingsGroup';
-import { SettingsIndex } from './SettingsIndex';
 import { SignInGroup } from './SignInGroup';
 import { ThemeChoice } from './ThemeChoice';
 
@@ -32,6 +33,7 @@ export function SettingsPage() {
   const { user } = useAuth();
   // The title: the way back up shows once it's scrolled away
   const [top, setTop] = useState<HTMLElement | null>(null);
+  const [shown, goTo] = useReadingAt(groups.map(({ id }) => id));
   // Behind RequireAuth, so this only covers the moment of deleting the account
   if (!user) return null;
 
@@ -49,7 +51,12 @@ export function SettingsPage() {
             className='mt-8 animate-rise max-lg:hidden'
             style={{ animationDelay: '160ms' }}
           >
-            <SettingsIndex groups={groups} />
+            <PageContents
+              label='Settings'
+              parts={groups}
+              shown={shown}
+              onGo={goTo}
+            />
           </div>
         </div>
 

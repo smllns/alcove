@@ -100,4 +100,32 @@ describe('a reader’s books', () => {
       (await api('/books/by-work/OL1W', { cookie })).body.bookId,
     ).toBeNull();
   });
+  it('keeps a book read without having it unbound, with no place or loan', async () => {
+    const { cookie } = await signUp();
+    const added = await api('/books', {
+      method: 'POST',
+      cookie,
+      body: {
+        ...book('The Lathe of Heaven'),
+        format: 'paperback',
+        copy: {
+          nonPhysical: 'audiobook',
+          status: 'lent',
+          person: 'Anna',
+          condition: 'worn',
+          reading: 'read',
+        },
+      },
+    });
+    expect(added.status).toBe(201);
+    expect(added.body.book.format).toBeUndefined();
+    const { copy } = added.body.book;
+    expect(copy).toMatchObject({
+      nonPhysical: 'audiobook',
+      status: 'shelf',
+      reading: 'read',
+    });
+    expect(copy.person).toBeUndefined();
+    expect(copy.condition).toBeUndefined();
+  });
 });

@@ -1,32 +1,33 @@
-import { useListChoice } from '@/features/lists/useListChoice';
 import { useRef, useState } from 'react';
 import { Check, ListChecks, ListPlus } from 'lucide-react';
-import { useEditBook } from '@/entities/book/queries';
 import type { Book } from '@/entities/book/types';
+import { useListChoice } from '@/features/lists/useListChoice';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { AddOwnPill } from '@/shared/ui/AddOwnPill';
 import { Button } from '@/shared/ui/Button';
 import { FormError } from '@/shared/ui/FormError';
 import { Popover } from '@/shared/ui/Popover';
+import { useBookLists } from './useBookLists';
 
-// Beside a book of the reader's own: a way to put it in one of their
-// lists, or take it out, from a short menu of them all (a tick by those
-// it's in), or to start a new list with it in. Once it's in any, the
-// button says how many, so it's plain the book went in.
+// One of two marks or words in the one place, fading as the other comes
+const fade = '[grid-area:1/1] transition-opacity duration-300 ease-soft';
+
+// Beside a book, the reader's own or one from the catalogue: a way to put
+// it in one of their lists, or take it out, from a short menu of them all
+// (a tick by those it's in), or to start a new list with it in. Once it's
+// in any, the button says how many, so it's plain the book went in.
 export function AddToList({ book }: { book: Book }) {
   const button = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const { save, pending, error } = useEditBook(book);
+  const { value, change, error } = useBookLists(book);
   const {
     lists,
     chosen: inLists,
     toggle,
     addNew,
     failed,
-  } = useListChoice((pending ?? book).lists ?? [], (next) =>
-    save({ lists: next }),
-  );
+  } = useListChoice(value, change);
   // Those of its lists the reader still has, for the button to say so
   const shown = lists.filter((list) => inLists.has(list.id)).length;
 
@@ -41,8 +42,27 @@ export function AddToList({ book }: { book: Book }) {
         onClick={() => setOpen(!open)}
         className={cn(shown > 0 && 'border-ink')}
       >
-        {shown ? <ListChecks size={14} /> : <ListPlus size={14} />}
-        {shown ? `In ${counted(shown, 'list')}` : 'Add to list'}
+        {/* Its mark and its words each giving way softly to the other */}
+        <span className='grid'>
+          <ListPlus size={14} className={cn(fade, shown > 0 && 'opacity-0')} />
+          <ListChecks size={14} className={cn(fade, !shown && 'opacity-0')} />
+        </span>
+        {/* Both words in the one place, the button as wide as the wider,
+            so nothing beside it moves as one gives way to the other */}
+        <span className='grid'>
+          <span
+            aria-hidden={shown > 0}
+            className={cn(fade, shown > 0 && 'opacity-0')}
+          >
+            Add to list
+          </span>
+          <span
+            aria-hidden={!shown}
+            className={cn(fade, !shown && 'opacity-0')}
+          >
+            In {counted(Math.max(shown, 1), 'list')}
+          </span>
+        </span>
       </Button>
       <Popover
         open={open}

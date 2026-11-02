@@ -30,7 +30,7 @@ export function CoverAmbience({ book }: { book: Book }) {
       (sizes.map((size) => sizedCover(url, size)).find(coverSeen) ??
         sizedCover(url, 'L')),
   );
-  const { known, load, picture } = useCoverPicture(src);
+  const { known, load, attempt, picture } = useCoverPicture(src);
   const light = useLightDrift<HTMLDivElement>();
 
   return (
@@ -41,6 +41,7 @@ export function CoverAmbience({ book }: { book: Book }) {
       <div ref={light} className='absolute inset-x-0 top-[-10%] h-[180%]'>
         {src && load !== 'failed' ? (
           <img
+            key={attempt}
             src={src}
             alt=''
             {...picture}

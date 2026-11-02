@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api, signUp } from './api.js';
 
 // Open Library as it answers about readers' lists: one list of editions,
-// which it gives; one holding works, which it fails on; one empty
+// which it gives, said something of by its maker; one holding works,
+// which it fails on; one empty
 const answers: Record<string, () => Response> = {
   '/search/lists.json': () =>
     Response.json({
@@ -22,6 +23,11 @@ const answers: Record<string, () => Response> = {
         { url: '/books/OL10M/Wolf_Hall' },
         { url: '/books/OL20M/Milkman' },
       ],
+    }),
+  '/people/ann/lists/OL1L.json': () =>
+    Response.json({
+      name: 'Booker winners',
+      description: { type: '/type/text', value: 'Every **winner**, in order.' },
     }),
   '/people/bob/lists/OL2L/seeds.json': () =>
     new Response('Internal error', { status: 500 }),
@@ -54,11 +60,12 @@ describe('readers’ lists on Open Library', () => {
   it('finds lists, keeps only those whose books it can show, and opens them', async () => {
     const { cookie } = await signUp();
 
-    // At once, still to be looked into, the empty one left out
+    // At once, the biggest first, still to be looked into, the empty one
+    // left out
     const found = await api('/lookup/lists?q=booker', { cookie });
     expect(found.body.lists).toEqual([
-      { owner: 'ann', id: 'OL1L', name: 'Booker winners', books: 2 },
       { owner: 'bob', id: 'OL2L', name: 'Booker works', books: 5 },
+      { owner: 'ann', id: 'OL1L', name: 'Booker winners', books: 2 },
     ]);
     // Each looked into on its own
     expect(
@@ -82,13 +89,21 @@ describe('readers’ lists on Open Library', () => {
 
     asked.length = 0;
     const opened = await api('/lookup/lists/ann/OL1L', { cookie });
-    expect(opened.body.list).toMatchObject({ books: 2, more: false });
+    expect(opened.body.list).toMatchObject({
+      name: 'Booker winners',
+      description: 'Every winner, in order.',
+      books: 2,
+      more: false,
+    });
     expect(
       opened.body.list.works.map((w: { title: string }) => w.title),
     ).toEqual(['Wolf Hall', 'Milkman']);
     // Its books were looked into as it was found: only the catalogue's
-    // search for them is asked now
-    expect(asked).toEqual(['/search.json']);
+    // search for them is asked now, and what the list says of itself
+    expect(asked.sort()).toEqual([
+      '/people/ann/lists/OL1L.json',
+      '/search.json',
+    ]);
 
     expect((await api('/lookup/lists/bob/OL2L', { cookie })).status).toBe(404);
     expect(asked.filter((path) => path.includes('seeds'))).toHaveLength(0);

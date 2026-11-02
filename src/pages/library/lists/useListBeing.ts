@@ -12,7 +12,7 @@ import type { ListChanges } from './useListChanges';
 // The list a list's page is of (`id` its address's): one of the reader's,
 // or one only being begun (at paths.newList), under a name of its own for
 // now and kept nowhere. That one's made (`make`) once something's done in
-// it, its name typed or a book put in, and its page's address becomes its
+// it, its name typed, a line said about it or a book put in, and its page's address becomes its
 // own, the page staying as it is; left before then, it was never made.
 // Books put in it before it's made wait with it (`early`, useBegunBooks),
 // and whether it's to be public, public unless chosen otherwise (`open`).
@@ -26,10 +26,10 @@ export function useListBeing(id: string, lists: BookList[] | undefined) {
   const list = begun
     ? lists && { id: '', name, public: open }
     : lists?.find((each) => each.id === id);
-  const make = (named = name) => {
+  const make = (made: { name?: string; description?: string } = {}) => {
     if (create.isPending) return;
     create.mutate(
-      { name: named, public: open },
+      { name: made.name ?? name, public: open, description: made.description },
       {
         onSuccess: ({ list: made }) =>
           void navigate(paths.list(made.id), {

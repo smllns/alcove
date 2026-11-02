@@ -10,6 +10,8 @@ import { AverageRatingField } from './AverageRatingField';
 import type { DraftForm } from './BookForm';
 import { EditionSelect } from './EditionSelect';
 import { GenrePicker } from './GenrePicker';
+import { HaveItFields } from './HaveItFields';
+import { isNonPhysical } from './draft';
 import { LanguageFields } from './LanguageFields';
 import { SeriesFields } from './SeriesFields';
 
@@ -39,6 +41,7 @@ export function BookStep({
 }: BookStepProps) {
   return (
     <div className='flex flex-col gap-6'>
+      <HaveItFields form={form} />
       {editions.length > 0 && (
         <EditionSelect
           editions={editions}
@@ -92,13 +95,16 @@ export function BookStep({
         <TextField label='Pages' inputMode='numeric' {...form.field('pages')} />
       </div>
 
-      <Choices
-        label='Format'
-        options={bookFormats}
-        value={form.values.format}
-        onChange={(format) => form.setValue('format', format)}
-        clearable
-      />
+      {/* How it's bound, for one that's bound at all */}
+      {!isNonPhysical(form.values) && (
+        <Choices
+          label='Format'
+          options={bookFormats}
+          value={form.values.format}
+          onChange={(format) => form.setValue('format', format)}
+          clearable
+        />
+      )}
 
       <LanguageFields form={form} />
 

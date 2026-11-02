@@ -1,5 +1,6 @@
 import type { BookInput } from '@/entities/book/types';
 import {
+  isNonPhysical,
   isTranslation,
   placeOf,
   type DraftExtras,
@@ -9,7 +10,9 @@ import { sources } from '@/entities/book/acquired';
 import { tidyLists, type DraftLists } from './entries';
 
 // The draft as the API wants it: text turned into numbers and lists, blanks
-// left out, and only what's on show (a translator only for a translation)
+// left out, and only what's on show (a translator only for a translation).
+// A book not on the shelves loses its binding, place, loan and condition
+// on the server.
 
 const whole = (value: string) => {
   const n = Number(value.trim());
@@ -64,6 +67,8 @@ export function toBookInput(
     averageRating: number(fields.averageRating),
     ...extras,
     copy: {
+      nonPhysical:
+        (isNonPhysical(fields) && fields['copy.nonPhysical']) || undefined,
       place: place.home
         ? {
             home: place.home,

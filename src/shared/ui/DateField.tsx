@@ -3,6 +3,7 @@ import { CalendarDays } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { fromDay, longDate, today } from '@/shared/lib/dates';
 import { Calendar } from './Calendar';
+import { Collapse } from './Collapse';
 import { FieldNote } from './FieldNote';
 import { labelClass } from './fieldStyles';
 import { RemoveButton } from './ListControls';
@@ -21,10 +22,13 @@ type DateFieldProps = {
   past?: boolean;
   // Nothing before this day, e.g. a finish before the start
   earliest?: string;
+  // The calendar opening in the page under the field, rather than over
+  // it: inside a dialog, which nothing drawn over the page can reach
+  inline?: boolean;
 };
 
-// A day, picked from a calendar that opens below the field, and shown
-// written out ("25 December 2019")
+// A day, picked from a calendar that opens below the field (over the page,
+// or, `inline`, in it), and shown written out ("25 December 2019")
 export function DateField({
   label,
   value,
@@ -35,6 +39,7 @@ export function DateField({
   className,
   past = false,
   earliest,
+  inline = false,
 }: DateFieldProps) {
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
@@ -49,6 +54,17 @@ export function DateField({
     onChange(day);
     close();
   };
+
+  const calendar = (
+    <div role='dialog' aria-label={`Choose ${label.toLowerCase()}`}>
+      <Calendar
+        value={value}
+        onPick={pick}
+        earliest={earliest || undefined}
+        latest={past ? today() : undefined}
+      />
+    </div>
+  );
 
   return (
     <div className={cn('flex min-w-0 flex-col gap-2', className)}>
@@ -91,21 +107,20 @@ export function DateField({
       </div>
       <FieldNote id={`${id}-note`} error={error} hint={hint} />
 
-      <Popover
-        open={open}
-        anchor={trigger}
-        onClose={(how) => (how === 'escape' ? close() : setOpen(false))}
-        width={304}
-      >
-        <div role='dialog' aria-label={`Choose ${label.toLowerCase()}`}>
-          <Calendar
-            value={value}
-            onPick={pick}
-            earliest={earliest || undefined}
-            latest={past ? today() : undefined}
-          />
-        </div>
-      </Popover>
+      {inline ? (
+        <Collapse open={open}>
+          <div className='max-w-76 pt-1'>{calendar}</div>
+        </Collapse>
+      ) : (
+        <Popover
+          open={open}
+          anchor={trigger}
+          onClose={(how) => (how === 'escape' ? close() : setOpen(false))}
+          width={304}
+        >
+          {calendar}
+        </Popover>
+      )}
     </div>
   );
 }

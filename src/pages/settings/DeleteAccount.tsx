@@ -13,7 +13,7 @@ export function DeleteAccount({
   id,
   delay,
 }: {
-  // Where the index leads to (SettingsIndex)
+  // Where the index leads to (PageContents)
   id: string;
   delay: number;
 }) {

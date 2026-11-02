@@ -12,7 +12,7 @@ import { countByList } from './repository.js';
 
 // Lists other readers have made public: found by their names, and opened,
 // never changed. Only what any reader may see of them goes out: the
-// list's name, whose it is, and its books as the catalogue tells them.
+// list's name and what's said of it, whose it is, and its books as the catalogue tells them.
 
 // The most found at once
 const MOST = 12;
@@ -112,6 +112,7 @@ export async function sharedList(id: string) {
   return {
     id: list.id,
     name: list.name,
+    description: list.description,
     owner: calledBy(owner),
     works: [...shelved, ...works],
   };

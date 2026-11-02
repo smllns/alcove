@@ -19,8 +19,9 @@ type BookCoverProps = {
   children?: ReactNode;
 };
 
-// A cover at a fixed 2:3 shape. Fades in once loaded; books without a
-// picture (or whose picture fails) get a plain cloth binding with the title.
+// A cover at a fixed 2:3 shape. Fades in once loaded, asked for again
+// should it not come at first; books without a picture (or whose picture
+// never comes) get a plain cloth binding with the title.
 export function BookCover({
   title,
   author,
@@ -32,7 +33,7 @@ export function BookCover({
   children,
 }: BookCoverProps) {
   const src = url && sizedCover(url, size);
-  const { known, load, picture } = useCoverPicture(src);
+  const { known, load, attempt, picture } = useCoverPicture(src);
   const showPicture = src && load !== 'failed';
 
   return (
@@ -48,6 +49,7 @@ export function BookCover({
     >
       {showPicture ? (
         <img
+          key={attempt}
           src={src}
           alt=''
           // One seen already is in the cache: left to load lazily, Safari

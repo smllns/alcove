@@ -19,9 +19,10 @@ import { EmptyShelf } from './EmptyShelf';
 import { LibraryBooks } from './LibraryBooks';
 import { ListsSection } from './lists/ListsSection';
 import { PlacesSection } from './places/PlacesSection';
+import { StatsSection } from './stats/StatsSection';
 import { useShelf } from '@/entities/book/useShelf';
 import { useBookView } from './views/views';
-import { needsEveryBook } from './views/order';
+import { keptBy, needsEveryBook } from './views/order';
 import { useShelfOrder } from './views/useShelfOrder';
 import { ShelfToolbar } from './ShelfToolbar';
 import { ViewStage } from './ViewStage';
@@ -41,21 +42,24 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
 
   const shelfOrder = useShelfOrder();
   // The sky shows every book, and any order but the newest first needs
-  // them all, as do the places (to find the books not yet in one) and the lists
+  // them all, as do the places (to find the books not yet in one), the
+  // lists and the stats. Only the shelves leave any out (the physical
+  // books alone, if chosen); the other sections take every one.
   const shelf = useShelf(
     books,
     search.query,
     view === 'universe' ||
       needsEveryBook(shelfOrder.arrangement) ||
       section === 'places' ||
-      section === 'lists',
+      section === 'lists' ||
+      section === 'stats',
+    section === 'all' ? keptBy(shelfOrder.arrangement.show) : undefined,
   );
-  const { all } = shelf;
-  const total = books.data?.pages[0]?.total ?? 0;
-  // Once there are books, the shelves take the page: tabs over the grid,
-  // and adding another lives up in the header. Until then, a greeting and
-  // the empty shelf sit in the middle of the screen.
-  const shelved = all.length > 0;
+  // Once there are books (any, whichever are shown), the shelves take the
+  // page: tabs over the grid, and adding another lives up in the header.
+  // Until then, a greeting and the empty shelf sit in the middle of the
+  // screen.
+  const shelved = Boolean(books.data?.pages[0]?.books.length);
   // The other sections always show the tabs, so there's a way back
   const tabbed = shelved || section !== 'all';
   // The sky fills the whole screen, with everything else floating over it
@@ -147,9 +151,11 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
               <div className='mt-8 sm:mt-12 xl:mt-16'>
                 <span ref={setSectionTop} aria-hidden className='block' />
                 {section === 'places' ? (
-                  <PlacesSection shelf={shelf} total={total} />
+                  <PlacesSection shelf={shelf} />
                 ) : section === 'lists' ? (
                   <ListsSection shelf={shelf} />
+                ) : section === 'stats' ? (
+                  <StatsSection shelf={shelf} />
                 ) : (
                   <ComingSoon section={section} />
                 )}

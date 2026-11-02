@@ -2,6 +2,10 @@ import { useSyncExternalStore } from 'react';
 
 // A phone's screen: narrower than Tailwind's sm
 export const PHONE = '(max-width: 639px)';
+// Pointed at by a finger, not a mouse
+export const COARSE = '(pointer: coarse)';
+// Able to hover: a mouse or a trackpad
+export const HOVER = '(hover: hover)';
 
 // Whether a media query matches, kept up to date as it changes
 export function useMediaQuery(query: string) {

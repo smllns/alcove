@@ -3,12 +3,17 @@ import type {
   BookFormat,
   CopyCondition,
   CopyStatus,
+  NonPhysicalWay,
   ReadingState,
 } from '@/entities/book/types';
 import type { PlaceChoice } from '@/features/places';
 
 // The form's text fields. Everything is a string while being edited.
 export type DraftFields = {
+  // Whether the reader has it on their shelves, and if not, how they read
+  // it: the first thing asked, deciding what else is
+  physical: 'yes' | 'no';
+  'copy.nonPhysical': NonPhysicalWay | '';
   title: string;
   subtitle: string;
   authors: string;
@@ -66,6 +71,8 @@ export type DraftExtras = {
 };
 
 export const emptyFields: DraftFields = {
+  physical: 'yes',
+  'copy.nonPhysical': '',
   title: '',
   subtitle: '',
   authors: '',
@@ -123,6 +130,8 @@ export const withPlace = (
 
 // The fields on the first step, about the book itself
 export const bookFieldNames = [
+  'physical',
+  'copy.nonPhysical',
   'title',
   'subtitle',
   'authors',
@@ -141,6 +150,23 @@ export const bookFieldNames = [
   'description',
   'averageRating',
 ] as const;
+
+// Not on the shelves: read on a screen, from a library and so on
+export const isNonPhysical = (fields: DraftFields) => fields.physical === 'no';
+
+// What the first step can't be left without: a title and an author, and
+// for a book not on the shelves, how it was read; everything else may
+// stay empty
+export const missingOnBookStep = (
+  fields: DraftFields,
+): Partial<Record<keyof DraftFields, string>> => ({
+  ...(isNonPhysical(fields) &&
+    !fields['copy.nonPhysical'] && {
+      'copy.nonPhysical': 'Choose one of these.',
+    }),
+  ...(!fields.title.trim() && { title: 'Every book needs a title.' }),
+  ...(!fields.authors.trim() && { authors: 'Who wrote it?' }),
+});
 
 // Sets the language, and the original along with it while the two were the
 // same (or the original was never set): most books are read in the

@@ -1,20 +1,35 @@
 import { z } from 'zod';
 import { coverHost } from '../books/schemas.js';
-import { list, maybe, nameOf } from '../lib/validation.js';
+import {
+  boundedText,
+  list,
+  maybe,
+  nameOf,
+  optionalText,
+} from '../lib/validation.js';
 import { WORK_KEY } from '../lookup/openLibrary.js';
 
-// A new list: its name, and whether other readers may find it (they may,
-// unless it's said otherwise)
+// As long as what's said about a list may be
+const ABOUT_MAX = 300;
+
+// A new list: its name, whether other readers may find it (they may,
+// unless it's said otherwise), and a line or two about it, if any
 export const newListSchema = z.object({
   name: nameOf('list'),
   public: z.boolean().default(true),
+  description: optionalText(ABOUT_MAX),
 });
 
-// A list changed: its name, whether other readers may find it, or both
+// A list changed: its name, whether other readers may find it, what's
+// said about it (nothing, once it's emptied), or any of them
 export const listChangeSchema = z
-  .object({ name: nameOf('list').optional(), public: z.boolean().optional() })
+  .object({
+    name: nameOf('list').optional(),
+    public: z.boolean().optional(),
+    description: boundedText(ABOUT_MAX).optional(),
+  })
   .refine(
-    (change) => change.name !== undefined || change.public !== undefined,
+    (change) => Object.values(change).some((value) => value !== undefined),
     'Nothing to change.',
   );
 
@@ -23,7 +38,7 @@ const MAX_CHANGED = 500;
 const TOO_MANY = 'That’s a lot of books at once.';
 
 // A book from the catalogue, as a search found it
-const listedWorkSchema = z.object({
+export const listedWorkSchema = z.object({
   workKey: z.string().regex(WORK_KEY),
   title: z.string().trim().min(1).max(500),
   authors: list(z.string().trim().max(200), 20, 'That’s a lot of authors.'),

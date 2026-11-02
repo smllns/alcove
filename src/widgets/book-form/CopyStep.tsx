@@ -7,7 +7,7 @@ import { StarRating } from '@/shared/ui/StarRating';
 import { TextArea } from '@/shared/ui/TextArea';
 import { AcquiredFields } from './AcquiredFields';
 import type { DraftForm } from './BookForm';
-import { placeOf, withPlace } from './draft';
+import { isNonPhysical, placeOf, withPlace } from './draft';
 import type { DraftLists } from './entries';
 import { LinkEntries } from './LinkEntries';
 import { LoanFields } from './LoanFields';
@@ -27,8 +27,9 @@ type CopyStepProps = {
 };
 
 // Step two: this particular copy. Whether it's been read, where it lives,
-// who has it, what shape it's in, and what the reader makes of it. All of
-// it optional.
+// who has it, what shape it's in, and what the reader makes of it (where,
+// who and what shape left out for a book not on the shelves). All of it
+// optional.
 export function CopyStep({
   form,
   entries,
@@ -42,6 +43,7 @@ export function CopyStep({
     (update: (each: DraftLists[K]) => DraftLists[K]) =>
       onEntriesChange((e) => ({ ...e, [name]: update(e[name]) }));
 
+  const physical = !isNonPhysical(form.values);
   return (
     <div className='flex flex-col gap-8'>
       <ReadingFields form={form} />
@@ -54,24 +56,29 @@ export function CopyStep({
         }
       />
 
-      <PlacePicker
-        value={placeOf(form.values)}
-        onChange={(place) => form.setValues((v) => withPlace(v, place))}
-      />
+      {physical && (
+        <PlacePicker
+          value={placeOf(form.values)}
+          onChange={(place) => form.setValues((v) => withPlace(v, place))}
+        />
+      )}
 
       <ListPicker value={lists} onChange={onListsChange} />
 
       <AcquiredFields form={form} />
 
-      <LoanFields form={form} />
-
-      <StepSlider
-        label='Condition'
-        steps={copyConditions}
-        value={form.values['copy.condition']}
-        onChange={(condition) => form.setValue('copy.condition', condition)}
-        clearable
-      />
+      {physical && (
+        <>
+          <LoanFields form={form} />
+          <StepSlider
+            label='Condition'
+            steps={copyConditions}
+            value={form.values['copy.condition']}
+            onChange={(condition) => form.setValue('copy.condition', condition)}
+            clearable
+          />
+        </>
+      )}
 
       <TextArea
         label='Review'

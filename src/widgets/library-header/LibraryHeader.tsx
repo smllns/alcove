@@ -9,6 +9,7 @@ import { FeedDrawer } from './FeedDrawer';
 import { HeaderSearch } from './HeaderSearch';
 import { SearchDialog } from './search/SearchDialog';
 import { useShortcut } from './useShortcut';
+import { holdKeyboard } from '@/shared/lib/keyboard';
 import { paths } from '@/shared/config/paths';
 
 // The header over the library and the pages in it: the logo, the search
@@ -25,7 +26,11 @@ export function LibraryHeader({
 }) {
   const [open, setOpen] = useState<'search' | 'feed' | null>(null);
   const close = () => setOpen(null);
-  const search = useCallback(() => setOpen('search'), []);
+  // On a phone, the keyboard comes up with it, the field taking it at once
+  const search = useCallback(() => {
+    holdKeyboard();
+    setOpen('search');
+  }, []);
   useShortcut('k', search);
   return (
     <SiteHeader

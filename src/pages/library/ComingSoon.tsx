@@ -7,7 +7,7 @@ import type { SectionKey } from '@/widgets/library-header';
 export function ComingSoon({
   section,
 }: {
-  section: Exclude<SectionKey, 'all'>;
+  section: Exclude<SectionKey, 'all' | 'stats'>;
 }) {
   const plan = plans[section];
   return (

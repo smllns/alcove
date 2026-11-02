@@ -16,6 +16,17 @@ export const copyConditions = ['new', 'good', 'worn', 'battered'] as const;
 export type CopyCondition = (typeof copyConditions)[number];
 export const readingStates = ['read', 'reading', 'unread'] as const;
 export type ReadingState = (typeof readingStates)[number];
+// How a book the reader doesn't have on their shelves was read: on a
+// screen, listened to, borrowed and given back, from a library, or once
+// their own and since sold, given away or lost
+export const nonPhysicalWays = [
+  'ebook',
+  'audiobook',
+  'borrowed',
+  'library',
+  'gone',
+] as const;
+export type NonPhysicalWay = (typeof nonPhysicalWays)[number];
 
 // How the book is bound: in boards, in paper, or pocket-sized
 export const bookFormats = ['hardcover', 'paperback', 'pocket'] as const;
@@ -24,6 +35,9 @@ export type BookFormat = (typeof bookFormats)[number];
 // The reader's own copy: where it is, who has it, what they make of it.
 // Dates are calendar days (YYYY-MM-DD), not moments.
 export type CopyDetails = {
+  // Set for a book that isn't on the shelves at all, how it was read
+  // instead: it has no place, loan or condition
+  nonPhysical?: NonPhysicalWay;
   place?: PlaceRef;
   // The moment it was put there (not a day, unlike the rest), for those
   // put there last to stand last
@@ -54,7 +68,8 @@ export type CopyDetails = {
   links?: { label?: string; url: string }[];
 };
 
-// One physical copy on someone's shelves
+// One book of someone's: a physical copy on their shelves, or one they
+// read without having it (copy.nonPhysical)
 export type BookDoc = {
   _id: ObjectId;
   userId: ObjectId;

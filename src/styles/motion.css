@@ -13,6 +13,14 @@
     }
   }
 
+  /* animate-fade-out: simply go, softly, in place */
+  --animate-fade-out: fade-out 0.3s ease-in both;
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
   /* animate-arrive: something found coming into a list, fading up a touch.
      Stagger with an animation-delay. */
   --animate-arrive: arrive 0.55s var(--ease-soft) both;

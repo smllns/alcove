@@ -5,6 +5,8 @@
 export type BookList = {
   id: string;
   name: string;
+  // A line or two about it, should the reader give one
+  description?: string;
   works?: ListedWork[];
   public?: boolean;
 };
@@ -35,6 +37,7 @@ export type SharedList = {
 export type SharedListBooks = {
   id: string;
   name: string;
+  description?: string;
   owner: string;
   works: ListedWork[];
 };

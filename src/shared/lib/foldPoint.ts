@@ -22,11 +22,15 @@ function rowsOf(el: HTMLElement, lineHeight: number) {
 // partway into a line its paragraph goes on to, so the line before it
 // still reads and it plainly carries on under the fade, never at a
 // paragraph's end, where what's shown would look finished. Nearest above
-// the given number of lines, or else below.
+// the given number of lines, or else below. Text that fits, or would leave
+// only a line under the fold, is shown whole (as tall as it is).
 export function foldPoint(el: HTMLElement, lines: number) {
   const lineHeight = parseFloat(getComputedStyle(el).lineHeight);
   const rows = rowsOf(el, lineHeight);
   const target = lineHeight * lines;
+  // All of it fits: shown whole, nothing to fold (as tall as the text's
+  // own box, its lines a touch taller than the letters in them)
+  if ((rows.at(-1)?.bottom ?? 0) <= target + 1) return el.scrollHeight;
   // The next line follows straight on, not after a blank one
   const goesOn = (i: number) =>
     i + 1 < rows.length && rows[i + 1].top - rows[i].bottom < lineHeight / 2;
@@ -42,6 +46,9 @@ export function foldPoint(el: HTMLElement, lines: number) {
     while (at >= 0 && at < rows.length && !goesOn(at)) at++;
   }
   if (at < 0 || !goesOn(at)) return Math.round(target);
+  // No more than a line would be left under the fold: not worth a fold,
+  // shown whole
+  if (rows.length - (at + 1) <= 1) return el.scrollHeight;
   // A little over halfway down the next line, mostly faded out
   const next = rows[at + 1];
   return Math.round(next.top + (next.bottom - next.top) * 0.6);

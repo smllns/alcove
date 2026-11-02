@@ -12,13 +12,14 @@ export function ReadersListPage() {
   const list = useReadersList(owner, id);
   const pages = list.data?.pages ?? [];
   const works = pages.flatMap((page) => page.works);
-  const name = known?.name ?? 'A list on Open Library';
+  const name = pages[0]?.name ?? known?.name ?? 'A list on Open Library';
   const total = Math.max(pages[0]?.books ?? known?.books ?? 0, works.length);
   return (
     <WorksListPage
       lightKey={`${owner}/${id}`}
       eyebrow='A reader’s list on Open Library'
       name={name}
+      description={pages[0]?.description}
       works={works}
       total={total}
       more={

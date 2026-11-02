@@ -14,7 +14,11 @@ function shorten(text: string) {
   return end > 0 ? cut.slice(0, end + 1) : cut;
 }
 
-export function cleanDescription(text: string | undefined) {
+// Open Library's text as it writes it: plain, or as a typed value
+export type OpenLibraryText = string | { value?: string } | undefined;
+
+export function cleanDescription(written: OpenLibraryText) {
+  const text = typeof written === 'string' ? written : written?.value;
   if (!text) return undefined;
   const body = text
     .replace(/\r\n?/g, '\n')

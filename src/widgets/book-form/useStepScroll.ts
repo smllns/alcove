@@ -13,7 +13,8 @@ const ROOM_ABOVE = 96;
 // easy view. Changing a book, the steps are switched between at the
 // heading or after being brought there (`switchFromBelow`), so only a
 // heading out of sight altogether is, e.g. when a problem on the other step
-// sends the reader over to it. `form`: for the form's own element.
+// sends the reader over to it. `form`: for the form's own element;
+// `toHeading`: back up to the step's start, to what's missing there.
 export function useStepScroll(
   step: Step,
   editing: boolean,
@@ -25,6 +26,13 @@ export function useStepScroll(
   // the form's first showing (however many times that's run, as React's
   // strict mode does in development)
   const shown = useRef(step);
+  // Up to the step's heading, gently
+  const toHeading = () => {
+    const el = heading.current;
+    if (!el) return;
+    const top = el.getBoundingClientRect().top;
+    scrollPageTo(pageScrollY(el) + top - ROOM_ABOVE, 'smooth', el);
+  };
   useEffect(() => {
     if (shown.current === step) return;
     shown.current = step;
@@ -32,8 +40,7 @@ export function useStepScroll(
     const inView =
       top !== undefined && top > 0 && top < innerHeight / (editing ? 1 : 3);
     if (top === undefined || inView) return;
-    const el = heading.current;
-    scrollPageTo(pageScrollY(el) + top - ROOM_ABOVE, 'smooth', el);
+    toHeading();
   }, [step, editing]);
 
   // Changing a book, over to the other step from the buttons below it: up
@@ -55,5 +62,5 @@ export function useStepScroll(
       () => scrollPageTo(startOf()),
     );
   };
-  return { heading, form, switchFromBelow };
+  return { heading, form, switchFromBelow, toHeading };
 }

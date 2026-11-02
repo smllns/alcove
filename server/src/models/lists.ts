@@ -7,6 +7,8 @@ import type { ObjectId } from 'mongodb';
 export type BookListNode = {
   id: string;
   name: string;
+  // A line or two about it, should the reader give one
+  description?: string;
   works?: ListedWorkNode[];
   // Found by other readers, and opened by them, but never changed
   public?: boolean;

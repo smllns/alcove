@@ -30,7 +30,7 @@ const year = maybe(
     .max(thisYear + 2, 'Check the year.'),
 );
 
-export const bookInputSchema = z.object({
+const bookFields = z.object({
   title: z
     .string()
     .trim()
@@ -117,10 +117,20 @@ export const bookInputSchema = z.object({
   copy: maybe(copySchema),
 });
 
+// A book read without having it isn't bound in anything (its copy loses
+// its place, loan and condition the same way, copySchema)
+const unbound = <
+  T extends { format?: unknown; copy?: { nonPhysical?: unknown } },
+>(
+  book: T,
+) => (book.copy?.nonPhysical ? { ...book, format: undefined } : book);
+
+export const bookInputSchema = bookFields.transform(unbound);
+
 export type BookInput = z.infer<typeof bookInputSchema>;
 
 // Adding asks first when the book is already on the shelves; `anotherCopy`
 // is the reader saying yes, they have two
-export const addBookSchema = bookInputSchema.extend({
-  anotherCopy: z.boolean().default(false),
-});
+export const addBookSchema = bookFields
+  .extend({ anotherCopy: z.boolean().default(false) })
+  .transform(unbound);

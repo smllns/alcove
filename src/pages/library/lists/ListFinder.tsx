@@ -126,7 +126,6 @@ export function ListFinder({
         setOpen(true);
       }}
       onFocus={() => setOpen(true)}
-      onBlur={phone ? () => setOpen(false) : undefined}
       placeholder='Add a book: yours, or any'
       className={phone ? 'w-full' : className}
     />

@@ -92,10 +92,11 @@ describe('a reader’s lists', () => {
     const made = await api(`/lists/${open}`, {
       method: 'PATCH',
       cookie: owner.cookie,
-      body: { public: true },
+      body: { public: true, description: '  For the long nights.  ' },
     });
     expect(made.body.lists[0]).toMatchObject({
       name: 'Winter classics',
+      description: 'For the long nights.',
       public: true,
     });
 
@@ -114,6 +115,7 @@ describe('a reader’s lists', () => {
     expect(
       shown.body.list.works.map((w: { title: string }) => w.title),
     ).toEqual(['The Left Hand of Darkness', 'Tehanu']);
+    expect(shown.body.list.description).toBe('For the long nights.');
     // Nothing of the owner's copy goes out
     expect(Object.keys(shown.body.list.works[0]).sort()).toEqual(
       ['authors', 'editionCount', 'title', 'workKey'].sort(),
@@ -127,6 +129,13 @@ describe('a reader’s lists', () => {
     expect(
       (await api(`/lists/shared/${open}`, { cookie: reader.cookie })).status,
     ).toBe(404);
+    // Emptied, nothing's said about it
+    const emptied = await api(`/lists/${open}`, {
+      method: 'PATCH',
+      cookie: owner.cookie,
+      body: { description: '' },
+    });
+    expect(emptied.body.lists[0]).not.toHaveProperty('description');
     expect(
       (
         await api(`/lists/${open}`, {

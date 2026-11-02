@@ -60,7 +60,6 @@ export function ShelfFinder({
         setOpen(true);
       }}
       onFocus={() => setOpen(true)}
-      onBlur={phone ? () => setOpen(false) : undefined}
       placeholder={placeholder}
       grows={grows}
       className={phone ? 'w-full' : className}

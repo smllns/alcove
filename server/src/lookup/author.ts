@@ -57,9 +57,7 @@ export async function workAuthor(workKey: string): Promise<AuthorAbout | null> {
     name: doc.name ?? '',
     born: yearOf(doc.birth_date),
     died: yearOf(doc.death_date),
-    bio: cleanDescription(
-      typeof doc.bio === 'string' ? doc.bio : doc.bio?.value,
-    ),
+    bio: cleanDescription(doc.bio),
     photoUrl: photo
       ? `https://covers.openlibrary.org/a/id/${photo}-M.jpg`
       : undefined,

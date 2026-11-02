@@ -1,4 +1,5 @@
 import { copyConditions } from '@/entities/book/conditions';
+import { nonPhysicalLabel } from '@/entities/book/nonPhysical';
 import { useEditCopy } from '@/entities/book/queries';
 import type { Book } from '@/entities/book/types';
 import { placePath } from '@/entities/place/names';
@@ -6,6 +7,7 @@ import { usePlaces } from '@/entities/place/queries';
 import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/cn';
 import { ButtonLink } from '@/shared/ui/ButtonLink';
+import { labelClass } from '@/shared/ui/fieldStyles';
 import { FormError } from '@/shared/ui/FormError';
 import { StepSlider } from '@/shared/ui/StepSlider';
 import { outlineCardClass } from '@/shared/ui/surfaces';
@@ -15,7 +17,8 @@ import { copyStory } from './copyMoments';
 import { PlaceTrail } from './PlaceTrail';
 
 // This copy: where it lives, drawn as the way to it; what shape it's in, on
-// a scale to set right here; and its story, the latest first
+// a scale to set right here; and its story, the latest first. For a book
+// not on the shelves, how it was read in place of where and what shape.
 export function YourCopy({ book }: { book: Book }) {
   const homes = usePlaces().data?.homes ?? [];
   const { save, pending, error } = useEditCopy(book);
@@ -23,9 +26,10 @@ export function YourCopy({ book }: { book: Book }) {
   const path = copy?.place ? placePath(homes, copy.place) : [];
   const moments = copyStory(book.copy);
   const where = path.length > 0 || Boolean(copy?.location);
+  const away = copy?.nonPhysical;
 
   return (
-    <BookSection title='Your copy'>
+    <BookSection title={away ? 'Your reading' : 'Your copy'}>
       <div className='flex flex-col gap-8'>
         {/* Where it is and what shape it's in, on one card, a rule
             between them */}
@@ -35,6 +39,14 @@ export function YourCopy({ book }: { book: Book }) {
             outlineCardClass,
           )}
         >
+          {away && (
+            <p className='flex flex-col gap-1.5'>
+              <span className={labelClass}>How you read it</span>
+              <span className='font-serif text-[17px] text-ink'>
+                {nonPhysicalLabel(away)}
+              </span>
+            </p>
+          )}
           {where && (
             <div className='min-w-0'>
               {path.length > 0 ? (
@@ -60,19 +72,21 @@ export function YourCopy({ book }: { book: Book }) {
               )}
             </div>
           )}
-          <div className={cn(where && 'border-t border-line/60 pt-5')}>
-            <StepSlider
-              inline
-              label='Condition'
-              steps={copyConditions}
-              value={copy?.condition ?? ''}
-              onChange={(condition) =>
-                save({ condition: condition || undefined })
-              }
-              clearable
-            />
-            <FormError message={error} small className='mt-2' />
-          </div>
+          {!away && (
+            <div className={cn(where && 'border-t border-line/60 pt-5')}>
+              <StepSlider
+                inline
+                label='Condition'
+                steps={copyConditions}
+                value={copy?.condition ?? ''}
+                onChange={(condition) =>
+                  save({ condition: condition || undefined })
+                }
+                clearable
+              />
+              <FormError message={error} small className='mt-2' />
+            </div>
+          )}
         </div>
         {moments.length > 0 && <CopyStory moments={moments} />}
       </div>

@@ -11,6 +11,7 @@ export function FeaturedListPage() {
       lightKey={id}
       eyebrow='From Open Library'
       name={list.data?.name ?? ''}
+      description={list.data?.description}
       works={list.data?.works ?? []}
       error={list.error}
       loading={!list.data}

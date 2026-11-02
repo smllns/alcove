@@ -1,3 +1,4 @@
+import { isPhysical } from '@/entities/book/nonPhysical';
 import type { Book } from '@/entities/book/types';
 
 // How the grid and the list are ordered (either way round), and which
@@ -5,24 +6,30 @@ import type { Book } from '@/entities/book/types';
 export type ShelfOrder =
   'added' | 'title' | 'author' | 'rating' | 'read' | 'published';
 export type ShelfFade = 'none' | 'read' | 'unread';
-// How the shelf is arranged: an order, which way round, and what fades
+// Which books are shown: the physical ones, or those and the ones read
+// without having them
+export type ShelfShow = 'physical' | 'all';
+// How the shelf is arranged: an order, which way round, what fades and
+// which books are there at all
 export type Arrangement = {
   order: ShelfOrder;
   reversed: boolean;
   fade: ShelfFade;
+  show: ShelfShow;
 };
 
-// Newest first, nothing faded: how the books come from the server
+// Newest first, nothing faded, every book: how the shelves start
 export const usual: Arrangement = {
   order: 'added',
   reversed: false,
   fade: 'none',
+  show: 'all',
 };
 
-// Whether putting the books in order takes all of them, not just the
-// pages loaded so far
-export const needsEveryBook = ({ order, reversed }: Arrangement) =>
-  order !== 'added' || reversed;
+// Whether putting the books in order (or leaving some out) takes all of
+// them, not just the pages loaded so far
+export const needsEveryBook = ({ order, reversed, show }: Arrangement) =>
+  order !== 'added' || reversed || show !== 'all';
 
 // Each with its two ways round, the usual one first
 export const orders: {
@@ -43,6 +50,15 @@ export const fades: { value: ShelfFade; label: string }[] = [
   { value: 'read', label: 'Books I’ve read' },
   { value: 'unread', label: 'Books I haven’t read' },
 ];
+
+export const shows: { value: ShelfShow; label: string }[] = [
+  { value: 'all', label: 'All books' },
+  { value: 'physical', label: 'Physical' },
+];
+
+// What `show` keeps of the books, if it leaves any out
+export const keptBy = (show: ShelfShow) =>
+  show === 'physical' ? isPhysical : undefined;
 
 const collator = new Intl.Collator('en', {
   sensitivity: 'base',

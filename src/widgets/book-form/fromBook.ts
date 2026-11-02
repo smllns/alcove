@@ -22,6 +22,8 @@ export function draftFromBook(book: Book): {
   const how = copy?.acquired?.how ?? '';
   const fields: DraftFields = {
     ...emptyFields,
+    physical: copy?.nonPhysical ? 'no' : 'yes',
+    'copy.nonPhysical': copy?.nonPhysical ?? '',
     title: book.title,
     subtitle: text(book.subtitle),
     authors: book.authors.join(', '),

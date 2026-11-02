@@ -6,7 +6,7 @@ import { Spinner } from '@/shared/ui/Spinner';
 import { aboutTextClass } from './aboutText';
 import { BookSection } from './BookSection';
 
-// What a book not on the reader's shelves is about, as the catalogue tells
+// What a book not in the reader's library is about, as the catalogue tells
 // it, asked for at once (nothing of the reader's own to write it in)
 export function AboutWork({ book }: { book: Book }) {
   const details = useWorkDetails(book.openLibrary?.work);

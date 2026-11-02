@@ -3,6 +3,10 @@ import { cn } from '@/shared/lib/cn';
 import { useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { InlineEditor } from '@/shared/ui/InlineEditor';
 
+// Round what's said of a list as it's being changed in place, soft
+export const editBoxClass =
+  '-mx-3 rounded-2xl px-3 transition-colors duration-500 ease-soft';
+
 // A list's name as its page's title, and while the list's being changed
 // (`editing`), the box to change it in, a soft field fading in under it:
 // the cursor in it at once with a mouse (on a phone, a tap away, so the
@@ -27,7 +31,8 @@ export function ListName({
   return (
     <span
       className={cn(
-        '-mx-3 -mb-2 -mt-3 block rounded-2xl px-3 pb-2 pt-3 transition-colors duration-500 ease-soft',
+        '-mb-2 -mt-3 block pb-2 pt-3',
+        editBoxClass,
         editing ? 'bg-ink/5' : 'bg-transparent',
       )}
     >

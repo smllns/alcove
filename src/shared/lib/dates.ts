@@ -46,6 +46,10 @@ export const longDate = (date: Date) =>
 export const monthName = (date: Date) =>
   date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
+// A month by its number in the year, January being 0: "March"
+export const monthOfYear = (month: number) =>
+  new Date(2000, month).toLocaleDateString('en-GB', { month: 'long' });
+
 export const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
 const DAY_MS = 24 * 60 * 60 * 1000;

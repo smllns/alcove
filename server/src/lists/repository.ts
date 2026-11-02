@@ -23,12 +23,13 @@ export const deleteLists = (userId: ObjectId) =>
 const sameName = (a: string, b: string) =>
   a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0;
 
-// A new list, at the end, public if `open`. One by that name
-// already is the one meant.
+// A new list, at the end, public if `open`, with what's said about it, if
+// anything. One by that name already is the one meant.
 export async function createList(
   userId: ObjectId,
   name: string,
   open: boolean,
+  description?: string,
 ) {
   const all = await getLists(userId);
   const known = all.find((list) => sameName(list.name, name));
@@ -37,6 +38,7 @@ export async function createList(
   const list: BookListNode = {
     id: new ObjectId().toHexString(),
     name,
+    ...(description && { description }),
     public: open,
   };
   await lists().updateOne(
@@ -47,16 +49,16 @@ export async function createList(
   return list;
 }
 
-// Renamed, unless another list has that name already ('taken'), and made
-// public or private
+// Renamed, unless another list has that name already ('taken'), made
+// public or private, and said something else of (or nothing, emptied)
 export async function changeList(
   userId: ObjectId,
   id: string,
-  change: { name?: string; public?: boolean },
+  change: { name?: string; public?: boolean; description?: string },
 ) {
   const all = await getLists(userId);
   if (!all.some((list) => list.id === id)) return 'missing';
-  const { name } = change;
+  const { name, description } = change;
   if (
     name !== undefined &&
     all.some((list) => list.id !== id && sameName(list.name, name))
@@ -70,8 +72,10 @@ export async function changeList(
         ...(change.public !== undefined && {
           'lists.$.public': change.public,
         }),
+        ...(description && { 'lists.$.description': description }),
         updatedAt: new Date(),
       },
+      ...(description === '' && { $unset: { 'lists.$.description': '' } }),
     },
   );
   return 'changed';

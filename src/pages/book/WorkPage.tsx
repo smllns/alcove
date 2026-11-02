@@ -9,7 +9,7 @@ import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { BookShell } from './BookShell';
 import { BookView } from './BookView';
 
-// A book from the catalogue that isn't on the reader's shelves: its page
+// A book from the catalogue that isn't in the reader's library: its page
 // laid out as any book's (BookView), with only what the catalogue knows of
 // it and a way to add it. One the reader turns out to have opens their own
 // copy's page in its place.

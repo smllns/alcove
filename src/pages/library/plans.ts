@@ -8,7 +8,7 @@ type Plan = {
   cards: { title: string; detail: string }[];
 };
 
-export const plans: Record<Exclude<SectionKey, 'all'>, Plan> = {
+export const plans: Record<Exclude<SectionKey, 'all' | 'stats'>, Plan> = {
   places: {
     title: 'Your books, room by room',
     text: 'Every home, room, bookcase and shelf, with the books that sit on each. Pick a home to see only what’s there.',
@@ -31,29 +31,6 @@ export const plans: Record<Exclude<SectionKey, 'all'>, Plan> = {
         title: 'From Open Library',
         detail: 'Lists other readers made that your books are in',
       },
-    ],
-  },
-  stats: {
-    title: 'Your library in numbers',
-    text: 'What your shelves say about you, from the authors you keep coming back to, to how many pages you own.',
-    cards: [
-      {
-        title: 'Books and pages',
-        detail: 'How many, and how tall a stack they’d make',
-      },
-      { title: 'Favourite authors', detail: 'The names that show up most' },
-      { title: 'Genres', detail: 'What your shelves lean towards' },
-      {
-        title: 'By decade',
-        detail: 'From the oldest book you own to the newest',
-      },
-      { title: 'Added each month', detail: 'When the library grew' },
-      { title: 'Languages', detail: 'Every language you read in' },
-      {
-        title: 'Longest and shortest',
-        detail: 'The doorstop and the slimmest one',
-      },
-      { title: 'Most quoted', detail: 'The books you underlined the most' },
     ],
   },
   profile: {

@@ -13,6 +13,7 @@ export function SharedListPage() {
       lightKey={id}
       eyebrow={list.data ? `${list.data.owner}’s list` : 'A reader’s list'}
       name={list.data?.name ?? ''}
+      description={list.data?.description}
       works={list.data?.works ?? []}
       error={list.error}
       loading={!list.data}

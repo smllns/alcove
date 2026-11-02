@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { IconButton } from './IconButton';
 import { Modal } from './Modal';
@@ -6,7 +6,8 @@ import { solidRaisedClass } from './surfaces';
 
 // A panel slid in over the page from its right edge (from the bottom, the
 // whole width, on a phone), for something to look through without leaving
-// the page under it: it closes on its cross, Escape, or a click beside it
+// the page under it: it closes on its cross, Escape, or a click beside it.
+// Each time it opens, it starts from the top, however far it was scrolled.
 export function Drawer({
   open,
   onClose,
@@ -20,6 +21,10 @@ export function Drawer({
 }) {
   // Opened on its title, not its cross, so nothing's ringed as it comes in
   const heading = useRef<HTMLHeadingElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (open) scroller.current?.scrollTo({ top: 0 });
+  }, [open]);
   return (
     <Modal
       open={open}
@@ -31,7 +36,8 @@ export function Drawer({
       <div className='flex h-full flex-col'>
         <div
           data-grab
-          className='flex touch-none items-center justify-between border-b border-line/70 py-3 pl-6 pr-4 sm:touch-auto'
+          // On a phone, room over its title for the handle it's pulled down by
+          className='flex touch-none items-center justify-between border-b border-line/70 pb-3 pl-6 pr-4 pt-7 sm:touch-auto sm:pt-3'
         >
           <h2
             ref={heading}
@@ -44,7 +50,10 @@ export function Drawer({
             <X size={16} />
           </IconButton>
         </div>
-        <div className='flex-1 overflow-y-auto overscroll-contain'>
+        <div
+          ref={scroller}
+          className='flex-1 overflow-y-auto overscroll-contain'
+        >
           {children}
         </div>
       </div>

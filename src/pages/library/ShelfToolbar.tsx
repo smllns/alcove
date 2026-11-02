@@ -1,6 +1,8 @@
 import type { Ref } from 'react';
 import type { Shelf } from '@/entities/book/useShelf';
+import { ChoiceCapsule } from '@/shared/ui/ChoiceCapsule';
 import { BookSearch } from './views/BookSearch';
+import { shows } from './views/order';
 import { SearchResults } from './views/SearchResults';
 import { ShelfOrderMenu } from './views/ShelfOrderMenu';
 import type { useShelfOrder } from './views/useShelfOrder';
@@ -8,7 +10,8 @@ import type { useShelfSearch } from './views/useShelfSearch';
 import type { BookView, ViewKind } from './views/views';
 import { ViewSwitcher } from './views/ViewSwitcher';
 
-// Over the books: the search, how the shelf is ordered (not in the sky,
+// Over the books: the search, which books are shown (all, or only the
+// physical ones, in every view), how the shelf is ordered (not in the sky,
 // where there's no order to speak of) and the view choices. On a phone the
 // search takes a row of its own.
 export function ShelfToolbar({
@@ -54,6 +57,13 @@ export function ShelfToolbar({
           />
         )}
       </div>
+      <ChoiceCapsule
+        label='Show'
+        words
+        options={shows}
+        current={order.arrangement.show}
+        onChange={order.setShow}
+      />
       {view !== 'universe' && (
         <ShelfOrderMenu
           arrangement={order.arrangement}

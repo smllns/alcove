@@ -10,16 +10,26 @@ import type {
 
 export const fetchLists = () => request<Lists>('/lists');
 
-// A new list, public unless said otherwise; one by that name already is
-// given back instead
-export const createList = (list: { name: string; public?: boolean }) =>
+// A new list, public unless said otherwise, with what's said about it, if
+// anything; one by that name already is given back instead
+export const createList = (list: {
+  name: string;
+  public?: boolean;
+  description?: string;
+}) =>
   request<Lists & { list: BookList }>('/lists', {
     method: 'POST',
     body: list,
   });
 
-// A list renamed, or made public or private
-export type ListChange = { id: string; name?: string; public?: boolean };
+// A list renamed, made public or private, or said something else of
+// (emptied, nothing)
+export type ListChange = {
+  id: string;
+  name?: string;
+  public?: boolean;
+  description?: string;
+};
 
 // Every list, as they are once one's changed or gone
 export const changeList = ({ id, ...change }: ListChange) =>

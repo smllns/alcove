@@ -7,7 +7,12 @@ import { BookStep } from './BookStep';
 import { CopyStep } from './CopyStep';
 import { CoverPicker } from './CoverPicker';
 import { coverChoices, extrasForEdition, withEdition } from './catalogue';
-import { emptyFields, type DraftExtras, type DraftFields } from './draft';
+import {
+  emptyFields,
+  missingOnBookStep,
+  type DraftExtras,
+  type DraftFields,
+} from './draft';
 import { emptyLists, tidyLists, type DraftLists } from './entries';
 import { FormButtons } from './FormButtons';
 import { FormNotice } from './FormNotice';
@@ -88,27 +93,24 @@ export function BookForm({
     heading: stepHeading,
     form: formRef,
     switchFromBelow,
+    toHeading,
   } = useStepScroll(step, Boolean(editing), setStep);
   useErrorStep(form.errors, setStep);
 
   const onSubmit = (e: SubmitEvent) => {
     e.preventDefault();
-    if (step === 'book') {
-      // The two things every book needs; everything else may stay empty
-      const missing = {
-        ...(!form.values.title.trim() && {
-          title: 'Every book needs a title.',
-        }),
-        ...(!form.values.authors.trim() && { authors: 'Who wrote it?' }),
-      };
-      if (Object.keys(missing).length) {
-        form.setErrors((errors) => ({ ...errors, ...missing }));
-        return;
-      }
-      if (!editing) {
-        setStep('copy');
-        return;
-      }
+    // Asked from either step (a book being changed saves from both): on
+    // the first, up to its first questions; from the second, over to them
+    // (useErrorStep)
+    const missing = missingOnBookStep(form.values);
+    if (Object.keys(missing).length) {
+      form.setErrors((errors) => ({ ...errors, ...missing }));
+      if (step === 'book') toHeading();
+      return;
+    }
+    if (step === 'book' && !editing) {
+      setStep('copy');
+      return;
     }
     void form.onSubmit();
   };

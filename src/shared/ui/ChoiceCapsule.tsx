@@ -5,24 +5,24 @@ import { capsuleClass } from './surfaces';
 import { Tooltip } from './Tooltip';
 
 // A small capsule of choices; the chosen one sits in a soft pill. Each
-// is its icon, explained as it's hovered (`tips`), or said beside it
-// (`words`)
+// is its icon, explained as it's hovered (`tips`), or said beside it, or
+// alone (`words`)
 export function ChoiceCapsule<T extends string>({
   label,
   options,
   current,
   onChange,
-  tips = true,
   words = false,
+  tips = !words,
   className,
 }: {
   label: string;
-  options: { value: T; label: string; icon: ReactNode; wide?: boolean }[];
+  options: { value: T; label: string; icon?: ReactNode; wide?: boolean }[];
   current: T;
   onChange: (value: T) => void;
-  // Hover labels, for icons that need explaining
-  tips?: boolean;
   words?: boolean;
+  // Hover labels, for icons that need explaining (none for words)
+  tips?: boolean;
   className?: string;
 }) {
   return (

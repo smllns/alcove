@@ -23,6 +23,7 @@ import { PassageQuotes } from './PassageQuotes';
 import { QuoteSuggestions } from './QuoteSuggestions';
 import { SameAuthor } from './SameAuthor';
 import { ReadNext } from './ReadNext';
+import { AddToList } from './AddToList';
 import { AddWork } from './AddWork';
 import { OwnBookActions } from './OwnBookActions';
 import { YourCopy } from './YourCopy';
@@ -105,7 +106,10 @@ export function BookView({
               onRemove={() => setRemoving(true)}
             />
           ) : (
-            <AddWork work={on.work} />
+            <>
+              <AddWork work={on.work} />
+              <AddToList book={book} />
+            </>
           )}
         </div>
       </div>

@@ -45,8 +45,12 @@ listsRouter.get('/', async (req, res) => {
 });
 
 listsRouter.post('/', async (req, res) => {
-  const { name, public: open } = parseBody(newListSchema, req.body);
-  const list = await createList(me(req), name, open);
+  const {
+    name,
+    public: open,
+    description,
+  } = parseBody(newListSchema, req.body);
+  const list = await createList(me(req), name, open, description);
   if (!list)
     throw new HttpError(
       409,
@@ -95,7 +99,7 @@ listsRouter.delete('/saved', async (req, res) => {
   res.json({ saved: await getSaved(me(req)) });
 });
 
-// Renamed, or made public or private
+// Renamed, made public or private, or said something else of
 listsRouter.patch('/:id', async (req, res) => {
   const change = parseBody(listChangeSchema, req.body);
   const result = await changeList(me(req), req.params.id, change);

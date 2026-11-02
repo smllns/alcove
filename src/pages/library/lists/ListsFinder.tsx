@@ -42,7 +42,6 @@ export function ListsFinder({ className }: { className?: string }) {
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          onBlur={phone ? () => setOpen(false) : undefined}
           placeholder='Find a list'
           className={phone ? 'w-full' : className}
         />

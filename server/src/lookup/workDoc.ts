@@ -27,10 +27,7 @@ export const firstAuthor = (work: WorkDoc) =>
 export async function workDetails(workKey: string) {
   const { description, subjects } = await workDoc(workKey);
   return {
-    description:
-      cleanDescription(
-        typeof description === 'string' ? description : description?.value,
-      ) ?? null,
+    description: cleanDescription(description) ?? null,
     genres: genresOf(subjects),
   };
 }

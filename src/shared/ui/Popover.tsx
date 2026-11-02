@@ -1,16 +1,20 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  type ReactNode,
-  type RefObject,
-} from 'react';
+import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/shared/lib/cn';
+import { useTapAway } from '@/shared/lib/useTapAway';
 import { raisedClass, solidRaisedClass } from './surfaces';
 
 const GAP = 6;
 const EDGE = 8;
+// The tallest one set in the page gets, what's in it scrolling past that
+const INLINE_MAX = 256;
+
+// The nearest box above `el` that scrolls, if any
+function scrollerOf(el: HTMLElement) {
+  for (let at = el.parentElement; at; at = at.parentElement)
+    if (/auto|scroll/.test(getComputedStyle(at).overflowY)) return at;
+  return null;
+}
 
 type PopoverProps = {
   open: boolean;
@@ -49,13 +53,26 @@ export function Popover({
     const el = panel.current;
     if (!open || !el) return;
     if (inline) {
-      // Only kept on the screen from side to side: the page carries it up
-      // and down with its anchor
+      // Kept on the screen from side to side, the page carrying it up and
+      // down with its anchor; no taller than INLINE_MAX (what's in it
+      // scrolls), and opening upward when there's no room for it below
+      // (in the page, or what it scrolls in: a dialog) and more above
       const fit = () => {
         // Measured from the box it's set in, not as it pops in, scaled
-        const left = (el.offsetParent ?? el).getBoundingClientRect().left;
-        const over = left + el.offsetWidth - (innerWidth - EDGE);
-        el.style.left = `${over > 0 ? -Math.min(over, Math.max(left - EDGE, 0)) : 0}px`;
+        const box = (el.offsetParent ?? el).getBoundingClientRect();
+        const over = box.left + el.offsetWidth - (innerWidth - EDGE);
+        el.style.left = `${over > 0 ? -Math.min(over, Math.max(box.left - EDGE, 0)) : 0}px`;
+        el.style.maxHeight = `${INLINE_MAX}px`;
+        const clip = scrollerOf(el)?.getBoundingClientRect();
+        const below =
+          Math.min(innerHeight, clip?.bottom ?? innerHeight) - box.bottom;
+        const above = box.top - Math.max(0, clip?.top ?? 0);
+        const tall = Math.min(el.scrollHeight, INLINE_MAX) + GAP + EDGE;
+        const up = below < tall && above > below;
+        el.style.top = up ? 'auto' : '';
+        el.style.bottom = up ? '100%' : '';
+        el.style.marginTop = up ? '0' : '';
+        el.style.marginBottom = up ? `${GAP}px` : '';
       };
       fit();
       addEventListener('resize', fit);
@@ -90,17 +107,7 @@ export function Popover({
     };
   }, [open, anchor, width, inline]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (anchor.current?.contains(target) || panel.current?.contains(target))
-        return;
-      onClose('outside');
-    };
-    document.addEventListener('pointerdown', onDown);
-    return () => document.removeEventListener('pointerdown', onDown);
-  }, [open, anchor, onClose]);
+  useTapAway(open, [anchor, panel], () => onClose('outside'));
 
   if (!open) return null;
   const drawn = (

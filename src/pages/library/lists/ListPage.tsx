@@ -9,6 +9,7 @@ import { FormError } from '@/shared/ui/FormError';
 import { Loading } from '@/shared/ui/Loading';
 import { PageTitle } from '@/shared/ui/PageHeading';
 import { useArranging } from '../places/shelf/arranging';
+import { ListAbout } from './ListAbout';
 import { ListActions } from './ListActions';
 import { ListBooks } from './ListBooks';
 import { ListFrame } from './ListFrame';
@@ -48,12 +49,17 @@ export function ListPage() {
   const changes = useListChanges(list, search.found);
   const { frame, takeOut } = changes;
   const { putIn, putWork } = useBegunBooks(being, changes);
-  const rename = useChangeList();
+  const change = useChangeList();
   const renamed = (text: string) => {
     const name = tidyListName(text);
     if (!list || !name || name === list.name) return;
-    if (begun) being.make(name);
-    else rename.mutate({ id: list.id, name });
+    if (begun) being.make({ name });
+    else change.mutate({ id: list.id, name });
+  };
+  const described = (description: string) => {
+    if (!list) return;
+    if (begun) being.make({ description });
+    else change.mutate({ id: list.id, description });
   };
 
   return (
@@ -71,6 +77,15 @@ export function ListPage() {
           />
         )
       }
+      about={
+        list && (
+          <ListAbout
+            text={list.description}
+            editing={editing.on}
+            onChange={described}
+          />
+        )
+      }
       actions={
         list && (
           <>
@@ -82,7 +97,7 @@ export function ListPage() {
               onOpen={begun ? being.setOpen : undefined}
             />
             <FormError
-              message={(being.error ?? rename.error)?.message ?? null}
+              message={(being.error ?? change.error)?.message ?? null}
               small
               className='mt-2'
             />

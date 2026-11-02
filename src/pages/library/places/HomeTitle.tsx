@@ -9,16 +9,19 @@ import { Typewriter } from '@/shared/ui/Typewriter';
 
 // The home shown, its name the section's title, how many books it holds
 // under it; with more homes than one, a menu of them all to switch to
-// (each with its own count), opening softly from the name
+// (each with its own count), opening softly from the name. Centred on a
+// phone, unless set at the start of the line (`start`) as the rest is.
 export function HomeTitle({
   homes,
   home,
   onHome,
+  start = false,
 }: {
   homes: { home: Home; count: number }[];
   // The one shown
   home: string;
   onHome: (id: string) => void;
+  start?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const title = useRef<HTMLButtonElement>(null);
@@ -35,7 +38,12 @@ export function HomeTitle({
         onClick={() => setOpen(!open)}
         // Typed over as another home is chosen, staying put while the page
         // under it changes (home-title, transitions-in-place.css)
-        className='home-title group -mx-3 flex min-w-0 cursor-pointer flex-col items-center rounded-2xl px-3 py-1.5 text-center transition-colors duration-500 ease-soft enabled:hover:bg-ink/5 disabled:cursor-default sm:items-start sm:text-left'
+        className={cn(
+          'home-title group -mx-3 flex min-w-0 cursor-pointer flex-col rounded-2xl px-3 py-1.5 transition-colors duration-500 ease-soft enabled:hover:bg-ink/5 disabled:cursor-default',
+          start
+            ? 'items-start text-left'
+            : 'items-center text-center sm:items-start sm:text-left',
+        )}
       >
         {/* Its name, the menu's arrow right by it, in a ring as a button */}
         <span className='flex min-w-0 max-w-full items-center gap-2.5'>

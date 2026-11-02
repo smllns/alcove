@@ -7,6 +7,7 @@ import { useShelf } from '@/entities/book/useShelf';
 import { counted } from '@/shared/lib/plural';
 import { FormError } from '@/shared/ui/FormError';
 import { ListFrame } from './ListFrame';
+import { ListAbout } from './ListAbout';
 import { ListLamp } from './ListLamp';
 import { ListSearch, NoneFound } from './ListSearch';
 import { useListSearch } from './useListSearch';
@@ -15,13 +16,15 @@ import { WorkGrid, WorkGridSkeleton, type MoreWorks } from './WorkGrid';
 // A list of books from the catalogue opened (one every reader sees,
 // another reader's, one made on Open Library): its pile by a measure, how
 // many of its books are on the reader's shelves marked in gold, and its
-// books' covers, a book in it found by its title or writer. `total`: how
+// books' covers, a book in it found by its title or writer, and what its
+// maker says of it, if anything. `total`: how
 // many it holds, when not all are here yet (`more` brings the next).
 // While it's `loading`, drawn bare, its books' places held (ListFrame).
 export function WorksListPage({
   lightKey,
   eyebrow,
   name,
+  description,
   works,
   total = works.length,
   more,
@@ -32,6 +35,8 @@ export function WorksListPage({
   lightKey: string;
   eyebrow: string;
   name: string;
+  // What's said about it, if anything
+  description?: string;
   works: CatalogueWork[];
   total?: number;
   more?: MoreWorks;
@@ -51,6 +56,7 @@ export function WorksListPage({
       lightKey={lightKey}
       eyebrow={eyebrow}
       title={name}
+      about={description && <ListAbout text={description} />}
       line={`${counted(total, 'book')} · ${mine ? `${mine} in your library` : 'none in your library yet'}`}
       ruler={
         <ListLamp

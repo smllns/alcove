@@ -16,8 +16,10 @@ export function ListPile({ books }: { books: Book[] }) {
     <div
       className={cn(
         'list-pile flex flex-col items-center',
+        // Faded at the top, its edges let out past the books leaning
+        // furthest, so the fade never clips them
         books.length > SHOWN &&
-          'mask-[linear-gradient(to_bottom,transparent,black_3.5rem)]',
+          '-mx-4 px-4 mask-[linear-gradient(to_bottom,transparent,black_3.5rem)]',
       )}
     >
       {shown.map((book, i) => (

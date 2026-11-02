@@ -14,15 +14,17 @@ import { lightOf } from '../places/drawing/decor';
 // left (`ruler`) with the ways to change it (`actions`) under it, as a
 // book's are under its cover, and a way to look for a book in it
 // (`search`) under them, all staying in sight as the books go by; on the
-// right what it's called, a line about it and its books (`children`). On
-// a phone, the pile comes under the line, the ways to change it under the
-// pile, and the search under them. While it's `loading`, all of it is
+// right what it's called, what's said about it (`about`), a line of how
+// many and its books (`children`). On
+// a phone, the search comes under the line, the pile under it, and the
+// ways to change it under the pile. While it's `loading`, all of it is
 // drawn bare (the lamp unlit, the title and line as soft bars, its books
 // as `children` give them meanwhile), coming in as it's there; should it
 // not come, `waiting` in its place.
 export function ListFrame({
   eyebrow,
   title,
+  about,
   line,
   ruler,
   actions,
@@ -34,6 +36,8 @@ export function ListFrame({
 }: {
   eyebrow: string;
   title: ReactNode;
+  // What's said about it, if anything (ListAbout)
+  about?: ReactNode;
   line: ReactNode;
   ruler: ReactNode;
   actions?: ReactNode;
@@ -108,6 +112,14 @@ export function ListFrame({
                     title
                   )}
                 </PageTitle>
+                {!loading && about && (
+                  <div
+                    className='animate-rise'
+                    style={{ animationDelay: '90ms' }}
+                  >
+                    {about}
+                  </div>
+                )}
                 <p
                   ref={setTop}
                   className='mt-4 animate-rise text-[15px] text-muted'
@@ -119,11 +131,13 @@ export function ListFrame({
                     line
                   )}
                 </p>
+                {/* The search before the pile, up where a phone's keyboard
+                    leaves it in sight, so the page needn't move for it */}
+                {search && !loading && (
+                  <div className='mt-6 lg:hidden'>{search}</div>
+                )}
                 <div className='relative -z-10 mt-8 lg:hidden'>{ruler}</div>
                 {actions && <div className='mt-6 lg:hidden'>{actions}</div>}
-                {search && !loading && (
-                  <div className='mt-4 lg:hidden'>{search}</div>
-                )}
                 <div
                   className='mt-10 animate-rise border-t border-line/70 pt-10'
                   style={{ animationDelay: '200ms' }}

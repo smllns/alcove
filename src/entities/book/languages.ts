@@ -55,3 +55,44 @@ export function languageOptions(...extra: string[]) {
     .map((code) => ({ value: code, label: languageName(code) }))
     .sort((a, b) => a.label.localeCompare(b.label));
 }
+
+// The MARC codes that aren't the ones browsers name languages by (the
+// library's own, ISO 639-2/B), each with the one they are (639-2/T)
+const terminology: Record<string, string> = {
+  alb: 'sqi',
+  arm: 'hye',
+  baq: 'eus',
+  bur: 'mya',
+  chi: 'zho',
+  cze: 'ces',
+  dut: 'nld',
+  fre: 'fra',
+  geo: 'kat',
+  ger: 'deu',
+  gre: 'ell',
+  ice: 'isl',
+  mac: 'mkd',
+  mao: 'mri',
+  may: 'msa',
+  per: 'fas',
+  rum: 'ron',
+  slo: 'slk',
+  tib: 'bod',
+  wel: 'cym',
+};
+
+// A language named in itself: "Deutsch", "Русский"; in English when the
+// browser can't (asked in a language it doesn't speak, it would answer in
+// the reader's own instead)
+export function nativeName(code: string) {
+  const tag = terminology[code] ?? code;
+  try {
+    if (Intl.DisplayNames.supportedLocalesOf(tag).length) {
+      const name = new Intl.DisplayNames([tag], { type: 'language' }).of(tag);
+      if (name && name !== tag) return name[0].toUpperCase() + name.slice(1);
+    }
+  } catch {
+    // Not a language the browser knows
+  }
+  return languageName(code);
+}

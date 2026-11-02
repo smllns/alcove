@@ -7,3 +7,6 @@ export const unaccented = (text: string) =>
 // read as a pattern
 export const escapedForRegex = (text: string) =>
   text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// A name with its spaces tidied: none at the ends, one between words
+export const tidyName = (name: string) => name.trim().replace(/\s+/g, ' ');
