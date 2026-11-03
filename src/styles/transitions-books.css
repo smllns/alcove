@@ -8,6 +8,38 @@
   view-transition-name: var(--shelf-name);
 }
 
+/* shown: other books on the shelves (every one, or the physical ones
+   alone). Only the books fade from the ones to the others, where they
+   stand, each at its own height from the top; the rest of the page (the
+   header, the tabs, the controls) is left out of it, live as it is: faded
+   over itself, the dark button and the frosted bars would blink lighter
+   for a moment. */
+:root[data-transition='shown']::view-transition-old(root) {
+  display: none;
+}
+:root[data-transition='shown']::view-transition-new(root) {
+  animation: none;
+}
+:root[data-transition='shown'] .books-stage {
+  view-transition-name: books-stage;
+}
+::view-transition-group(books-stage) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+}
+::view-transition-old(books-stage),
+::view-transition-new(books-stage) {
+  height: auto;
+  object-fit: none;
+  object-position: top;
+}
+::view-transition-old(books-stage) {
+  animation: swap-out 0.4s cubic-bezier(0.45, 0, 0.55, 1) both;
+}
+::view-transition-new(books-stage) {
+  animation: swap-in 0.4s cubic-bezier(0.45, 0, 0.55, 1) both;
+}
+
 /* view: the books shown another way. Only the covers carry a name (set as
    --cover-name on the card or the row), so each one in sight flies from
    where it was to where it is now, while the rest of the page, titles and

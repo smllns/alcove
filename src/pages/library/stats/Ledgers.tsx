@@ -1,16 +1,19 @@
 import type { CSSProperties } from 'react';
 import { clothFor } from '@/entities/book/coverImage';
 import type { Book } from '@/entities/book/types';
+import { cn } from '@/shared/lib/cn';
 import { nativeName } from '@/entities/book/languages';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { BooksDrawer } from './BooksDrawer';
 import { LedgerRow, LedgerWithMore } from './Ledger';
-import { AVERAGE_PAGES, type Tally } from './libraryStats';
-import { ToneSpine } from './ToneSpine';
+import { AVERAGE_PAGES } from './libraryStats';
+import type { Tally } from './tallies';
+import { RisingSpine } from './ToneSpine';
 import { useBooksDrawer } from './useBooksDrawer';
 
-// The most of an author's books drawn after their number
+// The most of an author's books drawn after their number, fewer on a phone
 const SPINES = 14;
+const SPINES_PHONE = 8;
 
 // The authors with the most books, each with their books drawn small
 // after how many, the rest opening out under them (LedgerWithMore); an
@@ -45,18 +48,19 @@ export function AuthorsLedger({ authors }: { authors: Tally[] }) {
   );
 }
 
-// An author's books drawn small after how many, as thick as their pages
+// An author's books drawn small after how many, as thick as their pages,
+// in a row as wide as the most it holds, so the numbers line up
 function Spines({ books }: { books: Book[] }) {
   return (
-    <span className='ml-1 flex h-4 shrink-0 items-end gap-px self-center max-sm:hidden'>
-      {books.slice(0, SPINES).map((book) => (
-        <span
+    <span className='ml-1 flex h-4 w-[39px] shrink-0 items-end gap-px self-center sm:w-[69px]'>
+      {books.slice(0, SPINES).map((book, i) => (
+        <RisingSpine
           key={book.id}
-          className='block w-1 transition-[translate,filter] duration-700 ease-soft group-hover/books:-translate-y-0.5 group-hover/books:brightness-110'
-          style={{ height: 10 + (book.pages ?? AVERAGE_PAGES) / 120 }}
-        >
-          <ToneSpine book={book} className='size-full' />
-        </span>
+          book={book}
+          height={10 + (book.pages ?? AVERAGE_PAGES) / 120}
+          small
+          className={cn('w-1', i >= SPINES_PHONE && 'max-sm:hidden')}
+        />
       ))}
     </span>
   );

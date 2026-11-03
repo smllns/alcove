@@ -40,7 +40,7 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
   const phone = useMediaQuery(PHONE);
   const { view, arrived, leaving, left, choose, chooseKind } = useBookView();
 
-  const shelfOrder = useShelfOrder();
+  const shelfOrder = useShelfOrder(view === 'universe');
   // The sky shows every book, and any order but the newest first needs
   // them all, as do the places (to find the books not yet in one), the
   // lists and the stats. Only the shelves leave any out (the physical

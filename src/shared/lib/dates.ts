@@ -43,6 +43,10 @@ export const longDate = (date: Date) =>
     year: 'numeric',
   });
 
+// "25 Dec"
+export const dayMonth = (date: Date) =>
+  date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
 export const monthName = (date: Date) =>
   date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
@@ -51,8 +55,11 @@ export const monthOfYear = (month: number) =>
   new Date(2000, month).toLocaleDateString('en-GB', { month: 'long' });
 
 export const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+// The months by their first letters, January first, as a chart's axis
+// writes them
+export const monthLetters = 'JFMAMJJASOND'.split('');
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Days from today to `day`: 0 for today, below 0 for a day gone by; null
 // for something that isn't a day

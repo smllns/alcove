@@ -1,15 +1,16 @@
 // A page that rises in over the old one (the 'forward' transition, and 'onward'
 // to a section of the library), is uncovered as the old one lowers away
 // ('return'), or something shown in place of what was (a room or a home in the
-// places: 'swap') needs no entrance of its own: whatever it would fade or rise
-// into place is simply there, including whatever turns up while it's still
-// rising (once its data loads, say). More than tidier: as a transition ends,
-// WebKit (Safari, every iPhone browser) draws a frame of any entrance still
-// under way back at its start, a visible blink. Only what plays once is
-// settled; the sky's endless drifting is held still instead
-// (stillWhileTurning). Called once, it watches every view transition, the
-// router's included, keeps one the browser gives up on from turning into an
-// error, and ends one that's stuck rather than leave it hanging over the page.
+// places: 'swap'; other books on the shelves: 'shown') needs no entrance of its
+// own: whatever it would fade or rise into place is simply there, including
+// whatever turns up while it's still rising (once its data loads, say). More
+// than tidier: as a transition ends, WebKit (Safari, every iPhone browser)
+// draws a frame of any entrance still under way back at its start, a visible
+// blink. Only what plays once is settled; the sky's endless drifting is held
+// still instead (stillWhileTurning). Called once, it watches every view
+// transition, the router's included, keeps one the browser gives up on from
+// turning into an error, and ends one that's stuck rather than leave it hanging
+// over the page.
 
 import { pageTurning } from './stillWhileTurning';
 
@@ -81,7 +82,7 @@ export function settleEntrances() {
         window.clearTimeout(stuck);
       });
     const kind = document.documentElement.dataset.transition;
-    if (!['forward', 'return', 'onward', 'swap'].includes(kind ?? ''))
+    if (!['forward', 'return', 'onward', 'swap', 'shown'].includes(kind ?? ''))
       return transition;
     transition.updateCallbackDone
       .then(() => {

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Book } from '@/entities/book/types';
-import { byMonth, cameOn, finishedOn } from './growth';
-import { authors, byDecade, extremes, figures, tally } from './libraryStats';
+import { byArrival, byMonth, cameOn, finishedOn } from './growth';
+import { authors, byDecade, extremes, figures } from './libraryStats';
+import { tally } from './tallies';
 
 let made = 0;
 const book = (fields: Partial<Book> = {}): Book => ({
@@ -40,7 +41,7 @@ describe('library stats', () => {
     ]);
   });
 
-  it('draws every decade between, gathering the oldest of a long span', () => {
+  it('draws every decade between, folding long empty runs', () => {
     const decades = byDecade([
       book({ firstPublishedYear: 1813 }),
       book({ firstPublishedYear: 1925 }),
@@ -48,16 +49,31 @@ describe('library stats', () => {
       book({ firstPublishedYear: 2024 }),
       book(),
     ])!;
-    expect(decades.columns[0]).toMatchObject({ older: true, from: 1880 });
-    expect(decades.columns[0].books).toHaveLength(1);
-    expect(decades.columns.at(-1)).toMatchObject({ from: 2020 });
-    expect(decades.columns.at(-1)!.books).toHaveLength(2);
-    expect(decades.columns).toHaveLength(15);
+    // 1820–1910 and 1930–2010 have nothing, each folded into one break
+    expect(
+      decades.columns.map(({ from, to, books }) => [from, to, books.length]),
+    ).toEqual([
+      [1810, undefined, 1],
+      [1820, 1910, 0],
+      [1920, undefined, 1],
+      [1930, 2010, 0],
+      [2020, undefined, 2],
+    ]);
     expect(decades.oldest.firstPublishedYear).toBe(1813);
     expect(decades.newest.firstPublishedYear).toBe(2024);
   });
 
-  it('finds the thickest and slimmest among the paged', () => {
+  it('gathers the oldest once there are too many decades to draw', () => {
+    const every = Array.from({ length: 20 }, (_, i) =>
+      book({ firstPublishedYear: 1830 + i * 10 }),
+    );
+    const decades = byDecade(every)!;
+    expect(decades.columns).toHaveLength(14);
+    expect(decades.columns[0]).toMatchObject({ older: true, from: 1890 });
+    expect(decades.columns[0].books).toHaveLength(7);
+  });
+
+  it('finds the thickest and slimmest among the paged, and piles them by length', () => {
     const found = extremes([
       book({ pages: 64, title: 'Slim' }),
       book({ pages: 1079, title: 'Thick' }),
@@ -66,7 +82,21 @@ describe('library stats', () => {
     ])!;
     expect(found.longest.title).toBe('Thick');
     expect(found.shortest.title).toBe('Slim');
-    expect(found).toMatchObject({ average: 448, counted: 3 });
+    expect(found).toMatchObject({ average: 448 });
+    // A hundred pages each, the slimmest's to the doorstop's, 800 and on as one
+    expect(
+      found.piles.map((pile) => [pile.from, pile.more, pile.books.length]),
+    ).toEqual([
+      [0, false, 1],
+      [100, false, 0],
+      [200, false, 1],
+      [300, false, 0],
+      [400, false, 0],
+      [500, false, 0],
+      [600, false, 0],
+      [700, false, 0],
+      [800, true, 1],
+    ]);
     expect(extremes([book({ pages: 10 })])).toBeNull();
   });
 
@@ -95,6 +125,24 @@ describe('library stats', () => {
     expect(months.map((m) => m.length)).toEqual([
       0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
     ]);
+  });
+
+  it('groups the books by how they came, own words as another way', () => {
+    const came = (how?: string) =>
+      book({ copy: { status: 'shelf', acquired: { how } } });
+    const found = byArrival([
+      came('gift'),
+      came('bought'),
+      came('gift'),
+      came('Won it in a raffle'),
+      came(),
+    ]);
+    expect(found.rows.map((row) => [row.name, row.books.length])).toEqual([
+      ['A gift', 2],
+      ['Bought', 1],
+      ['Other', 1],
+    ]);
+    expect(found.told).toBe(4);
   });
 
   it('counts a book finished only once it has been read', () => {

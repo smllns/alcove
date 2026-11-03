@@ -6,7 +6,7 @@ import { Collapse } from '@/shared/ui/Collapse';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
 import { HoverBooks } from './HoverBooks';
 import { LedgerColumns, LedgerNames } from './LedgerNames';
-import { FEW } from './libraryStats';
+import { FEW, type Tally } from './tallies';
 
 // Names and their numbers, one under another, dotted across from one to
 // the other as in a book's contents
@@ -19,8 +19,6 @@ export function Ledger({
 }) {
   return <ul className={cn('flex flex-col', className)}>{children}</ul>;
 }
-
-export type Counted = { name: string; books: Book[] };
 
 // How far apart its lines stand: words close, lines with a drawing in
 // them (`drawn`) further, the finer ones under them in two columns at most
@@ -36,7 +34,7 @@ const spacing = {
 // one book each only named (LedgerNames). Each line drawn by `row`, told
 // whether it's one of the finer ones and its place; each named one called
 // `named` and opening its books by `onOpen`.
-export function LedgerWithMore<T extends Counted>({
+export function LedgerWithMore<T extends Tally>({
   items,
   shown = 5,
   noun,

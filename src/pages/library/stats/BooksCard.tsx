@@ -6,19 +6,21 @@ import { BookRows } from './BookRows';
 // in serif, a word on it (the year, how many) under a fine rule, then its
 // books one under another, each its cover with its title and author
 // beside it; past a few, scrolled through (`scroller`, the box they
-// scroll in, `room`, how tall it may be)
+// scroll in, `room`, how tall it may be; `detail`, a word on each book)
 export function BooksCard({
   heading,
   meta,
   books,
   scroller,
   room,
+  detail,
 }: {
   heading: string;
   meta: string;
   books: Book[];
   scroller?: Ref<HTMLDivElement>;
   room: number;
+  detail?: (book: Book) => string;
 }) {
   return (
     <>
@@ -35,7 +37,7 @@ export function BooksCard({
         className='-mr-3 overflow-y-auto pr-3'
         style={{ maxHeight: room }}
       >
-        <BookRows books={books} />
+        <BookRows books={books} detail={detail} />
       </div>
     </>
   );

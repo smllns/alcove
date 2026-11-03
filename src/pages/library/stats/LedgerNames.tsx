@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { labelClass } from '@/shared/ui/fieldStyles';
 import { HoverBooks } from './HoverBooks';
-import type { Counted } from './Ledger';
+import type { Tally } from './tallies';
 
 // Lines of a ledger (`count` of them) read down columns where there's
 // room: two once it's wide enough (`always`, even when it's narrow, for
@@ -45,7 +45,7 @@ export function LedgerColumns({
 // Those with one book each (authors, languages), under a word saying so:
 // only their names (`named`, if not as they're counted), in two columns
 // even where the ledger's narrow, each opening its book
-export function LedgerNames<T extends Counted>({
+export function LedgerNames<T extends Tally>({
   items,
   hover,
   onOpen,

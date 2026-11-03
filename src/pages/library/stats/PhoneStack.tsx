@@ -2,7 +2,7 @@ import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { ListPile } from '../lists/ListPile';
 import { figures, stampOf } from './libraryStats';
-import { tallness } from './sayings';
+import { tallness } from './words';
 
 // On a phone, where a drawing of a building is too small to read: the
 // books as a pile, as the lists draw theirs (ListPile), on a slab over

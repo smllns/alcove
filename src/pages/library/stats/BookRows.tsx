@@ -4,8 +4,15 @@ import { ownBookLine } from '@/entities/book/ui/ownBookLine';
 import { BookLink } from '../views/BookLink';
 
 // Books one under another, each its cover with its title and author
-// beside it, leading to its page, its cover flying over to it
-export function BookRows({ books }: { books: Book[] }) {
+// beside it (and `detail`, if given: its pages, say), leading to its page,
+// its cover flying over to it
+export function BookRows({
+  books,
+  detail,
+}: {
+  books: Book[];
+  detail?: (book: Book) => string;
+}) {
   return (
     <ul className='flex flex-col gap-1'>
       {books.map((book) => (
@@ -15,7 +22,7 @@ export function BookRows({ books }: { books: Book[] }) {
             draggable={false}
             className='group -mx-2 flex rounded-xl px-2 py-1.5 transition-colors duration-300 ease-soft hover:bg-ink/5'
           >
-            <BookLine {...ownBookLine(book)} />
+            <BookLine {...ownBookLine(book)} details={[detail?.(book)]} />
           </BookLink>
         </li>
       ))}

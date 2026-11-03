@@ -20,6 +20,10 @@ import { flyCoverHome } from './coverFlight';
 //   swap:        something shown in place of what was (another home or
 //                room, the places shown another way): coming in over it
 //                where it stands (styles/places.css)
+//   shown:       other books on the shelves (every one, or the physical
+//                ones alone): only the books fade from the ones to the
+//                others, the rest of the page left as it is, live
+//                (styles/transitions-books.css)
 //   onward:      another of the library's sections, chosen from the tabs:
 //                it rises over the one left, as forward does, under the
 //                header and the tabs, which stay put
@@ -34,12 +38,14 @@ export type PageTransition =
   | 'shelf'
   | 'view'
   | 'swap'
+  | 'shown'
   | 'onward';
 
 // back is done with a curtain over the page rather than a View Transition
 export const usesCurtain = (kind: PageTransition) => kind === 'back';
 
-// View Transitions read the kind off <html data-transition> to pick an animation
+// View Transitions read the kind off <html data-transition> to pick an
+// animation
 export function setPageTransition(kind: PageTransition) {
   document.documentElement.dataset.transition = kind;
 }

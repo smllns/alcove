@@ -13,7 +13,7 @@ import { HomeSection } from './HomeSection';
 import { PhoneStack } from './PhoneStack';
 import { booksIn, figures } from './libraryStats';
 import { inBlock, inHome } from './measured';
-import { tallness } from './sayings';
+import { tallness } from './words';
 
 // Everything together, the first choice of the homes' menu
 const ALL = 'all';

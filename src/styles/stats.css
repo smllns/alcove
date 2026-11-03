@@ -37,29 +37,6 @@
   border-bottom: 0;
 }
 
-/* A fine line across a thing, ticked at both ends, as a drawing gives a
-   width */
-.stats-width {
-  position: relative;
-  height: 1px;
-  background: var(--fine);
-}
-.stats-width::before,
-.stats-width::after {
-  content: '';
-  position: absolute;
-  top: -4px;
-  width: 1px;
-  height: 9px;
-  background: var(--fine);
-}
-.stats-width::before {
-  left: 0;
-}
-.stats-width::after {
-  right: 0;
-}
-
 /* A room's lamp lit in a drawing of the stats, as a room's in the places
    comes on pointed at (places.css): its shade filled, its bulb showing */
 .stats-lit .lamp-shade {
@@ -67,4 +44,17 @@
 }
 .stats-lit .lamp-bulb {
   opacity: 1;
+}
+
+/* A month's pages hanging under the shelf, its edges ruled as a book's
+   are, leaf after leaf */
+.month-pages {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      color-mix(in oklab, var(--ink) 14%, transparent) 2px 3px
+    ),
+    var(--page);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 28%, transparent);
 }

@@ -34,6 +34,41 @@ const editionFields = (
       }
     : { isbn: '', publisher: '', publishedYear: '', pages: '', format: '' };
 
+// Whether the draft still shows `edition`'s printing: its ISBN, publisher,
+// year, pages and format as the edition gave them. One changed, the book
+// is the reader's own to describe, the edition no longer said to be it
+// (the rest of what it filled in left as it is).
+export function keepsEdition(fields: DraftFields, edition: CatalogueEdition) {
+  return Object.entries(editionFields(edition)).every(
+    ([key, value]) =>
+      key === 'language' || fields[key as keyof DraftFields] === value,
+  );
+}
+
+// Of the `editions` to choose from, the one chosen (in `extras`), while
+// the draft still shows its printing (keepsEdition)
+export const keptEdition = (
+  editions: CatalogueEdition[],
+  extras: DraftExtras,
+  fields: DraftFields,
+) => {
+  const chosen = editions.find(
+    (each) => each.editionKey === extras.openLibrary?.edition,
+  );
+  return chosen && keepsEdition(fields, chosen) ? chosen : undefined;
+};
+
+// What's saved besides the fields: said to be the edition chosen only
+// while the details still show it
+export const savedExtras = (
+  editions: CatalogueEdition[],
+  extras: DraftExtras,
+  fields: DraftFields,
+) =>
+  keptEdition(editions, extras, fields)
+    ? extras
+    : extrasForEdition(extras, null);
+
 // The draft with a different edition chosen (or none): its printing's
 // details, and its language carrying the original along
 export function withEdition(

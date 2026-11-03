@@ -4,7 +4,7 @@ import type { Shelf } from '@/entities/book/useShelf';
 import { useLists, useSavedLists } from '@/entities/list/queries';
 import { cn } from '@/shared/lib/cn';
 import { paths } from '@/shared/config/paths';
-import { useMediaQuery } from '@/shared/lib/useMediaQuery';
+import { PHONE, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { labelClass } from '@/shared/ui/fieldStyles';
 import { Button } from '@/shared/ui/Button';
@@ -15,10 +15,7 @@ import { FirstList } from './FirstList';
 import { SavedLists, SavedStacks } from './SavedLists';
 import { isOwn, listedBooks } from './listedBooks';
 import { ListsFinder } from './ListsFinder';
-import { ListStack, stackClass, stacksClass } from './ListStack';
-
-// A floor of four, for the reader's few lists and their few kept ones
-const togetherClass = 'grid grid-cols-4 gap-x-8 pt-4';
+import { floorClass, ListStack, stackClass, stacksClass } from './ListStack';
 
 // Every list of the reader's, each a pile of its books standing on the
 // floor, piles carrying over onto the next floor down as there are more,
@@ -29,6 +26,7 @@ export function ListsSection({ shelf }: { shelf: Shelf }) {
   const lists = useLists();
   const saved = useSavedLists().data ?? [];
   const wide = useMediaQuery('(min-width: 1024px)');
+  const phone = useMediaQuery(PHONE);
   const navigate = useTransitionNavigate();
   const start = () => void navigate(paths.newList);
   if (lists.isPending) return <Loading />;
@@ -41,30 +39,43 @@ export function ListsSection({ shelf }: { shelf: Shelf }) {
     );
 
   const { lists: all, counts } = lists.data;
-  // Few of their own and few kept, on a wide screen: all on the one floor,
-  // the kept ones under a word of their own
+  // Few enough of their own and kept to stand on one floor (as many as a
+  // floor holds there: two on a phone, up to four on a wide screen): all
+  // on the one floor, the kept ones under a word of their own
   const together =
-    wide &&
     all.length > 0 &&
     saved.length > 0 &&
-    all.length + saved.length <= 4;
+    all.length + saved.length <= (wide ? 4 : phone ? 2 : 3);
   return (
     <section className='mx-auto w-full max-w-6xl'>
-      {/* On a phone, the search a row of its own under the rest, as wide
-          as the page, for what it finds to have the room */}
-      <div className='mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-4'>
+      {/* On a phone, the search over the word for the reader's own, as it
+          finds every list, not only theirs: beside the way to start one
+          (only its sign, for what the search finds to have the room) */}
+      <div className='mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-4 max-sm:items-start'>
         {/* All on one floor, each part's word stands over its own */}
-        <h2 className={cn(labelClass, 'mr-auto', together && 'invisible')}>
+        <h2
+          className={cn(
+            labelClass,
+            'mr-auto max-sm:order-last max-sm:w-full',
+            // On a phone it would only be an empty row
+            together && 'invisible max-sm:hidden',
+          )}
+        >
           Your lists · {all.length}
         </h2>
-        <ListsFinder className='max-sm:order-last max-sm:w-full sm:w-64' />
-        <Button variant='pill' onClick={start} className='shrink-0'>
+        <ListsFinder className='min-w-0 flex-1 sm:w-64 sm:flex-none' />
+        <Button
+          variant='pill'
+          onClick={start}
+          aria-label='New list'
+          className='shrink-0 max-sm:size-10 max-sm:justify-center max-sm:px-0'
+        >
           <Plus size={15} />
-          New list
+          <span className='max-sm:sr-only'>New list</span>
         </Button>
       </div>
       {all.length ? (
-        <ul className={together ? togetherClass : stacksClass}>
+        <ul className={together ? floorClass : stacksClass}>
           {all.map((list, i) => {
             const books = listedBooks(list, shelf.all);
             return (

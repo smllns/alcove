@@ -1,31 +1,10 @@
 import type { Book } from '@/entities/book/types';
+import { counted } from '@/shared/lib/plural';
 import type { HomeBooks } from '../places/arrange';
+import { tally } from './tallies';
 
 // What the stats tab says of the reader's books, worked out from the
 // books themselves: nothing is asked of the server or the catalogue
-
-// Things counted among the books (an author, a genre, a language), with
-// the books that have each, the commonest first
-export type Tally = { name: string; books: Book[] };
-
-export function tally(books: Book[], keysOf: (book: Book) => string[]) {
-  const by = new Map<string, Book[]>();
-  for (const book of books)
-    for (const key of new Set(keysOf(book))) {
-      const held = by.get(key);
-      if (held) held.push(book);
-      else by.set(key, [book]);
-    }
-  return [...by]
-    .map(([name, held]): Tally => ({ name, books: held }))
-    .sort(
-      (a, b) => b.books.length - a.books.length || a.name.localeCompare(b.name),
-    );
-}
-
-// How many a list (genres, authors, languages) may hold to be shown whole;
-// past that, its first few are shown and the rest open out on asking
-export const FEW = 8;
 
 // How thick a book is, in metres: its pages, and its covers (boards
 // thicker than paper). A book with no page count is taken as an average one.
@@ -41,7 +20,7 @@ export function figures(books: Book[]) {
   const read = books.filter((book) => book.copy?.reading === 'read').length;
   return {
     books: books.length,
-    pages: books.reduce((sum, book) => sum + (book.pages ?? 0), 0),
+    pages: pagesIn(books),
     authors: new Set(books.flatMap((book) => book.authors)).size,
     unread: books.length - read,
     height: books.reduce((sum, book) => sum + thickness(book), 0),
@@ -57,51 +36,111 @@ export const stampOf = (found: ReturnType<typeof figures>) =>
     ['Unread', found.unread],
   ] as [string, number][];
 
+// What's said of a book where its length matters: how many pages it has
+export const pagesOf = (book: Book) => counted(book.pages ?? 0, 'page');
+
+// How many pages the books come to, those with none given counting none
+export const pagesIn = (books: Book[]) =>
+  books.reduce((sum, book) => sum + (book.pages ?? 0), 0);
+
 // When a book came out: first, in any edition, or else this copy's edition
 export const yearOf = (book: Book) =>
   book.firstPublishedYear ?? book.publishedYear;
 
-// The most decades drawn; any older are gathered into one
+// The most columns drawn (decades and folds); any older are gathered into
+// one
 const DECADES = 14;
 
 // The books by the decade they came out in, from the first decade any did
-// to the last, every decade between drawn even with nothing in it; the
-// oldest of a long span gathered as one (`older`)
+// to the last, every decade between drawn even with nothing in it (a long
+// run of them folded into one break); the oldest of a long span gathered
+// as one (`older`)
 export function byDecade(books: Book[]) {
   const dated = books.filter((book) => yearOf(book) !== undefined);
   if (!dated.length) return null;
-  const decadeOf = (book: Book) => Math.floor(yearOf(book)! / 10) * 10;
-  const decades = dated.map(decadeOf);
+  const decades = dated.map((book) => Math.floor(yearOf(book)! / 10) * 10);
   const last = Math.max(...decades);
-  const first = Math.max(Math.min(...decades), last - (DECADES - 1) * 10);
-  const older = Math.min(...decades) < first;
-  // Each book into its decade's column in one pass, the oldest of a long
-  // span into the first
-  const columns: { from: number; older: boolean; books: Book[] }[] = [];
-  if (older) columns.push({ from: first - 10, older: true, books: [] });
-  for (let from = first; from <= last; from += 10)
-    columns.push({ from, older: false, books: [] });
-  dated.forEach((book, i) => {
-    const at = (decades[i] - first) / 10 + (older ? 1 : 0);
-    columns[Math.max(at, 0)].books.push(book);
-  });
+  // The decades drawn from `first` on, the books of any before it gathered
+  // into one, then long empty runs folded
+  const drawnFrom = (first: number) => {
+    const older = Math.min(...decades) < first;
+    const columns: Decade[] = [];
+    if (older) columns.push({ from: first - 10, older: true, books: [] });
+    for (let from = first; from <= last; from += 10)
+      columns.push({ from, older: false, books: [] });
+    dated.forEach((book, i) => {
+      const at = (decades[i] - first) / 10 + (older ? 1 : 0);
+      columns[Math.max(at, 0)].books.push(book);
+    });
+    return foldEmpty(columns);
+  };
+  // From the oldest book's decade, unless that leaves too many to draw
+  let first = Math.min(...decades);
+  let columns = drawnFrom(first);
+  while (columns.length > DECADES) columns = drawnFrom((first += 10));
   const byYear = [...dated].sort((a, b) => yearOf(a)! - yearOf(b)!);
   return { columns, oldest: byYear[0], newest: byYear.at(-1)! };
 }
 
-// The thickest book and the slimmest, by their pages, and what an average
-// one runs to; only among the books whose pages are known
+// How many empty decades in a row are folded into one break
+const FOLDED = 3;
+
+type Decade = { from: number; older: boolean; books: Book[]; to?: number };
+
+// Decades with nothing in them, as many as FOLDED or more in a row, folded
+// into one break (`to`, the last of them), so a lone old book doesn't
+// leave the piles narrow over a long run of nothing
+function foldEmpty(columns: Decade[]) {
+  const folded: Decade[] = [];
+  let run: Decade[] = [];
+  const close = () => {
+    if (run.length >= FOLDED) folded.push({ ...run[0], to: run.at(-1)!.from });
+    else folded.push(...run);
+    run = [];
+  };
+  for (const column of columns) {
+    if (column.books.length) {
+      close();
+      folded.push(column);
+    } else run.push(column);
+  }
+  close();
+  return folded;
+}
+
+// How many pages a pile of books of a length spans, and the last pile,
+// which takes every book from its first page on
+const BAND = 100;
+const LAST = 8;
+const bandOf = (pages: number) => Math.min(LAST, Math.floor(pages / BAND));
+
+// The thickest book and the slimmest, by their pages, what an average one
+// runs to, and the books in piles by their length, a hundred pages each,
+// from the slimmest's pile to the doorstop's (the slimmer first in each);
+// only among the books whose pages are known
 export function extremes(books: Book[]) {
   const paged = books
     .filter((book) => book.pages)
-    .sort((a, b) => b.pages! - a.pages!);
+    .sort((a, b) => a.pages! - b.pages!);
   if (paged.length < 2) return null;
-  const pages = paged.reduce((sum, book) => sum + book.pages!, 0);
+  const pages = pagesIn(paged);
+  const shortest = paged[0];
+  const longest = paged.at(-1)!;
+  const first = bandOf(shortest.pages!);
+  const piles = Array.from(
+    { length: bandOf(longest.pages!) - first + 1 },
+    (_, i) => ({
+      from: (first + i) * BAND,
+      more: first + i === LAST,
+      books: [] as Book[],
+    }),
+  );
+  for (const book of paged) piles[bandOf(book.pages!) - first].books.push(book);
   return {
-    longest: paged[0],
-    shortest: paged.at(-1)!,
+    longest,
+    shortest,
     average: Math.round(pages / paged.length),
-    counted: paged.length,
+    piles,
   };
 }
 

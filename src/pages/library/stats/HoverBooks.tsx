@@ -5,10 +5,7 @@ import { counted } from '@/shared/lib/plural';
 import { solidRaisedClass } from '@/shared/ui/surfaces';
 import { BooksCard } from './BooksCard';
 import { useCardPlace } from './useCardPlace';
-
-// Where a group's card sits over it: from its left edge, its right, or
-// centred, so it stays on the page at a row's ends
-export type CardSide = 'start' | 'end' | 'middle';
+import type { CardSide } from './cardSide';
 
 const sides: Record<CardSide, string> = {
   start: 'left-0',
@@ -16,13 +13,14 @@ const sides: Record<CardSide, string> = {
   middle: 'left-1/2 -translate-x-1/2',
 };
 
-// A group of books drawn in the stats (a month's bay, a decade's pile),
-// opening them to choose from: pointed at (`hover`), in a card over it,
-// its spines rising a touch (theirs to do, `group-hover/books`);
-// otherwise, tapped, in a drawer (`onOpen`). The card headed `heading`,
-// with `meta` beside it (how many books, unless said otherwise). `over`:
-// what's written over the drawing, which the card doesn't cover. Where the card opens, and
-// how it moves as the page scrolls, is useCardPlace's to say.
+// A group of books drawn in the stats (a month's bay, a decade's pile), opening
+// them to choose from: pointed at (`hover`), in a card over it, its spines
+// rising a touch (theirs to do, `group-hover/books`); otherwise, tapped, in a
+// drawer (`onOpen`). The card headed `heading`, with `meta` beside it (how many
+// books, unless said otherwise), and a word on each book (`detail`), if given.
+// `over`: what's written over the drawing, which the card doesn't cover. Where
+// the card opens, and how it moves as the page scrolls, is useCardPlace's to
+// say.
 export function HoverBooks({
   heading,
   books,
@@ -31,6 +29,7 @@ export function HoverBooks({
   hover,
   onOpen,
   over,
+  detail,
   className,
   children,
 }: {
@@ -41,6 +40,7 @@ export function HoverBooks({
   hover: boolean;
   onOpen: () => void;
   over?: ReactNode;
+  detail?: (book: Book) => string;
   className?: string;
   children: ReactNode;
 }) {
@@ -95,6 +95,7 @@ export function HoverBooks({
               books={books}
               scroller={scroller}
               room={place.room}
+              detail={detail}
             />
           </div>
         </div>

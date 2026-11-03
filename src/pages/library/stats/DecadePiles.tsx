@@ -1,99 +1,125 @@
-import type { CSSProperties } from 'react';
+import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
+import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { seedOf } from '@/shared/lib/seed';
-import type { byDecade } from './libraryStats';
+import { yearOf, type byDecade } from './libraryStats';
+import { BookEnds } from './BookEnds';
 import { BooksDrawer } from './BooksDrawer';
-import { DecadeEnds } from './DecadeEnds';
 import { HoverBooks } from './HoverBooks';
-import { ToneSpine } from './ToneSpine';
+import { sideAt } from './cardSide';
+import { Pile, PileCount } from './Pile';
+import { thinned } from './piles';
 import { useBooksDrawer } from './useBooksDrawer';
 
-// The most books a pile is drawn with; past that, one spine stands for
-// several books
-const TALLEST = 40;
+// How wide a fold of empty decades is, against a decade's width
+const FOLD = 0.6;
 
-// A decade written under its pile: in full at a century's turn, otherwise
-// by its last two figures
-const decadeName = (from: number, older: boolean) =>
-  older ? `<${from + 10}` : from % 100 ? `’${String(from).slice(2)}` : from;
+type Column = NonNullable<ReturnType<typeof byDecade>>['columns'][number];
+const folded = (column: Column) => column.to !== undefined;
+
+// A decade written under its pile: in full at a century's turn, and where
+// the century isn't plain from the decade before it (the first, or one
+// after a fold into another century), otherwise by its last two figures
+const decadeName = (from: number, older: boolean, before?: number) =>
+  older
+    ? `<${from + 10}`
+    : from % 100 &&
+        before !== undefined &&
+        Math.floor(before / 100) === Math.floor(from / 100)
+      ? `’${String(from).slice(2)}`
+      : from;
+
+// What's said of each book in a decade: the year it was written
+const yearWritten = (book: Book) => String(yearOf(book) ?? '');
 
 // The books by decade, each decade a pile of them lying one on another
 // (as a list's pile is), how many over it, a ruler of the years under the
-// piles; a decade's books opened to choose from as a month's are
-// (HoverBooks); and the oldest book and the newest, ruled off under them
-// (DecadeEnds)
+// piles (broken where a long run of empty decades is folded away); a
+// decade's books opened to choose from as a month's are (HoverBooks), each
+// with its year; and the oldest book and the newest, ruled off under them
+// (BookEnds)
 export function DecadePiles({
   decades,
 }: {
   decades: NonNullable<ReturnType<typeof byDecade>>;
 }) {
   const { columns, oldest, newest } = decades;
-  const most = Math.max(...columns.map((column) => column.books.length));
-  const every = Math.ceil(most / TALLEST);
+  const drawn = thinned(columns.map((column) => column.books));
   const hover = useMediaQuery(HOVER);
   const drawer = useBooksDrawer();
+  // Each column's share of the width, a fold narrower than a decade, and
+  // where along the ruler each one's middle falls
+  const widths = columns.map((column) => (folded(column) ? FOLD : 1));
+  const whole = widths.reduce((sum, width) => sum + width, 0);
+  const middles = widths.map(
+    (width, i) =>
+      ((widths.slice(0, i).reduce((sum, w) => sum + w, 0) + width / 2) /
+        whole) *
+      100,
+  );
+  // Every other decade written on a phone, counting only the decades, and
+  // always those either side of a fold
+  const written = columns.map(
+    (_, i) =>
+      columns.slice(0, i + 1).filter((each) => !folded(each)).length % 2 ===
+        1 || [columns[i - 1], columns[i + 1]].some((c) => c && folded(c)),
+  );
   return (
     <>
       <div
         className='grid items-end gap-x-1.5'
-        style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
+        style={{
+          gridTemplateColumns: widths.map((width) => `${width}fr`).join(' '),
+        }}
       >
-        {columns.map(({ from, older, books }, i) => {
+        {columns.map((column, i) => {
+          const { from, older, books } = column;
+          // A fold, nothing in it to open
+          if (folded(column)) return <span key={from} />;
           const name = older ? `Before ${from + 10}` : `The ${from}s`;
           return (
             <HoverBooks
               key={from}
               heading={name}
               books={books}
-              side={i < 3 ? 'start' : i > columns.length - 4 ? 'end' : 'middle'}
+              side={sideAt(i, columns.length)}
               hover={hover}
               onOpen={() => drawer.show(name, books)}
+              detail={yearWritten}
               className='items-stretch'
-              over={
-                <span className='mb-1.5 text-center font-serif text-[13px] text-faint transition-colors duration-500 ease-soft group-hover/books:text-ink'>
-                  {books.length || ''}
-                </span>
-              }
+              over={<PileCount count={books.length} />}
             >
-              <span className='flex flex-col items-center gap-px'>
-                {books
-                  .filter((_, k) => k % every === 0)
-                  .map((book, k, shown) => (
-                    // Pointed at, the pile loosens: each book lifting the
-                    // more the higher it lies, so the pile opens up a touch
-                    // from the bottom, and brightens
-                    <span
-                      key={book.id}
-                      className='block h-1.5 transition-[translate,filter] duration-700 ease-soft group-hover/books:translate-y-(--rise) group-hover/books:brightness-110'
-                      style={
-                        {
-                          width: `${70 + seedOf(book.id) * 30}%`,
-                          '--rise': `${-Math.min(shown.length - 1 - k, 24) * 0.6}px`,
-                        } as CSSProperties
-                      }
-                    >
-                      {/* Set a little off true, as a pile is */}
-                      <ToneSpine
-                        book={book}
-                        className='size-full'
-                        style={{
-                          translate: `${seedOf(`${book.id}x`) * 6 - 3}%`,
-                        }}
-                      />
-                    </span>
-                  ))}
-              </span>
+              <Pile books={drawn[i]} />
             </HoverBooks>
           );
         })}
       </div>
       <div className='relative mt-2 h-8 border-t border-(--fine)'>
-        {columns.map(({ from, older }, i) => {
-          const left = `${((i + 0.5) / columns.length) * 100}%`;
-          const minor = i % 2 === 1 && i !== columns.length - 1;
+        {columns.map((column, i) => {
+          const left = `${middles[i]}%`;
+          // A fold, the ruler broken across it as a drawing breaks a line
+          // too long to draw: two slants over a gap in it
+          if (folded(column))
+            return (
+              <svg
+                key={column.from}
+                aria-hidden
+                viewBox='0 0 16 14'
+                className='absolute -top-[7px] h-3.5 w-4 -translate-x-1/2 text-(--fine)'
+                style={{ left }}
+              >
+                <rect x='3' y='5' width='10' height='4' fill='var(--bg-mid)' />
+                <path
+                  d='M2 12 L7 2 M9 12 L14 2'
+                  stroke='currentColor'
+                  strokeWidth='1.2'
+                  fill='none'
+                />
+              </svg>
+            );
+          const last = i === columns.length - 1;
           return (
-            <span key={from}>
+            <span key={column.from}>
               <i
                 className='absolute -top-1 h-2 w-px bg-(--fine)'
                 style={{ left }}
@@ -101,20 +127,37 @@ export function DecadePiles({
               <em
                 className={cn(
                   'absolute top-2.5 -translate-x-1/2 text-[11px] whitespace-nowrap text-muted not-italic',
-                  minor && 'max-sm:hidden',
+                  !written[i] && !last && 'max-sm:hidden',
                 )}
-                style={{ left }}
+                // Kept within the ruler at its ends
+                style={{ left: `clamp(1.3rem, ${left}, calc(100% - 1.3rem))` }}
               >
-                {decadeName(from, older)}
+                {decadeName(
+                  column.from,
+                  column.older,
+                  // The decade drawn before it, past any fold
+                  i > 0
+                    ? columns[folded(columns[i - 1]) ? i - 2 : i - 1]?.from
+                    : undefined,
+                )}
               </em>
             </span>
           );
         })}
       </div>
       <div className='mt-8'>
-        <DecadeEnds oldest={oldest} newest={newest} />
+        <BookEnds
+          first={{ kind: 'The oldest', book: oldest }}
+          last={{ kind: 'The newest', book: newest }}
+          only='The only dated book'
+          value={yearOf}
+          measure={counted(
+            (yearOf(newest) ?? 0) - (yearOf(oldest) ?? 0),
+            'year',
+          )}
+        />
       </div>
-      {!hover && <BooksDrawer {...drawer} />}
+      {!hover && <BooksDrawer {...drawer} detail={yearWritten} />}
     </>
   );
 }

@@ -1,17 +1,17 @@
 import { spineSize } from '@/entities/book/spine';
-import { monthOfYear } from '@/shared/lib/dates';
+import { monthLetters, monthOfYear } from '@/shared/lib/dates';
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { BooksDrawer } from './BooksDrawer';
+import { sideAt } from './cardSide';
 import { HoverBooks } from './HoverBooks';
-import { ToneSpine } from './ToneSpine';
+import { RisingSpine } from './ToneSpine';
 import { useBooksDrawer } from './useBooksDrawer';
 
 // The most books a bay stands, as many as fit a phone's narrow bays
 const SHOWN = 12;
-const LETTERS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
 // A year as a shelf of twelve bays, a month each, with the books of that
 // month standing in it, as many over it as there are (gold, over the
@@ -23,11 +23,14 @@ export function MonthShelf({
   months,
   soFar,
   year,
+  detail,
 }: {
   months: Book[][];
   // How many of the months have come
   soFar: number;
   year: number;
+  // What's said of each book in a month's card, if anything
+  detail?: (book: Book) => string;
 }) {
   const hover = useMediaQuery(HOVER);
   const drawer = useBooksDrawer();
@@ -46,9 +49,10 @@ export function MonthShelf({
               heading={monthOfYear(m)}
               meta={`${year} · ${many}`}
               books={books}
-              side={m < 3 ? 'start' : m > 8 ? 'end' : 'middle'}
+              side={sideAt(m, 12)}
               hover={hover}
               onOpen={() => open(m)}
+              detail={detail}
               className={cn(!come && 'opacity-35')}
               over={
                 <span
@@ -65,22 +69,19 @@ export function MonthShelf({
             >
               <span className='flex h-20 items-end justify-center gap-0.5'>
                 {books.slice(0, SHOWN).map((book) => (
-                  <span
+                  <RisingSpine
                     key={book.id}
-                    className='block min-w-px shrink basis-2 transition-[translate,filter] duration-700 ease-soft group-hover/books:-translate-y-1 group-hover/books:brightness-110'
-                    style={{
-                      height: Math.round(spineSize(book).height * 0.72),
-                    }}
-                  >
-                    <ToneSpine book={book} className='size-full' />
-                  </span>
+                    book={book}
+                    height={Math.round(spineSize(book).height * 0.72)}
+                    className='min-w-px shrink basis-2'
+                  />
                 ))}
               </span>
             </HoverBooks>
           );
         })}
         <div className='stats-plank col-span-12' />
-        {LETTERS.map((letter, m) => (
+        {monthLetters.map((letter, m) => (
           <button
             key={m}
             type='button'
@@ -93,7 +94,7 @@ export function MonthShelf({
           </button>
         ))}
       </div>
-      {!hover && <BooksDrawer {...drawer} />}
+      {!hover && <BooksDrawer {...drawer} detail={detail} />}
     </>
   );
 }

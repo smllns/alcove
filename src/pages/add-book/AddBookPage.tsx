@@ -16,19 +16,21 @@ import { paths } from '@/shared/config/paths';
 type Step =
   | { kind: 'search' }
   | { kind: 'picked'; work: CatalogueWork; isbnEdition?: CatalogueEdition }
-  | { kind: 'manual' };
+  | { kind: 'manual'; isbn?: string };
 
 // Find the book in the catalogue (or type it in), check the details, add it
 export function AddBookPage() {
   const navigate = useTransitionNavigate();
-  const found = (useLocation().state as AddBookState | null)?.work;
+  const found = useLocation().state as AddBookState | null;
   const [step, setStep] = useState<Step>(
-    found ? { kind: 'picked', work: found } : { kind: 'search' },
+    found?.work
+      ? { kind: 'picked', work: found.work, isbnEdition: found.isbnEdition }
+      : { kind: 'search' },
   );
   const back = () => setStep({ kind: 'search' });
 
   return (
-    <InnerPage width='lg'>
+    <InnerPage width='lg' fit={step.kind === 'search'}>
       <Eyebrow rise={0}>Add a book</Eyebrow>
       <PageTitle rise={80} className='mt-3 sm:mt-4'>
         What’s on your shelf?
@@ -39,13 +41,16 @@ export function AddBookPage() {
           : 'Check the details, then tell us about your copy.'}
       </Lead>
 
-      <div className='animate-rise' style={{ animationDelay: '240ms' }}>
+      <div
+        className='flex flex-1 animate-rise flex-col'
+        style={{ animationDelay: '240ms' }}
+      >
         {step.kind === 'search' && (
           <CatalogueSearch
             onPick={(work, isbnEdition) =>
               setStep({ kind: 'picked', work, isbnEdition })
             }
-            onManual={() => setStep({ kind: 'manual' })}
+            onManual={(isbn) => setStep({ kind: 'manual', isbn })}
           />
         )}
         {step.kind === 'picked' && (
@@ -58,7 +63,7 @@ export function AddBookPage() {
         )}
         {step.kind === 'manual' && (
           <BookForm
-            fields={emptyFields}
+            fields={{ ...emptyFields, isbn: step.isbn ?? '' }}
             extras={{}}
             editions={[]}
             onSaved={() => navigate(paths.library, 'forward')}

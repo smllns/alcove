@@ -22,3 +22,33 @@ export function ToneSpine({
     />
   );
 }
+
+// A spine standing in a drawing, `height` tall, rising a touch and
+// brightening as its group is pointed at (`group-hover/books`); `small`,
+// rising less, for the finest. Its width is the drawing's (`className`).
+export function RisingSpine({
+  book,
+  height,
+  small = false,
+  className,
+}: {
+  book: Book;
+  height: number;
+  small?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        'block transition-[translate,filter] duration-700 ease-soft group-hover/books:brightness-110',
+        small
+          ? 'group-hover/books:-translate-y-0.5'
+          : 'group-hover/books:-translate-y-1',
+        className,
+      )}
+      style={{ height }}
+    >
+      <ToneSpine book={book} className='size-full' />
+    </span>
+  );
+}

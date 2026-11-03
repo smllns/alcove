@@ -1,4 +1,6 @@
+import { ways } from '@/entities/book/acquired';
 import type { Book } from '@/entities/book/types';
+import { byOption } from './tallies';
 
 // The months of the stats: when books came to the reader, and when they
 // were finished, going only by the days the reader gave for them (a book
@@ -42,4 +44,17 @@ export function byMonth(books: Book[], year: number, dayOf: DayOf) {
 export function monthsSoFar(year: number, today = new Date()) {
   if (year < today.getFullYear()) return 12;
   return year === today.getFullYear() ? today.getMonth() + 1 : 0;
+}
+
+// The books by how they came to the reader (bought, a gift, …), the most
+// first, those told in their own words counted as another way; and how
+// many say how they came at all
+export function byArrival(books: Book[]) {
+  const found = byOption(books, ways, (book) => {
+    const how = book.copy?.acquired?.how;
+    if (!how) return undefined;
+    return ways.some((way) => way.value === how) ? how : ways.at(-1)!.value;
+  });
+  found.rows.sort((a, b) => b.books.length - a.books.length);
+  return found;
 }

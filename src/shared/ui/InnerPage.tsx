@@ -16,16 +16,21 @@ const widths = {
 
 // A page one step in from the library (settings, adding a book): the header
 // with a way to the shelves, a way back to wherever the reader came from
-// (the shelves, if from nowhere), and a centred column for the content
+// (the shelves, if from nowhere), and a centred column for the content.
+// `fit`: the column as tall as the screen, no taller unless what's in it
+// grows (its last part, stretching, takes up what's left), so a short page
+// doesn't scroll on a phone.
 export function InnerPage({
   width = 'md',
+  fit = false,
   children,
 }: {
   width?: keyof typeof widths;
+  fit?: boolean;
   children: ReactNode;
 }) {
   return (
-    <main className='bg-paper min-h-screen text-ink'>
+    <main className={cn('bg-paper min-h-dvh text-ink', fit && 'flex flex-col')}>
       <SiteHeader home={paths.library}>
         <ButtonLink to={paths.library} variant='pill'>
           <LibraryBig size={15} />
@@ -35,11 +40,17 @@ export function InnerPage({
 
       <div
         className={cn(
-          'mx-auto w-full px-6 pb-24 pt-4 sm:px-10 sm:pt-10',
+          'mx-auto w-full px-6 pt-4 sm:px-10 sm:pt-10',
+          fit ? 'flex flex-1 flex-col pb-8 sm:pb-12' : 'pb-24',
           widths[width],
         )}
       >
-        <BackLink to={paths.library} returns />
+        <BackLink
+          to={paths.library}
+          returns
+          // Its own width, not the column's, in a column laid out as flex
+          className='mb-7 self-start sm:mb-10'
+        />
         {children}
       </div>
     </main>

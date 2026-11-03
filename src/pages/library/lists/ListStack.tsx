@@ -12,8 +12,9 @@ import { ListPile } from './ListPile';
 // three rows of the floor it's on (stackClass): its pile, its name, its
 // count, so every pile on a floor stands on the same line, however many
 // lines their names take.
-export const stacksClass =
-  'grid grid-cols-2 gap-x-8 gap-y-14 pt-4 sm:grid-cols-3 lg:grid-cols-4';
+export const floorClass =
+  'grid grid-cols-2 gap-x-8 pt-4 sm:grid-cols-3 lg:grid-cols-4';
+export const stacksClass = `${floorClass} gap-y-14`;
 export const stackClass = 'row-span-3 grid grid-rows-subgrid gap-y-0';
 // A list's name under its floor, as a room's is written on the drawing of
 // a home: in spaced capitals

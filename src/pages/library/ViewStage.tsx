@@ -38,6 +38,11 @@ export function ViewStage({
           sky
             ? 'pointer-events-auto fixed inset-0 z-0 flex'
             : 'relative z-1 mt-6 sm:mt-8',
+          // What fades as other books are shown, alone
+          // (transitions-books.css); not the sky, which is behind the
+          // header and would come over it as it faded, and fades its
+          // stars itself (Universe)
+          !sky && 'books-stage',
           going && 'pointer-events-none',
           going
             ? sky

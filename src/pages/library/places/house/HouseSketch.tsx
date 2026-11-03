@@ -4,7 +4,7 @@ import { SectionNotes } from './SectionNotes';
 import { SectionWall } from './SectionWall';
 import { AtticLight } from './AtticLight';
 import { EAVES, RIDGE, SLAB, UNDER, WALL } from '../drawing/section';
-import { useMeasured } from '../drawing/useMeasured';
+import { useMeasured } from '@/shared/lib/useMeasured';
 
 // The house drawn as an architect's section through it, over its rooms
 // (each marked data-room): what's cut through solid (the roof following

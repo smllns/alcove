@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { Book } from '@/entities/book/types';
+import type { ShelfShow } from '../views/order';
 import { boundsOf, layoutSky } from './layout';
 import { letGo } from './leaving';
 import { SkyControls } from './SkyControls';
@@ -19,19 +20,28 @@ import { useSkyCamera } from './useSkyCamera';
 import { leaveForBook } from '../views/leaveForBook';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { cn } from '@/shared/lib/cn';
+import { useFadeSwap } from '@/shared/lib/useFadeSwap';
 import { floatingClass } from '@/shared/ui/surfaces';
 import { paths } from '@/shared/config/paths';
 
+// How long the stars take to fade out, other books chosen, before the new
+// ones fade in (duration-450 and duration-800 below)
+const FADE_OUT_MS = 450;
+
 // Every book a star, scattered across a sky to drag around and zoom into.
 // The best loved shine the biggest; a writer's books are gathered into a
-// constellation, which lights up as one of them is pointed at. While searching, the books in `lit`
-// shine and the rest fade, and the view glides over to them.
+// constellation, which lights up as one of them is pointed at. While
+// searching, the books in `lit` shine and the rest fade, and the view
+// glides over to them. Other books chosen (`show`: every one, or the
+// physical ones alone), the stars fade out and the new ones in, the sky
+// behind them staying.
 export function Universe({
   books,
   lit = null,
   eased = false,
   notice,
   insetTop = 0,
+  show,
 }: {
   books: Book[];
   lit?: Set<string> | null;
@@ -43,9 +53,12 @@ export function Universe({
   // How far down the tabs and the search reach over the sky; the books
   // are fitted into the room below
   insetTop?: number;
+  // Which books are chosen to be shown, for a change of them to fade
+  show: ShelfShow;
 }) {
   const sky = useRef<HTMLDivElement>(null);
-  const layout = useMemo(() => layoutSky(books), [books]);
+  const [drawn, fading] = useFadeSwap(books, show, FADE_OUT_MS);
+  const layout = useMemo(() => layoutSky(drawn), [drawn]);
   const [shape, nextShape] = useSkyShape();
   const litStars = useMemo(
     () => (lit ? layout.stars.filter((star) => lit.has(star.book.id)) : []),
@@ -126,10 +139,12 @@ export function Universe({
       <div
         className={cn(
           'absolute left-0 top-0 z-1 origin-top-left will-change-transform',
-          // Fades in once it's in place, rather than appearing in a blink;
-          // unless the switch to it faded it in already
-          !eased && 'transition-opacity duration-700 ease-soft',
-          placed || eased ? 'opacity-100' : 'opacity-0',
+          // Fades in once it's in place, rather than appearing in a blink
+          // (unless the switch to it faded it in already); other books
+          // chosen, fades softly out and in again with them
+          'transition-opacity ease-in-out',
+          fading ? 'duration-450' : 'duration-800',
+          (placed || eased) && !fading ? 'opacity-100' : 'opacity-0',
         )}
         style={{
           transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`,

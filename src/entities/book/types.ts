@@ -170,8 +170,12 @@ export type CatalogueAuthor = {
 export type SimilarBook = CatalogueWork & { bookId?: string };
 
 // What the page for adding a book may be opened with: one already found in
-// the catalogue (a book to read next, say), to start from its details
-export type AddBookState = { work?: CatalogueWork };
+// the catalogue (a book to read next, say), to start from its details, and
+// the printing an ISBN found, if it was found so
+export type AddBookState = {
+  work?: CatalogueWork;
+  isbnEdition?: CatalogueEdition;
+};
 
 // From the catalogue: one specific printing
 export type CatalogueEdition = {

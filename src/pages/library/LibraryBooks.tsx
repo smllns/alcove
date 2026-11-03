@@ -73,6 +73,7 @@ export function LibraryBooks({
         eased={viewEased}
         notice={sought && complete && !found.length && nothingMatches(sought)}
         insetTop={skyInset}
+        show={arrangement.show}
       />
     );
   // Nothing found is only certain once every book is in

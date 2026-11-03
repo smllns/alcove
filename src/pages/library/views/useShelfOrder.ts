@@ -35,8 +35,10 @@ function read(): Arrangement {
 
 // The chosen order, fade and books shown, remembered in this browser. A
 // new order, or the same one turned round, glides each book over to its
-// new place; other books shown come in over those before.
-export function useShelfOrder() {
+// new place; other books shown fade in after those before (the grid and
+// the list by a page transition; the sky, shown, fades its stars itself,
+// as a transition would hold it still meanwhile).
+export function useShelfOrder(sky: boolean) {
   const [choice, setArrangement] = useState(read);
   const save = (next: Arrangement) => {
     store(
@@ -54,7 +56,9 @@ export function useShelfOrder() {
     setFade: (fade: ShelfFade) => setArrangement(save({ ...choice, fade })),
     setShow: (show: ShelfShow) => {
       if (show === choice.show) return;
-      easeChange(() => setArrangement(save({ ...choice, show })), 'swap');
+      const update = () => setArrangement(save({ ...choice, show }));
+      if (sky) update();
+      else easeChange(update, 'shown');
     },
   };
 }

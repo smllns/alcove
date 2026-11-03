@@ -13,6 +13,7 @@ import { SmoothHeight } from '@/shared/ui/SmoothHeight';
 import { Spinner } from '@/shared/ui/Spinner';
 import { solidRaisedClass } from '@/shared/ui/surfaces';
 import type { ListOpenState } from '@/entities/list/types';
+import { ScanButton } from '@/features/scan-isbn';
 import { SearchFound } from './SearchFound';
 import { useSearch, type SearchKind } from './useSearch';
 
@@ -26,7 +27,9 @@ const kinds: { value: SearchKind; label: string }[] = [
 
 // One search over everything, opened over the page (the whole screen, on
 // a phone): the reader's own books, every book in the catalogue, other
-// readers (@name), writers and lists
+// readers (@name), writers and lists. On a phone or tablet, a book can be
+// looked for by its barcode too, read with the camera: its ISBN searched
+// for among the books.
 export function SearchDialog({
   open,
   onClose,
@@ -100,6 +103,13 @@ export function SearchDialog({
         >
           <Spinner />
         </span>
+        <ScanButton
+          icon
+          onFound={(isbn) => {
+            setText(isbn);
+            setKind('books');
+          }}
+        />
         <IconButton aria-label='Close' onClick={onClose} className='sm:hidden'>
           <X size={16} />
         </IconButton>

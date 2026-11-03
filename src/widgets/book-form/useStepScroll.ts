@@ -7,14 +7,15 @@ import type { Step } from './StepHeading';
 // the tabs floating there
 const ROOM_ABOVE = 96;
 
-// Each step starts from its heading (`heading`). Once the new step
-// is on screen, as the page may have changed height with it (on a phone
-// the second step drops the cover choices); only if the heading is out of
-// easy view. Changing a book, the steps are switched between at the
-// heading or after being brought there (`switchFromBelow`), so only a
-// heading out of sight altogether is, e.g. when a problem on the other step
-// sends the reader over to it. `form`: for the form's own element;
-// `toHeading`: back up to the step's start, to what's missing there.
+// Each step starts from its heading (`heading`). Once the new step is on
+// screen, as the page may have changed height with it (on a phone the second
+// step drops the cover choices); only if the heading is out of easy view
+// (adding a book, anywhere below the top third of the screen; changing one, off
+// it). The steps are switched between at the heading or after being brought
+// there (`switchFromBelow`), adding a book as changing one, so only a heading
+// out of sight altogether is, e.g. when a problem on the other step sends the
+// reader over to it. `form`: for the form's own element; `toHeading`: back up
+// to the step's start, to what's missing there.
 export function useStepScroll(
   step: Step,
   editing: boolean,
@@ -43,7 +44,7 @@ export function useStepScroll(
     toHeading();
   }, [step, editing]);
 
-  // Changing a book, over to the other step from the buttons below it: up
+  // Over to the other step from the buttons below it: up
   // to where that step starts first, the book's from its cover, the copy's
   // from the tabs; and kept there as the step changes, though what's above
   // may change with it (on a phone, the copy has no cover choices)

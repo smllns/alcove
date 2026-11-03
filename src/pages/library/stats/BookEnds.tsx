@@ -1,15 +1,17 @@
+import type { ReactNode } from 'react';
 import type { Book } from '@/entities/book/types';
 import { BookCover } from '@/entities/book/ui/BookCover';
 import { paths } from '@/shared/config/paths';
-import { counted } from '@/shared/lib/plural';
 import { labelClass } from '@/shared/ui/fieldStyles';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
-import { yearOf } from './libraryStats';
 
-// One end of the span: what it is, the year large, and the book, its cover
-// beside its title and who wrote it; leading to it, and pointed at, its
-// cover rising slowly a touch and brightening, as the spines do
-function End({ kind, book }: { kind: string; book: Book }) {
+type End = { kind: string; book: Book };
+
+// One end of the span: what it is, its measure large (`value`), and the
+// book, its cover beside its title and who wrote it; leading to it, and
+// pointed at, its cover rising slowly a touch and brightening, as the
+// spines do
+function EndCard({ kind, book, value }: End & { value: ReactNode }) {
   const author = book.authors.join(', ');
   return (
     <TransitionLink
@@ -18,8 +20,8 @@ function End({ kind, book }: { kind: string; book: Book }) {
     >
       <span className='flex items-baseline justify-between gap-3'>
         <span className={labelClass}>{kind}</span>
-        <span className='font-serif text-2xl leading-none text-ink'>
-          {yearOf(book)}
+        <span className='font-serif text-2xl leading-none whitespace-nowrap text-ink'>
+          {value}
         </span>
       </span>
       <span className='flex items-center gap-3'>
@@ -46,21 +48,39 @@ function End({ kind, book }: { kind: string; book: Book }) {
   );
 }
 
-// The oldest book and the newest, ruled off under the piles as the title
-// block is under a drawing: one at each end, and between them, measured
-// as an architect measures, the years from one to the other (on a phone,
-// one over the other, the measure left to the sentence above)
-export function DecadeEnds({ oldest, newest }: { oldest: Book; newest: Book }) {
-  const span = (yearOf(newest) ?? 0) - (yearOf(oldest) ?? 0);
-  if (newest === oldest)
+// The two books at the ends of a chapter's span (the oldest and the
+// newest, the slimmest and the thickest), ruled off under its drawing as
+// the title block is under a drawing: one at each end, each with its
+// measure (`value`), and between them, measured as an architect measures,
+// how far one is from the other (on a phone, one over the other, the
+// measure left to the sentence above). The same book at both ends shown
+// once, as the `only` one (or as the first).
+export function BookEnds({
+  first,
+  last,
+  only,
+  value,
+  measure,
+}: {
+  first: End;
+  last: End;
+  only?: string;
+  value: (book: Book) => ReactNode;
+  measure: string;
+}) {
+  if (first.book === last.book)
     return (
       <div className='max-w-sm border border-(--fine)'>
-        <End kind='The only dated book' book={oldest} />
+        <EndCard
+          kind={only ?? first.kind}
+          book={first.book}
+          value={value(first.book)}
+        />
       </div>
     );
   return (
     <div className='flex border border-(--fine) max-sm:flex-col'>
-      <End kind='The oldest' book={oldest} />
+      <EndCard {...first} value={value(first.book)} />
       <span
         aria-hidden
         className='relative w-28 shrink-0 self-stretch border-x border-(--fine) max-sm:hidden'
@@ -70,11 +90,11 @@ export function DecadeEnds({ oldest, newest }: { oldest: Book; newest: Book }) {
         <span className='absolute top-1/2 left-3 h-2 w-px -translate-y-1/2 bg-(--fine)' />
         <span className='absolute top-1/2 right-3 h-2 w-px -translate-y-1/2 bg-(--fine)' />
         <span className='absolute inset-x-0 top-1/2 -translate-y-[calc(100%+4px)] text-center font-serif text-[13px] text-ink-soft'>
-          {counted(span, 'year')}
+          {measure}
         </span>
       </span>
       <span className='h-px bg-(--fine) sm:hidden' />
-      <End kind='The newest' book={newest} />
+      <EndCard {...last} value={value(last.book)} />
     </div>
   );
 }

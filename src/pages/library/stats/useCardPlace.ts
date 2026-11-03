@@ -21,12 +21,12 @@ const SWAP_MS = 200;
 
 type Place = { under: boolean; room: number };
 
-// Where a group's card (HoverBooks) opens: over the group where there's
-// room for it, under it where there's more; fitting neither way, its books scroll in less room, for
-// it to fit the roomier one. Chosen each time the group's pointed at and,
-// while it is, as the page scrolls. Out of sight, the card is simply put
-// there; on screen, it fades away and comes back there (`moving`), never
-// jumping across, and stays put while the pointer's in it. Left and gone,
+// Where a group's card (HoverBooks) opens: over the group where there's room
+// for it, under it where there's more; fitting neither way, its books scroll in
+// less room, for it to fit the roomier one. Chosen each time the group's
+// pointed at and, while it is, as the page scrolls. Out of sight, the card is
+// simply put there; on screen, it fades away and comes back there (`moving`),
+// never jumping across, and stays put while the pointer's in it. Left and gone,
 // its books are back at the top.
 export function useCardPlace(
   card: RefObject<HTMLElement | null>,

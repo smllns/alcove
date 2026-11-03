@@ -6,7 +6,13 @@ import { useForm } from '@/shared/lib/useForm';
 import { BookStep } from './BookStep';
 import { CopyStep } from './CopyStep';
 import { CoverPicker } from './CoverPicker';
-import { coverChoices, extrasForEdition, withEdition } from './catalogue';
+import {
+  coverChoices,
+  extrasForEdition,
+  keptEdition,
+  savedExtras,
+  withEdition,
+} from './catalogue';
 import {
   emptyFields,
   missingOnBookStep,
@@ -37,6 +43,9 @@ type BookFormProps = {
   onBack: () => void;
   // The step it opens on
   startStep?: Step;
+  // Already said to be a second copy of a book on the shelves, so adding
+  // it doesn't ask again
+  secondCopy?: boolean;
 };
 
 // A book in two steps: the book itself, prefilled from the catalogue and
@@ -51,6 +60,7 @@ export function BookForm({
   onSaved,
   onBack,
   startStep = 'book',
+  secondCopy = false,
 }: BookFormProps) {
   const addBook = useAddBook();
   const updateBook = useUpdateBook();
@@ -59,13 +69,17 @@ export function BookForm({
   const [entries, setEntries] = useState<DraftLists>(initialEntries);
 
   // Set once the reader says yes, it's a second copy of a book they have
-  const anotherCopy = useRef(false);
+  const anotherCopy = useRef(secondCopy);
   const form = useForm<DraftFields>(
     { ...emptyFields, ...fields },
     async (values) => {
       const tidied = tidyLists(entries);
       setEntries(tidied);
-      const input = toBookInput(values, extras, tidied);
+      const input = toBookInput(
+        values,
+        savedExtras(editions, extras, values),
+        tidied,
+      );
       if (editing) {
         await updateBook.mutateAsync({
           id: editing.id,
@@ -109,7 +123,7 @@ export function BookForm({
       return;
     }
     if (step === 'book' && !editing) {
-      setStep('copy');
+      switchFromBelow('copy');
       return;
     }
     void form.onSubmit();
@@ -137,7 +151,7 @@ export function BookForm({
       />
       <FormButtons
         step={step}
-        onStep={editing ? switchFromBelow : setStep}
+        onStep={switchFromBelow}
         editing={Boolean(editing)}
         saving={saving}
         onBack={onBack}
@@ -169,14 +183,13 @@ export function BookForm({
             editing ? (next) => softSwitch(() => setStep(next)) : undefined
           }
         />
-        {/* Changing a book, one step comes in softly in place of the
-            other; adding one, each rises in afresh as it's reached */}
-        <div key={step} className={editing ? 'soft-switch' : 'animate-rise'}>
+        {/* One step comes in softly in place of the other */}
+        <div key={step} className='soft-switch'>
           {step === 'book' ? (
             <BookStep
               form={form}
               editions={editions}
-              edition={extras.openLibrary?.edition}
+              edition={keptEdition(editions, extras, form.values)?.editionKey}
               onChooseEdition={chooseEdition}
               genres={extras.genres ?? []}
               onGenresChange={(genres) => setExtras((x) => ({ ...x, genres }))}
