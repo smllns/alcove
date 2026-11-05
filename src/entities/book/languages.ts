@@ -91,6 +91,13 @@ export function wikiLanguage(code: string | undefined) {
   }
 }
 
+// The language a book's own words are in, as the page is told it (for
+// hyphenating them): the one it's read in, or, not knowing that, Russian
+// for a title written in Cyrillic
+export const titleLanguage = (book: { title: string; language?: string }) =>
+  wikiLanguage(book.language) ??
+  (/\p{Script=Cyrillic}/u.test(book.title) ? 'ru' : undefined);
+
 // A language named in itself: "Deutsch", "Русский"; in English when the
 // browser can't (asked in a language it doesn't speak, it would answer in
 // the reader's own instead)

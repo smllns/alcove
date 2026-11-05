@@ -80,14 +80,21 @@
   pointer-events: none;
 }
 
-/* Each book drawn once, shadow and all, on a layer of its own, which the
-   browser then only slides about with the sky: drawn together on one,
-   Safari drew every book's shadow over again as the sky moved, and
-   whenever one was pointed at. While searching, the books that weren't
-   found all but fade away, on that layer, without a redraw. */
+/* While searching, the books that weren't found all but fade away. With a
+   mouse, each book is drawn once, shadow and all, on a layer of its own,
+   which the browser then only slides about with the sky (fading it there
+   without a redraw): drawn together on one, Safari drew every book's
+   shadow over again as the sky moved, and whenever one was pointed at. Not
+   on a touch screen, where nothing is pointed at: a layer per book, every
+   one of them kept at once with the sky zoomed out, was more than an
+   iPhone's browser would hold, and it gave up on the page. */
 .sky .star-shade {
-  will-change: transform;
   transition: opacity 0.6s var(--ease-soft);
+}
+@media (hover: hover) {
+  .sky .star-shade {
+    will-change: transform;
+  }
 }
 .sky[data-searching] .star:not([data-lit]) .star-shade {
   opacity: 0.12;

@@ -21,6 +21,17 @@
   --star-flight: drop-shadow(0 14px 18px rgb(0 0 0 / 0.7));
   --star-unlit: drop-shadow(0 14px 18px rgb(0 0 0 / 0));
 }
+/* No shadow at all on a touch screen: there the books are drawn together
+   on one layer (universe.css), and a phone drew every one of their shadows
+   over again whenever the sky moved, which held it up */
+@media (hover: none) {
+  :root,
+  :root[data-theme='dark'] {
+    --star-shadow: none;
+    --star-flight: none;
+    --star-unlit: none;
+  }
+}
 /* Its tilt and its growing (on hover, below) are moved by these two rather
    than by transform itself: a transform Chrome would move on its own,
    drawing the shadow once, at the start, so the book would shrink back

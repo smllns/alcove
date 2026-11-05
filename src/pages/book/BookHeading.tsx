@@ -1,5 +1,6 @@
 import type { Ref } from 'react';
 import { nonPhysicalLabel } from '@/entities/book/nonPhysical';
+import { titleLanguage } from '@/entities/book/languages';
 import type { Book } from '@/entities/book/types';
 import { readingState } from '@/entities/book/reading';
 import { cn } from '@/shared/lib/cn';
@@ -74,7 +75,11 @@ export function BookHeading({
         </Eyebrow>
       )}
       <div ref={ref}>
-        <PageTitle rise={60} className='font-medium text-balance'>
+        <PageTitle
+          rise={60}
+          lang={titleLanguage(book)}
+          className='font-medium text-balance'
+        >
           {book.title}
         </PageTitle>
       </div>

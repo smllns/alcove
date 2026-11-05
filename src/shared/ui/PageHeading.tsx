@@ -40,16 +40,21 @@ const titleSizes = {
   lg: 'text-5xl sm:text-7xl',
 };
 
+// A word too long for the line (a book's title in Russian, say) is
+// hyphenated by the rules of its language (`lang`), or else broken where
+// it meets the edge, rather than running out past it
 export function PageTitle({
   children,
   className,
   rise,
   size = 'md',
-}: TextProps & { size?: keyof typeof titleSizes }) {
+  lang,
+}: TextProps & { size?: keyof typeof titleSizes; lang?: string }) {
   return (
     <h1
+      lang={lang}
       className={cn(
-        'font-serif leading-[0.95] tracking-tighter',
+        'font-serif leading-[0.95] tracking-tighter hyphens-auto wrap-break-word',
         titleSizes[size],
         rise !== undefined && 'animate-rise',
         className,
