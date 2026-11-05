@@ -20,6 +20,9 @@ function validationError(error: z.ZodError) {
 
 // One of the address's ?key= values as plain text: trimmed, and no longer
 // than `max`, so an endless one costs nothing
+// An id as the database writes one: 24 hex figures
+export const OBJECT_ID = /^[0-9a-f]{24}$/;
+
 export const queryText = (req: Request, key: string, max: number) =>
   String(req.query[key] ?? '')
     .trim()

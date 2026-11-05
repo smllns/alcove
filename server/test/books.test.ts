@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { api, signUp } from './api.js';
+import { stubOpenLibrary } from './sites.js';
+
+// No test asks the real catalogue (a book with a work warms its lists)
+stubOpenLibrary();
 
 const book = (title: string) => ({
   title,

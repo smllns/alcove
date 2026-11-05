@@ -82,12 +82,33 @@ export function startToFinish(average: number, atOnce: number) {
       A book takes you <Mark>{counted(average, 'day')}</Mark> on average
       {atOnce > 1 ? (
         <>
-          . At most you were reading <Mark>{inWords(atOnce)} at once</Mark>
+          , and at most you were reading <Mark>{inWords(atOnce)} at once</Mark>
         </>
       ) : (
-        <>. You read one book at a time</>
+        <>, one book at a time</>
       )}
       .
+    </>
+  );
+}
+
+// Under the pages of a year, the books finished in it with no pages given,
+// which they leave out: none of them given, or how many aren't
+export function unpagedNote(unpaged: number, finished: number, year: number) {
+  if (!unpaged) return null;
+  if (unpaged === finished)
+    return (
+      <>
+        None of the books you finished in {year} has its pages given. Add them
+        in a book’s details to see the pages here.
+      </>
+    );
+  return (
+    <>
+      {counted(unpaged, 'book')} you finished in {year}{' '}
+      {unpaged === 1 ? 'has' : 'have'} no pages given, so{' '}
+      {unpaged === 1 ? 'its' : 'their'} pages aren’t counted. Add them in a
+      book’s details.
     </>
   );
 }

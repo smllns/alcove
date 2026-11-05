@@ -80,13 +80,16 @@
   pointer-events: none;
 }
 
-/* While searching, the books that weren't found all but fade away: on
-   their drifting layer, which the browser moves on its own, so it fades
-   them too without the page redrawing them */
-.sky .sky-drift {
+/* Each book drawn once, shadow and all, on a layer of its own, which the
+   browser then only slides about with the sky: drawn together on one,
+   Safari drew every book's shadow over again as the sky moved, and
+   whenever one was pointed at. While searching, the books that weren't
+   found all but fade away, on that layer, without a redraw. */
+.sky .star-shade {
+  will-change: transform;
   transition: opacity 0.6s var(--ease-soft);
 }
-.sky[data-searching] .star:not([data-lit]) .sky-drift {
+.sky[data-searching] .star:not([data-lit]) .star-shade {
   opacity: 0.12;
 }
 

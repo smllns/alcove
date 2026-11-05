@@ -23,17 +23,22 @@ const step = softClass(
 // The month name opens a grid of years, for days long past. Arrow keys move
 // a day or a week, Page Up and Down a month, Enter picks. Given `earliest`
 // or `latest`, nothing outside them can be picked, or even moved to.
+// `quiet`: opened from a field being typed in, it turns to each new
+// `value` as it comes and leaves the keyboard where it is, until the
+// arrow keys are used in it.
 export function Calendar({
   value,
   onPick,
   earliest,
   latest,
+  quiet = false,
 }: {
   value: string;
   // '' to clear
   onPick: (day: string) => void;
   earliest?: string;
   latest?: string;
+  quiet?: boolean;
 }) {
   const first = earliest ? fromDay(earliest) : null;
   const last = latest ? fromDay(latest) : null;
@@ -43,12 +48,22 @@ export function Calendar({
     within(fromDay(value) ?? new Date()),
   );
   const setFocus = (date: Date) => setFocusAnywhere(within(date));
+  // Turned to a new day given, as it's typed
+  const [turnedTo, setTurnedTo] = useState(value);
+  if (value !== turnedTo) {
+    setTurnedTo(value);
+    const date = fromDay(value);
+    if (date) setFocus(date);
+  }
+  // Whether the keyboard's been used in it, for a quiet one to take it
+  const keyed = useRef(!quiet);
   const [years, setYears] = useState(false);
   const grid = useRef<HTMLDivElement>(null);
   const focusDay = toDay(focus);
 
   // Keyboard focus follows the focused day as it moves
   useEffect(() => {
+    if (!keyed.current) return;
     grid.current
       ?.querySelector<HTMLElement>(`[data-day="${focusDay}"]`)
       ?.focus({ preventScroll: true });
@@ -65,6 +80,7 @@ export function Calendar({
     };
     if (!moves[e.key]) return;
     e.preventDefault();
+    keyed.current = true;
     setFocus(moves[e.key]());
   };
 

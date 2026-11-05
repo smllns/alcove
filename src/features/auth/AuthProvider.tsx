@@ -8,9 +8,14 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import * as userApi from '@/entities/user/api';
 import type { User } from '@/entities/user/types';
+import { keepFor } from '@/shared/lib/storage';
 import { AuthContext, type AuthState } from './AuthContext';
 
-const signedIn = (user: User): AuthState => ({ status: 'signed-in', user });
+// Signed in, the browser's preferences (shared/lib/storage) are theirs
+const signedIn = (user: User): AuthState => {
+  keepFor(user.id);
+  return { status: 'signed-in', user };
+};
 const guest: AuthState = { status: 'guest', user: null };
 
 // Knows who's signed in. Asks the server once on load; login, register and
@@ -51,12 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     await userApi.logout();
     queryClient.clear();
+    keepFor('');
     setState(guest);
   }, [queryClient]);
 
   const replaceUser = useCallback((user: User) => setState(signedIn(user)), []);
   const forgetUser = useCallback(() => {
     queryClient.clear();
+    keepFor('');
     setState(guest);
   }, [queryClient]);
 

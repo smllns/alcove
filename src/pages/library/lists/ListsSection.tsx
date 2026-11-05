@@ -16,6 +16,7 @@ import { SavedLists, SavedStacks } from './SavedLists';
 import { isOwn, listedBooks } from './listedBooks';
 import { ListsFinder } from './ListsFinder';
 import { floorClass, ListStack, stackClass, stacksClass } from './ListStack';
+import { WANT_LIST } from '@/entities/list/names';
 
 // Every list of the reader's, each a pile of its books standing on the
 // floor, piles carrying over onto the next floor down as there are more,
@@ -98,6 +99,7 @@ export function ListsSection({ shelf }: { shelf: Shelf }) {
                   books={books}
                   count={counts[list.id] ?? books.length}
                   owned={books.filter(isOwn).length}
+                  marked={list.id === WANT_LIST}
                 />
               </li>
             );

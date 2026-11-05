@@ -70,6 +70,11 @@ export type DraftExtras = {
   openLibrary?: { work?: string; edition?: string };
 };
 
+// A value as a field holds it: as text, nothing for none (the catalogue
+// sometimes says null where it means nothing)
+export const fieldText = (value: string | number | null | undefined) =>
+  value === undefined || value === null ? '' : String(value);
+
 export const emptyFields: DraftFields = {
   physical: 'yes',
   'copy.nonPhysical': '',

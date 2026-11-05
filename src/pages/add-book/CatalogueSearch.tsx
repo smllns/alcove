@@ -1,10 +1,12 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { useCatalogueSearch } from '@/entities/book/catalogueQueries';
+import type { OurEdition } from '@/entities/book/ourEdition';
 import type { CatalogueEdition, CatalogueWork } from '@/entities/book/types';
 import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 import { RemoveButton } from '@/shared/ui/ListControls';
 import { Spinner } from '@/shared/ui/Spinner';
+import { OurResults } from './OurResults';
 import { SearchResult } from './SearchResult';
 import { FormError } from '@/shared/ui/FormError';
 import { textLinkClass } from '@/shared/ui/buttonStyles';
@@ -12,24 +14,38 @@ import { cn } from '@/shared/lib/cn';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { isbnFrom, ScanButton } from '@/features/scan-isbn';
 import { Button } from '@/shared/ui/Button';
+import { paths } from '@/shared/config/paths';
+import { TransitionLink } from '@/shared/ui/TransitionLink';
 
 type CatalogueSearchProps = {
   onPick: (work: CatalogueWork, isbnEdition?: CatalogueEdition) => void;
   // By hand, with the ISBN looked for and not found, if there was one
   onManual: (isbn?: string) => void;
+  // A printing alcove knows and Open Library doesn't, picked
+  onOurs: (edition: OurEdition) => void;
+  // Searched for from the start: a book kept only by its title
+  initialQuery?: string;
 };
 
 // Search as you type, by title, author or ISBN; or, on a phone or tablet,
 // by the barcode on the back, read with the camera: its ISBN searched for,
 // and the book it's found to be picked straight away, that very printing.
-// An ISBN the catalogue doesn't have: adding it by hand offered right there
-// (coming softly into view, after a scan), the ISBN filled in.
-export function CatalogueSearch({ onPick, onManual }: CatalogueSearchProps) {
-  const [query, setQuery] = useState('');
+// Under what Open Library found, printings alcove knows and it doesn't
+// (OurResults), one scanned picked straight away too. An ISBN neither
+// has: adding it by hand offered right there (coming softly into view,
+// after a scan), the ISBN filled in.
+export function CatalogueSearch({
+  onPick,
+  onManual,
+  onOurs,
+  initialQuery = '',
+}: CatalogueSearchProps) {
+  const [query, setQuery] = useState(initialQuery);
   const [scanned, setScanned] = useState<string>();
   const settled = useDebouncedValue(query.trim(), 350);
   const search = useCatalogueSearch(settled);
   const results = search.data?.results ?? [];
+  const ours = search.data?.ours ?? [];
   const searching =
     settled.length >= 2 && (search.isFetching || settled !== query.trim());
   const hover = useMediaQuery(HOVER);
@@ -38,17 +54,20 @@ export function CatalogueSearch({ onPick, onManual }: CatalogueSearchProps) {
   const manual = useRef<HTMLButtonElement>(null);
   // An ISBN looked for (typed or scanned) and not found
   const unknown =
-    !searching && !search.isError && settled && !results.length
+    !searching && !search.isError && settled && !results.length && !ours.length
       ? isbnFrom(settled)
       : null;
   const missedScan = Boolean(unknown) && unknown === scanned;
 
   // A scanned book found: on to it (the search giving way to the book)
   const pick = useEffectEvent(onPick);
+  const pickOurs = useEffectEvent(onOurs);
+  const ourFirst = ours[0];
   useEffect(() => {
-    if (scanned && settled === scanned && !searching && top && edition)
-      pick(top, edition);
-  }, [scanned, settled, searching, top, edition]);
+    if (!scanned || settled !== scanned || searching) return;
+    if (top && edition) pick(top, edition);
+    else if (!top && ourFirst) pickOurs(ourFirst);
+  }, [scanned, settled, searching, top, edition, ourFirst]);
   // A scanned book not found: the way to add it by hand brought into view
   useEffect(() => {
     if (missedScan)
@@ -86,7 +105,7 @@ export function CatalogueSearch({ onPick, onManual }: CatalogueSearchProps) {
       />
 
       {/* Stretching to the foot of the screen, the way to add by hand under it */}
-      <div className='mt-6 min-h-24 flex-1'>
+      <div className='mt-6 min-h-14 flex-1'>
         {search.isError ? (
           <FormError message={search.error.message} />
         ) : settled.length < 2 ? (
@@ -110,31 +129,36 @@ export function CatalogueSearch({ onPick, onManual }: CatalogueSearchProps) {
               Add it by hand
             </Button>
           </div>
-        ) : results.length === 0 && !searching ? (
+        ) : !results.length && !ours.length && !searching ? (
           <p className='text-sm text-muted'>Nothing found for “{settled}”.</p>
         ) : (
-          <ul
-            className={
-              searching ? 'opacity-60 transition-opacity' : 'transition-opacity'
-            }
-          >
-            {results.map((work, i) => (
-              <li key={work.workKey}>
-                <SearchResult
-                  work={work}
-                  // An ISBN search's exact printing belongs to its top result
-                  onPick={() =>
-                    onPick(
-                      work,
-                      i === 0
-                        ? (search.data?.isbnEdition ?? undefined)
-                        : undefined,
-                    )
-                  }
-                />
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul
+              className={
+                searching
+                  ? 'opacity-60 transition-opacity'
+                  : 'transition-opacity'
+              }
+            >
+              {results.map((work, i) => (
+                <li key={work.workKey}>
+                  <SearchResult
+                    work={work}
+                    // An ISBN search's exact printing belongs to its top result
+                    onPick={() =>
+                      onPick(
+                        work,
+                        i === 0
+                          ? (search.data?.isbnEdition ?? undefined)
+                          : undefined,
+                      )
+                    }
+                  />
+                </li>
+              ))}
+            </ul>
+            <OurResults editions={ours} onPick={onOurs} />
+          </>
         )}
       </div>
 
@@ -150,6 +174,14 @@ export function CatalogueSearch({ onPick, onManual }: CatalogueSearchProps) {
           </button>
         </p>
       )}
+      <p className='mt-2 text-sm'>
+        <TransitionLink
+          to={paths.importBooks}
+          className={cn('text-ink', textLinkClass)}
+        >
+          Import from Goodreads or StoryGraph
+        </TransitionLink>
+      </p>
     </div>
   );
 }

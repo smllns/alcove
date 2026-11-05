@@ -95,7 +95,7 @@ export function PlacesEditor({
       <div
         inert={!shown}
         className={cn(
-          'z-10 -mx-1.5 mt-8 flex w-fit flex-wrap items-center gap-3 rounded-full border p-1.5 pr-5 transition-[opacity,background-color,border-color,box-shadow] duration-500 ease-soft',
+          'z-10 -mx-1.5 mt-8 flex w-fit flex-wrap items-center gap-3 rounded-[31px] border p-1.5 pr-5 transition-[opacity,background-color,border-color,box-shadow] duration-500 ease-soft',
           quiet && 'sticky bottom-4',
           quiet || places.changed ? floatingClass : 'border-transparent',
           !shown && 'opacity-0',
@@ -113,7 +113,9 @@ export function PlacesEditor({
             : submitLabel}
         </Button>
         {secondary}
-        {(places.changed || quiet) && (
+        {/* Where saving stays put; where it leads on (onSaved), there's
+            nothing to tell, and no room for it beside the buttons */}
+        {(quiet || (places.changed && !onSaved)) && (
           <span className='text-sm text-muted'>
             {places.changed || places.saving
               ? 'Unsaved changes'

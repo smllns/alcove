@@ -8,6 +8,7 @@ import { TextField } from '@/shared/ui/TextField';
 import { AboutField } from './AboutField';
 import { AverageRatingField } from './AverageRatingField';
 import type { DraftForm } from './BookForm';
+import { AuthorsField } from './AuthorsField';
 import { EditionSelect } from './EditionSelect';
 import { GenrePicker } from './GenrePicker';
 import { HaveItFields } from './HaveItFields';
@@ -66,13 +67,7 @@ export function BookStep({
         )}
       </Reveal>
 
-      <TextField
-        label='Authors'
-        required
-        marked
-        hint='Separate several with commas.'
-        {...form.field('authors')}
-      />
+      <AuthorsField form={form} />
       <SeriesFields form={form} />
       {/* When the book first came out, then this particular printing */}
       <div className='grid gap-6 sm:grid-cols-2'>

@@ -2,6 +2,10 @@ import type { Book, CatalogueWork } from './types';
 
 const PREFIX = 'work-';
 
+// Whether a work is one the catalogue has a page for: not another reader's
+// own book (book-…) nor one kept only by its title (typed-…)
+export const inCatalogue = (workKey: string) => /^OL\d+W$/.test(workKey);
+
 // A work from the catalogue as a book, for its page: what the catalogue
 // says of it, and none of a reader's own (no copy, no lists of theirs)
 export const catalogueBook = (work: CatalogueWork): Book => ({
@@ -9,11 +13,13 @@ export const catalogueBook = (work: CatalogueWork): Book => ({
   title: work.title,
   subtitle: work.subtitle,
   authors: work.authors,
+  isbn: work.isbn,
   firstPublishedYear: work.firstPublishYear,
   cover: work.coverUrl
     ? { url: work.coverUrl, source: 'openlibrary' }
     : undefined,
-  openLibrary: { work: work.workKey },
+  // Only one the catalogue knows points to it
+  openLibrary: inCatalogue(work.workKey) ? { work: work.workKey } : undefined,
   createdAt: '',
   updatedAt: '',
 });
@@ -30,5 +36,6 @@ export const workOfBook = (book: Book): CatalogueWork | undefined =>
         firstPublishYear: book.firstPublishedYear,
         coverUrl: book.cover?.url,
         editionCount: 0,
+        isbn: book.isbn,
       }
     : undefined;

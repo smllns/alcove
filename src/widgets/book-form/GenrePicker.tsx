@@ -2,6 +2,7 @@ import { cn } from '@/shared/lib/cn';
 import { AddOwnPill } from '@/shared/ui/AddOwnPill';
 import { choiceClass } from '@/shared/ui/buttonStyles';
 import { labelClass } from '@/shared/ui/fieldStyles';
+import { useOwnGenres } from './ownNames';
 
 // The usual shelves of a bookshop, to pick from with a tap. The server
 // picks these same ones out of the catalogue's subjects
@@ -27,7 +28,9 @@ const common = [
 
 const MAX = 10;
 
-// Genres as pills to toggle, plus any of the reader's own
+// Genres as pills to toggle: the usual ones, those the reader often gives
+// their books themselves (useOwnGenres), and any others of this book's;
+// and a way to write one of their own
 export function GenrePicker({
   value,
   onChange,
@@ -36,11 +39,14 @@ export function GenrePicker({
   onChange: (genres: string[]) => void;
 }) {
   const chosen = new Set(value.map((g) => g.toLowerCase()));
-  // The common ones, then whatever the reader added that isn't among them
+  const own = useOwnGenres(common);
+  // The common ones, the reader's own usual ones, then whatever else this
+  // book has
+  const offered = [...common, ...own];
   const shown = [
-    ...common,
+    ...offered,
     ...value.filter(
-      (g) => !common.some((c) => c.toLowerCase() === g.toLowerCase()),
+      (g) => !offered.some((c) => c.toLowerCase() === g.toLowerCase()),
     ),
   ];
   const full = value.length >= MAX;

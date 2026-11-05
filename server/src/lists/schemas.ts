@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { coverHost } from '../books/schemas.js';
+import { coverHost, importBatch } from '../books/schemas.js';
 import {
   boundedText,
   list,
   maybe,
   nameOf,
   optionalText,
+  OBJECT_ID,
 } from '../lib/validation.js';
-import { WORK_KEY } from '../lookup/openLibrary.js';
 
 // As long as what's said about a list may be
 const ABOUT_MAX = 300;
@@ -37,20 +37,29 @@ export const listChangeSchema = z
 const MAX_CHANGED = 500;
 const TOO_MANY = 'That’s a lot of books at once.';
 
-// A book from the catalogue, as a search found it
+// A book from the catalogue's work, or one kept as it came from another
+// site (typed-…)
+// The start of the key of a book kept as it came from another site
+export const TYPED = 'typed-';
+const LISTED_KEY = /^(OL\d+W|typed-[0-9a-f]{24})$/;
+
+// A book from the catalogue, as a search found it, or one kept as it came
+// (put back after being taken out), with the ISBN it came with
 export const listedWorkSchema = z.object({
-  workKey: z.string().regex(WORK_KEY),
+  workKey: z.string().regex(LISTED_KEY),
   title: z.string().trim().min(1).max(500),
   authors: list(z.string().trim().max(200), 20, 'That’s a lot of authors.'),
   coverUrl: maybe(z.url().refine(coverHost, 'That cover can’t be used.')),
   firstPublishYear: maybe(z.number().int().min(-5000).max(3000)),
   editionCount: maybe(z.number().int().min(0)),
+  isbn: optionalText(20),
 });
 
-// Books from the catalogue put in a list, and taken out of it (by work)
+// Books from the catalogue put in a list, and taken out of it (by work;
+// one put in as it came from another site, by its own key, typed-…)
 export const listWorksSchema = z.object({
   add: list(listedWorkSchema, MAX_CHANGED, TOO_MANY),
-  remove: list(z.string().regex(WORK_KEY), MAX_CHANGED, TOO_MANY),
+  remove: list(z.string().regex(LISTED_KEY), MAX_CHANGED, TOO_MANY),
 });
 
 // A book in the pile of a list kept from another reader: one of the
@@ -69,7 +78,7 @@ const savedBase = {
 export const savedListSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('shared'),
-    ref: z.string().regex(/^[0-9a-f]{24}$/),
+    ref: z.string().regex(OBJECT_ID),
     ...savedBase,
   }),
   z.object({
@@ -78,3 +87,13 @@ export const savedListSchema = z.discriminatedUnion('kind', [
     ...savedBase,
   }),
 ]);
+
+// Books brought over from another site that the reader wants to read, as
+// that site has them, to be found in the catalogue
+export const wantedSchema = importBatch(
+  z.object({
+    title: z.string().trim().min(1).max(300),
+    authors: list(z.string().trim().max(200), 20, 'That’s a lot of authors.'),
+    isbn: optionalText(20),
+  }),
+);

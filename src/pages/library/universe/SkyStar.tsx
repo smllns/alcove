@@ -1,15 +1,18 @@
-import { memo, useRef, type CSSProperties } from 'react';
+import { memo, useState, type CSSProperties } from 'react';
 import { BookCover } from '@/entities/book/ui/BookCover';
-import { cn } from '@/shared/lib/cn';
-import { Rating } from '@/shared/ui/Rating';
-import { raisedClass } from '@/shared/ui/surfaces';
+import { useLingering } from '@/shared/lib/useLingering';
 import type { SkyStar as Star } from './layout';
-import { useDrift } from './useDrift';
+import { StarCaption } from './StarCaption';
 
-// One book in the sky, at its place, wandering a little. Hovering brings
+// How long a caption takes to fade once its book is let go (stars.css)
+const CAPTION_FADE_MS = 600;
+
+// One book in the sky, at its place, tilted a little. Hovering brings
 // it forward with its title (and rating) underneath. `lit`: found by a
 // search; `kin`: by the writer of the book being hovered, so it stays lit
-// as the rest of the sky dims.
+// as the rest of the sky dims. The caption is there only while the book is
+// pointed at, and as it fades once let go: under every book at once, the
+// captions made each book's layer far larger, for Safari to draw and keep.
 export const SkyStar = memo(function SkyStar({
   star,
   lit,
@@ -20,8 +23,8 @@ export const SkyStar = memo(function SkyStar({
   kin: boolean;
 }) {
   const { book, width } = star;
-  const drifting = useRef<HTMLDivElement>(null);
-  useDrift(drifting, star);
+  const [pointed, setPointed] = useState(false);
+  const captioned = useLingering(pointed, CAPTION_FADE_MS);
   const author = book.authors.join(', ');
   return (
     <div
@@ -29,6 +32,8 @@ export const SkyStar = memo(function SkyStar({
       data-star={book.id}
       data-lit={lit || undefined}
       data-kin={kin || undefined}
+      onPointerEnter={() => setPointed(true)}
+      onPointerLeave={() => setPointed(false)}
       style={
         {
           left: star.x - width / 2,
@@ -40,8 +45,7 @@ export const SkyStar = memo(function SkyStar({
       }
     >
       <div
-        ref={drifting}
-        className='sky-drift'
+        className='star-shade'
         style={{ '--tilt': `${star.tilt}deg` } as CSSProperties}
       >
         <div className='star-body'>
@@ -55,29 +59,7 @@ export const SkyStar = memo(function SkyStar({
             className='star-cover'
           />
         </div>
-        {/* Clear of the grown cover (it reaches 19% of its width further
-            down), on a card of its own, so it reads over whatever covers
-            are behind it */}
-        <div className='star-caption pointer-events-none absolute left-1/2 top-full mt-[30%] flex w-64 justify-center'>
-          <div
-            className={cn(
-              'max-w-full rounded-2xl px-4 py-2.5 text-center',
-              raisedClass,
-            )}
-          >
-            <p className='line-clamp-2 font-serif text-[17px] leading-snug tracking-[-0.01em] text-ink'>
-              {book.title}
-            </p>
-            {author && (
-              <p className='mt-1 line-clamp-1 text-[13px] text-ink-soft'>
-                {author}
-              </p>
-            )}
-            {book.copy?.rating ? (
-              <Rating value={book.copy.rating} className='mt-1 text-[13px]' />
-            ) : null}
-          </div>
-        </div>
+        {captioned && <StarCaption book={book} author={author} />}
       </div>
     </div>
   );

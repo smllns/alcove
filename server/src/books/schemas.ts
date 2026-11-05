@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { bookFormats, coverSources } from '../db.js';
-import { list, maybe, optionalText } from '../lib/validation.js';
+import { list, maybe, OBJECT_ID, optionalText } from '../lib/validation.js';
 import {
   cleanIsbn,
   EDITION_KEY,
@@ -9,6 +9,7 @@ import {
 } from '../lookup/openLibrary.js';
 import { DESCRIPTION_MAX } from '../lookup/description.js';
 import { copySchema } from './copy.js';
+import { ISBNS_AT_ONCE } from '../lookup/byIsbn.js';
 
 // Covers may only come from the catalogue or our own upload storage
 export const coverHost = (url: string) => {
@@ -134,3 +135,19 @@ export type BookInput = z.infer<typeof bookInputSchema>;
 export const addBookSchema = bookFields
   .extend({ anotherCopy: z.boolean().default(false) })
   .transform(unbound);
+
+// A batch of things brought over from another site (books, books wanted):
+// which import it's part of, the same for each batch of it, to undo it
+// by; and as many as the catalogue's asked about at once
+export const importBatch = <T extends z.ZodType>(item: T) =>
+  z.object({
+    importId: z.string().regex(OBJECT_ID),
+    books: z
+      .array(item)
+      .min(1, 'Nothing to bring over.')
+      .max(ISBNS_AT_ONCE, `Send at most ${ISBNS_AT_ONCE} books at a time.`),
+  });
+
+// Books brought over, each to be checked on its own (one that isn't a
+// book we can take doesn't stop the rest)
+export const importSchema = importBatch(z.unknown());

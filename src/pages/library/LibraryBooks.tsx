@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
+import { bookMatches } from '@/entities/book/matches';
 import type { Book } from '@/entities/book/types';
+import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 import { Loading } from '@/shared/ui/Loading';
 import { Universe } from './universe/Universe';
 import type { Shelf } from '@/entities/book/useShelf';
@@ -15,6 +17,9 @@ const gridSizes: Partial<Record<BookView, CardSize>> = {
   'grid-m': 'M',
   'grid-l': 'L',
 };
+
+// How long the typing has to pause for the sky to look for what's typed
+const SKY_SETTLE_MS = 350;
 
 const nothingMatches = (search: string) =>
   `Nothing on your shelves matches “${search}”.`;
@@ -51,10 +56,19 @@ export function LibraryBooks({
   const sought = findsListed ? '' : search;
   const found = findsListed ? all : shelf.found;
 
-  // The stars to light up: everything a search found
+  // The stars to light up: everything a search found, once the typing has
+  // paused, not to send the sky gliding after every key
+  const skySought = useDebouncedValue(sought, SKY_SETTLE_MS);
   const lit = useMemo(
-    () => (sought ? new Set(found.map((book) => book.id)) : null),
-    [sought, found],
+    () =>
+      skySought
+        ? new Set(
+            all
+              .filter((book) => bookMatches(book, skySought))
+              .map((book) => book.id),
+          )
+        : null,
+    [skySought, all],
   );
   // What the grid and the list show, easing over from one search to the next
   const { order, reversed, fade } = arrangement;
@@ -71,9 +85,12 @@ export function LibraryBooks({
         books={all}
         lit={lit}
         eased={viewEased}
-        notice={sought && complete && !found.length && nothingMatches(sought)}
+        notice={
+          skySought && complete && !lit?.size && nothingMatches(skySought)
+        }
         insetTop={skyInset}
         show={arrangement.show}
+        ready={complete}
       />
     );
   // Nothing found is only certain once every book is in

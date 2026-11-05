@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { turnEnded } from './stillWhileTurning';
+import { turnEnded } from './pageTurn';
 
 // Whether the page has finished turning to what's showing: false till the
 // page turn it came in on is done (true almost at once with none), for

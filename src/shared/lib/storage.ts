@@ -17,3 +17,17 @@ export function store(key: string, value: string) {
     // Not remembered, that's all
   }
 }
+
+// Whose preferences are being kept: the reader signed in (set as they
+// sign in or out), so one reader's choices don't carry over to another
+// in the same browser
+let owner = '';
+export const keepFor = (userId: string) => {
+  owner = userId;
+};
+
+// The same, kept for the reader signed in alone
+const ownKey = (key: string) => (owner ? `${key}:${owner}` : key);
+export const readOwn = (key: string) => readStored(ownKey(key));
+export const storeOwn = (key: string, value: string) =>
+  store(ownKey(key), value);

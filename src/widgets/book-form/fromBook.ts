@@ -1,13 +1,17 @@
 import type { Book } from '@/entities/book/types';
 import { ways } from '@/entities/book/acquired';
-import { emptyFields, type DraftExtras, type DraftFields } from './draft';
+import {
+  emptyFields,
+  type DraftExtras,
+  type DraftFields,
+  fieldText,
+} from './draft';
 import { entryId, type DraftLists } from './entries';
 
 // A book on the shelves, back as a draft of the form to change it: the
 // other way round from toBookInput
 
-const text = (value: string | number | undefined) =>
-  value === undefined ? '' : String(value);
+const text = fieldText;
 
 // One of the usual ways it came, or the reader's own words for it
 const usual = (how: string) =>

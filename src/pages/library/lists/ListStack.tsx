@@ -44,6 +44,7 @@ export function ListStack({
   owned,
   detail,
   state,
+  marked = false,
 }: {
   // Its place among the lists, from 1
   number: number;
@@ -60,6 +61,8 @@ export function ListStack({
   detail?: string;
   // What its page is opened with
   state?: unknown;
+  // The list every reader has (Want to read): a gold ribbon over its pile
+  marked?: boolean;
 }) {
   // Waited for its books, so they come in softly
   const [waited] = useState(!books);
@@ -73,7 +76,13 @@ export function ListStack({
         stackClass,
       )}
     >
-      <div className='flex w-full flex-col items-center justify-end pt-10 transition-transform duration-500 ease-soft group-hover:-translate-y-1'>
+      <div className='relative flex w-full flex-col items-center justify-end pt-10 transition-transform duration-500 ease-soft group-hover:-translate-y-1'>
+        {marked && (
+          <span
+            aria-hidden
+            className='absolute top-1 right-5 h-8 w-2.5 bg-gold [clip-path:polygon(0_0,100%_0,100%_100%,50%_76%,0_100%)]'
+          />
+        )}
         {!books ? (
           <span role='status' aria-label='Loading' className='mb-3 text-faint'>
             <Spinner />
@@ -102,11 +111,13 @@ export function ListStack({
           books ? arrive : 'invisible',
         )}
       >
-        {counted(count, 'book')} ·{' '}
-        {owned === undefined ? (
-          detail
+        {!count ? (
+          'Nothing in it yet'
+        ) : owned === undefined ? (
+          `${counted(count, 'book')} · ${detail}`
         ) : (
           <>
+            {counted(count, 'book')} ·{' '}
             <span className={cn(owned ? 'text-gold' : 'text-faint')}>
               {owned ? '●' : '○'}
             </span>{' '}

@@ -1,4 +1,4 @@
-import { Router, type Request } from 'express';
+import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { HttpError } from '../lib/errors.js';
 import { queryText } from '../lib/validation.js';
@@ -6,20 +6,22 @@ import { currentUser } from '../auth/middleware.js';
 import { shelvedWorks } from '../books/repository.js';
 import { cached } from './cache.js';
 import { listRouter } from './listRoutes.js';
+import { noneIfMissing, workKeyOf } from './params.js';
 import { listsOfWork } from './workLists.js';
 import { similarWorks } from './similar.js';
-import { workAuthor } from './author.js';
+import { authorRouter } from './authorRoutes.js';
 import { searchAuthors } from './authors.js';
 import { workSummary } from './work.js';
 import { featuredWith } from './featured.js';
 import { bookQuotes } from './wikiquote.js';
-import { editionByIsbn, workEditions } from './editions.js';
 import {
-  cleanIsbn,
-  looksLikeIsbn,
-  searchWorks,
-  WORK_KEY,
-} from './openLibrary.js';
+  ourEdition,
+  rememberFound,
+  searchOurs,
+  type OurEdition,
+} from '../catalogue/repository.js';
+import { editionByIsbn, workEditions } from './editions.js';
+import { cleanIsbn, looksLikeIsbn, searchWorks } from './openLibrary.js';
 import { workDetails, workRatings } from './workDoc.js';
 
 // Finding books to add: search the catalogue, then pick an edition.
@@ -46,33 +48,42 @@ lookupRouter.use(
 
 // The lists every reader sees, and readers' lists on Open Library
 lookupRouter.use(listRouter);
+// Who wrote a book
+lookupRouter.use(authorRouter);
 
 lookupRouter.get('/search', async (req, res) => {
   const query = String(req.query.q ?? '').trim();
   if (query.length < 2) {
-    res.json({ results: [], isbnEdition: null });
+    res.json({ results: [], isbnEdition: null, ours: [] });
     return;
   }
   const key = query.toLowerCase();
 
   const results = await cached(`search4:${key}`, 3, () => searchWorks(query));
 
-  // An ISBN points at one exact edition; fetch it so the form can use it as is
+  // An ISBN points at one exact edition; fetch it so the form can use it as
+  // is, and keep it in alcove's own catalogue
   let isbnEdition = null;
-  if (looksLikeIsbn(query)) {
+  const isIsbn = looksLikeIsbn(query);
+  if (isIsbn) {
     isbnEdition = await cached(`isbn3:${cleanIsbn(query)}`, 30, () =>
       editionByIsbn(query),
     ).catch(() => null);
+    if (isbnEdition)
+      await rememberFound([
+        { ...isbnEdition, isbn: isbnEdition.isbn ?? query },
+      ]);
   }
-  res.json({ results, isbnEdition });
+  // alcove's own: for words, printings readers added that Open Library
+  // doesn't know; for an ISBN it doesn't know, the printing a reader added
+  let ours: OurEdition[] = [];
+  if (!isIsbn) ours = await searchOurs(query);
+  else if (!results.length) {
+    const edition = await ourEdition(query);
+    if (edition) ours = [edition];
+  }
+  res.json({ results, isbnEdition, ours });
 });
-
-const workKeyOf = (req: Request) => {
-  const { workKey } = req.params;
-  if (typeof workKey !== 'string' || !WORK_KEY.test(workKey))
-    throw new HttpError(400, 'bad_work', 'That isn’t a book we know.');
-  return workKey;
-};
 
 // Writers by name, for the search over everything
 lookupRouter.get('/authors', async (req, res) => {
@@ -94,12 +105,6 @@ lookupRouter.get('/works/:workKey/editions', async (req, res) => {
   );
   res.json({ editions });
 });
-
-// A book the catalogue doesn't have says nothing, rather than failing
-const noneIfMissing = (err: unknown) => {
-  if (err instanceof HttpError && err.status === 404) return null;
-  throw err;
-};
 
 // A work in short (title, writers, cover), for its page opened directly
 lookupRouter.get('/works/:workKey/summary', async (req, res) => {
@@ -129,15 +134,6 @@ lookupRouter.get('/works/:workKey/ratings', async (req, res) => {
     workRatings(workKey).catch(noneIfMissing),
   );
   res.json({ ratings });
-});
-
-// Who wrote the book: name, years, picture and a few lines about them
-lookupRouter.get('/works/:workKey/author', async (req, res) => {
-  const workKey = workKeyOf(req);
-  const author = await cached(`author3:${workKey}`, 30, () =>
-    workAuthor(workKey).catch(noneIfMissing),
-  );
-  res.json({ author });
 });
 
 // The lists every reader sees that the book is in

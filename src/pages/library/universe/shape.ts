@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { readStored, store } from '@/shared/lib/storage';
+import { useBriefly } from '@/shared/lib/useBriefly';
+import { readOwn, storeOwn } from '@/shared/lib/storage';
 
 // How the books look while they're stars: cut to a circle, the cover with
 // its corners well rounded, or the cover as it is. Hovering always shows
@@ -14,19 +15,25 @@ export const shapeNames: Record<SkyShape, string> = {
 
 const order: SkyShape[] = ['rounded', 'circle', 'cover'];
 const KEY = 'alcove.sky-shape';
+// How long the stars take to change shape (the clip-path, stars.css)
+const RESHAPING_MS = 900;
 
 function read(): SkyShape {
-  const saved = readStored(KEY) as SkyShape | null;
+  const saved = readOwn(KEY) as SkyShape | null;
   return saved && order.includes(saved) ? saved : 'rounded';
 }
 
-// The chosen shape, remembered in this browser, and a way to the next one
+// The chosen shape, remembered in this browser, a way to the next one, and
+// whether the stars are still changing into it
 export function useSkyShape() {
   const [shape, setShape] = useState(read);
+  // The shape being changed into, for as long as that takes
+  const [reshaping, setReshaping] = useBriefly<SkyShape>(RESHAPING_MS);
   const next = () => {
     const following = order[(order.indexOf(shape) + 1) % order.length];
     setShape(following);
-    store(KEY, following);
+    setReshaping(following);
+    storeOwn(KEY, following);
   };
-  return [shape, next] as const;
+  return [shape, next, reshaping !== null] as const;
 }

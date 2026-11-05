@@ -3,7 +3,8 @@ import { ObjectId } from 'mongodb';
 import { currentUser } from '../auth/middleware.js';
 import { HttpError } from '../lib/errors.js';
 import { parseBody, queryText } from '../lib/validation.js';
-import { getLists, ownLists } from '../lists/repository.js';
+import { getLists, ownLists, WANT_LIST } from '../lists/repository.js';
+import { takeWanted } from '../lists/wanted.js';
 import { warmListsOfWork } from '../lookup/workLists.js';
 import { getPlaces, resolvePlace } from '../places/repository.js';
 import { storedCoverSources, type BookDoc } from '../db.js';
@@ -21,9 +22,14 @@ import {
   updateBook,
 } from './repository.js';
 import { addBookSchema, bookInputSchema, type BookInput } from './schemas.js';
+import { rememberAdded, rememberChanged } from '../catalogue/repository.js';
+import { begun } from './copy.js';
+import { importsRouter } from './imports.js';
 
 // A reader's own books. Mounted behind requireUser.
 export const booksRouter = Router();
+// Books brought over from another site, before the routes by id
+booksRouter.use(importsRouter);
 
 const me = (req: Request) => currentUser(req)._id;
 
@@ -74,7 +80,24 @@ async function ownRefsOnly<T extends BookInput>(req: Request, input: T) {
   ]);
   if (place && homes) input.copy!.place = resolvePlace(homes, place);
   if (lists) input.lists = ownLists(lists, input.lists);
-  return input;
+  return unwanted(input);
+}
+
+// A book begun or read is no longer one to read next: out of Want to read
+const unwanted = <T extends BookInput>(input: T) =>
+  begun(input.copy?.reading)
+    ? { ...input, lists: input.lists.filter((id) => id !== WANT_LIST) }
+    : input;
+
+// A copy added of a book wanted from the catalogue: it stays wanted, now
+// as the reader's own, until it's read
+async function claimWanted<T extends BookInput>(req: Request, input: T) {
+  const work = input.openLibrary?.work;
+  if (!work || !(await takeWanted(me(req), work))) return input;
+  return unwanted({
+    ...input,
+    lists: [...new Set([...input.lists, WANT_LIST])],
+  });
 }
 
 // Open Library is slow with a book's lists: asked for as soon as the book
@@ -86,16 +109,18 @@ function warmLists(book: BookDoc, before?: BookDoc) {
 }
 
 booksRouter.post('/', async (req, res) => {
-  const { anotherCopy, ...input } = await ownRefsOnly(
+  const { anotherCopy, ...asked } = await ownRefsOnly(
     req,
     parseBody(addBookSchema, req.body),
   );
+  const input = await claimWanted(req, asked);
   if (!anotherCopy) {
     const same = await findSameBook(me(req), input);
     if (same) throw alreadyShelved(same);
   }
   const book = await addBook(me(req), input);
   warmLists(book);
+  await rememberAdded([input]);
   res.status(201).json({ book: toPublicBook(book) });
 });
 
@@ -125,6 +150,7 @@ booksRouter.put('/:id', async (req, res) => {
   if (!updated) throw notOnShelves();
   const { book, old } = updated;
   warmLists(book, old);
+  await rememberChanged(input);
   // A cover of ours it no longer shows, unless another book still does
   if (old.cover && old.cover.url !== book.cover?.url)
     await discardCover(me(req), old.cover.url).catch(() => {});

@@ -8,13 +8,12 @@ import {
   withLanguage,
   type DraftExtras,
   type DraftFields,
+  fieldText,
 } from './draft';
 
 // Turning what the catalogue knows into a draft of the form
 
-const text = (value: string | number | null | undefined) =>
-  // The catalogue sometimes says null where it means nothing
-  value === undefined || value === null ? '' : String(value);
+const text = fieldText;
 
 // The fields that belong to one printing, for switching editions. With
 // none chosen they empty, all but the language, which the reader may have

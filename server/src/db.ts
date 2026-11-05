@@ -1,11 +1,13 @@
 import { MongoClient, type Db, type ObjectId } from 'mongodb';
 import { config } from './config.js';
 import type { BookDoc } from './models/books.js';
+import type { CatalogueEditionDoc } from './models/catalogue.js';
 import type { ListsDoc } from './models/lists.js';
 import type { PlacesDoc } from './models/places.js';
 
 // The documents kept, each area's in a file of its own
 export * from './models/books.js';
+export * from './models/catalogue.js';
 export * from './models/lists.js';
 export * from './models/places.js';
 
@@ -70,6 +72,8 @@ export const sessions = () => database().collection<SessionDoc>('sessions');
 export const books = () => database().collection<BookDoc>('books');
 export const places = () => database().collection<PlacesDoc>('places');
 export const lists = () => database().collection<ListsDoc>('lists');
+export const editions = () =>
+  database().collection<CatalogueEditionDoc>('editions');
 export const lookupCache = () =>
   database().collection<LookupCacheDoc>('lookupCache');
 
@@ -99,4 +103,12 @@ async function ensureIndexes(db: Db) {
   await db
     .collection<LookupCacheDoc>('lookupCache')
     .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+  // alcove's own printings found by words of their titles and writers, in
+  // any language (no stemming)
+  await db
+    .collection<CatalogueEditionDoc>('editions')
+    .createIndex(
+      { title: 'text', authors: 'text' },
+      { weights: { title: 3, authors: 1 }, default_language: 'none' },
+    );
 }

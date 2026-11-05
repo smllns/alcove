@@ -50,14 +50,25 @@
 /* Safari, as the cover changes shape, draws the cover over again but not
    its shadow beyond it, which keeps the old shape's. A change of opacity,
    too slight to see, as long as the shape's, has it draw the whole book,
-   shadow and all, at every step. Only there (WebKit alone knows that
-   font): Chrome redraws the shadows itself, and drawing every one of them
-   at every step besides makes the change stutter. */
+   shadow and all, at every step. Only for the books changing shape: all
+   of them as another shape is chosen (data-reshaping), and the one
+   pointed at or settling back; kept on every book, it had Safari draw
+   each one apart from the sky, which slowed it all down. Only there
+   (WebKit alone knows that font): Chrome redraws the shadows itself, and
+   drawing every one of them at every step besides makes the change
+   stutter. */
 @supports (font: -apple-system-body) {
-  .sky[data-shape='circle'] .star-body {
+  .sky[data-reshaping] .star-body {
+    opacity: 0.997;
+  }
+  .sky[data-shape='circle']
+    :is(.star:hover, .star[data-leaving], .sky[data-reshaping] .star)
+    .star-body {
     opacity: 0.999;
   }
-  .sky[data-shape='rounded'] .star-body {
+  .sky[data-shape='rounded']
+    :is(.star:hover, .star[data-leaving], .sky[data-reshaping] .star)
+    .star-body {
     opacity: 0.998;
   }
 }
@@ -122,4 +133,11 @@
 .sky .star:hover .star-caption {
   opacity: 1;
   translate: -50% 0;
+}
+/* It's put there as the book is pointed at, so it comes up from below */
+@starting-style {
+  .sky .star:hover .star-caption {
+    opacity: 0;
+    translate: -50% 4px;
+  }
 }

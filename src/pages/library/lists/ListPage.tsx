@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router';
 import { useBooks } from '@/entities/book/queries';
 import { useShelf } from '@/entities/book/useShelf';
-import { tidyListName } from '@/entities/list/names';
+import { tidyListName, WANT_LIST } from '@/entities/list/names';
 import { useChangeList, useLists } from '@/entities/list/queries';
 import { counted } from '@/shared/lib/plural';
 import { FormError } from '@/shared/ui/FormError';
@@ -50,6 +50,8 @@ export function ListPage() {
   const { frame, takeOut } = changes;
   const { putIn, putWork } = useBegunBooks(being, changes);
   const change = useChangeList();
+  // Want to read keeps its name and can't be deleted
+  const fixed = list?.id === WANT_LIST;
   const renamed = (text: string) => {
     const name = tidyListName(text);
     if (!list || !name || name === list.name) return;
@@ -70,7 +72,7 @@ export function ListPage() {
         list && (
           <ListName
             name={list.name}
-            editing={editing.on}
+            editing={editing.on && !fixed}
             // The cursor's for the books to put in a list just begun
             focus={begun ? false : undefined}
             onRename={renamed}
@@ -94,6 +96,7 @@ export function ListPage() {
               editing={editing.on}
               onEdit={editing.turn}
               kept={!begun}
+              removable={!fixed}
               onOpen={begun ? being.setOpen : undefined}
             />
             <FormError

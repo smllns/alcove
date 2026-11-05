@@ -85,6 +85,20 @@ export const cleanIsbn = (value: string) =>
 export const looksLikeIsbn = (value: string) =>
   /^(\d{9}[\dX]|\d{13})$/.test(cleanIsbn(value));
 
+// An ISBN as one key for a printing: ISBN-13, an ISBN-10 turned into one;
+// null for anything that isn't an ISBN
+export function isbn13(isbn: string | undefined) {
+  if (!isbn || !looksLikeIsbn(isbn)) return null;
+  const clean = cleanIsbn(isbn);
+  if (clean.length === 13) return clean;
+  const body = `978${clean.slice(0, 9)}`;
+  const sum = [...body].reduce(
+    (total, figure, i) => total + Number(figure) * (i % 2 ? 3 : 1),
+    0,
+  );
+  return body + ((10 - (sum % 10)) % 10);
+}
+
 export type SearchDoc = {
   key: string;
   title: string;

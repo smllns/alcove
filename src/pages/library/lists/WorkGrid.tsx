@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/cn';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { useGridFold } from './useGridFold';
+import { inCatalogue } from '@/entities/book/catalogueBook';
 
 // The grid's columns, for the books and for their places while they come
 const gridClass =
@@ -28,11 +29,6 @@ export function WorkGridSkeleton() {
 
 // More books to come than are here, brought only as they're asked for
 export type MoreWorks = { onMore: () => void; loading: boolean };
-
-// A book that isn't the catalogue's (in another reader's list, one of
-// their own) has no page to open
-const fromCatalogue = (work: CatalogueWork) =>
-  !work.workKey.startsWith('book-');
 
 // Books from the catalogue as a grid of covers, a few dozen at a time:
 // those on the reader's shelves (`owned`, by work) ringed in gold and
@@ -90,7 +86,7 @@ export function WorkGrid({
                 className='animate-rise'
                 style={{ animationDelay: `${Math.min(i % 48, 12) * 40}ms` }}
               >
-                {fromCatalogue(work) ? (
+                {inCatalogue(work.workKey) ? (
                   <TransitionLink
                     to={mine ? paths.book(mine) : paths.work(work.workKey)}
                     state={mine ? undefined : ({ work } satisfies AddBookState)}

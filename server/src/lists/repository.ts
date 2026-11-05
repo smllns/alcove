@@ -1,27 +1,47 @@
 import { ObjectId } from 'mongodb';
-import {
-  books,
-  lists,
-  type BookListNode,
-  type ListedWorkNode,
-  type SavedListNode,
-} from '../db.js';
+import { books, lists, type BookListNode, type ListedWorkNode } from '../db.js';
+import { sameButCase } from '../lib/text.js';
 
 // Most a reader can have, and most books from the catalogue in one; far
 // more than anyone keeps
 const MAX_LISTS = 200;
 const MAX_WORKS = 1000;
-const MAX_SAVED = 200;
 
-export const getLists = async (userId: ObjectId) =>
-  (await lists().findOne({ _id: userId }))?.lists ?? [];
+// The list every reader has from the start, first of all, of books
+// they'd like to read next: their own not read yet, and the catalogue's
+// they don't have. It can't be renamed or removed, only emptied.
+export const WANT_LIST = 'want-to-read';
+const wantList: BookListNode = {
+  id: WANT_LIST,
+  name: 'Want to read',
+  description:
+    'Every book you’d like to read, those on your shelves and those you don’t have yet. A book leaves once you start it.',
+  public: false,
+};
+
+// The reader's lists, Want to read first; put in place the first time
+// they're asked for (two asking at once, only one of them puts it there)
+export async function getLists(userId: ObjectId) {
+  const found = (await lists().findOne({ _id: userId }))?.lists ?? [];
+  if (found.some((list) => list.id === WANT_LIST)) return found;
+  try {
+    await lists().updateOne(
+      { _id: userId, 'lists.id': { $ne: WANT_LIST } },
+      {
+        $push: { lists: { $each: [wantList], $position: 0 } },
+        $set: { updatedAt: new Date() },
+      },
+      { upsert: true },
+    );
+  } catch (error) {
+    // Put there meanwhile by the other
+    if ((error as { code?: number }).code !== 11000) throw error;
+  }
+  return [wantList, ...found];
+}
 
 export const deleteLists = (userId: ObjectId) =>
   lists().deleteOne({ _id: userId });
-
-// Two names the same but for capitals: "Summer reads", "summer Reads"
-const sameName = (a: string, b: string) =>
-  a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0;
 
 // A new list, at the end, public if `open`, with what's said about it, if
 // anything. One by that name already is the one meant.
@@ -32,7 +52,7 @@ export async function createList(
   description?: string,
 ) {
   const all = await getLists(userId);
-  const known = all.find((list) => sameName(list.name, name));
+  const known = all.find((list) => sameButCase(list.name, name));
   if (known) return known;
   if (all.length >= MAX_LISTS) return null;
   const list: BookListNode = {
@@ -61,7 +81,7 @@ export async function changeList(
   const { name, description } = change;
   if (
     name !== undefined &&
-    all.some((list) => list.id !== id && sameName(list.name, name))
+    all.some((list) => list.id !== id && sameButCase(list.name, name))
   )
     return 'taken';
   await lists().updateOne(
@@ -153,40 +173,3 @@ export const ownLists = (all: BookListNode[], ids: string[]) => {
   const known = new Set(all.map((list) => list.id));
   return [...new Set(ids)].filter((id) => known.has(id));
 };
-
-// Other readers' lists the reader's kept, the last kept first
-export const getSaved = async (userId: ObjectId) =>
-  ((await lists().findOne({ _id: userId }))?.saved ?? []).sort(
-    (a, b) => b.savedAt.getTime() - a.savedAt.getTime(),
-  );
-
-// Kept, as it is now (kept already, kept afresh); false when there'd be
-// too many
-export async function saveList(
-  userId: ObjectId,
-  list: Omit<SavedListNode, 'savedAt'>,
-) {
-  const saved = await getSaved(userId);
-  const others = saved.filter(
-    (each) => !(each.kind === list.kind && each.ref === list.ref),
-  );
-  if (others.length >= MAX_SAVED) return false;
-  await lists().updateOne(
-    { _id: userId },
-    {
-      $set: {
-        saved: [...others, { ...list, savedAt: new Date() }],
-        updatedAt: new Date(),
-      },
-      $setOnInsert: { lists: [] },
-    },
-    { upsert: true },
-  );
-  return true;
-}
-
-export const unsaveList = (userId: ObjectId, kind: string, ref: string) =>
-  lists().updateOne({ _id: userId }, {
-    $pull: { saved: { kind, ref } },
-    $set: { updatedAt: new Date() },
-  } as never);

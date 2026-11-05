@@ -8,7 +8,7 @@ import type {
 import { InnerPage } from '@/shared/ui/InnerPage';
 import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
-import { BookForm, emptyFields } from '@/widgets/book-form';
+import { BookForm, draftFromOurs, emptyFields } from '@/widgets/book-form';
 import { CatalogueSearch } from './CatalogueSearch';
 import { PickedBook } from './PickedBook';
 import { paths } from '@/shared/config/paths';
@@ -16,7 +16,12 @@ import { paths } from '@/shared/config/paths';
 type Step =
   | { kind: 'search' }
   | { kind: 'picked'; work: CatalogueWork; isbnEdition?: CatalogueEdition }
-  | { kind: 'manual'; isbn?: string };
+  | {
+      kind: 'manual';
+      isbn?: string;
+      // Begun from a printing alcove knows
+      draft?: ReturnType<typeof draftFromOurs>;
+    };
 
 // Find the book in the catalogue (or type it in), check the details, add it
 export function AddBookPage() {
@@ -51,6 +56,10 @@ export function AddBookPage() {
               setStep({ kind: 'picked', work, isbnEdition })
             }
             onManual={(isbn) => setStep({ kind: 'manual', isbn })}
+            onOurs={(edition) =>
+              setStep({ kind: 'manual', draft: draftFromOurs(edition) })
+            }
+            initialQuery={found?.query}
           />
         )}
         {step.kind === 'picked' && (
@@ -63,8 +72,10 @@ export function AddBookPage() {
         )}
         {step.kind === 'manual' && (
           <BookForm
-            fields={{ ...emptyFields, isbn: step.isbn ?? '' }}
-            extras={{}}
+            fields={
+              step.draft?.fields ?? { ...emptyFields, isbn: step.isbn ?? '' }
+            }
+            extras={step.draft?.extras ?? {}}
             editions={[]}
             onSaved={() => navigate(paths.library, 'forward')}
             onBack={back}

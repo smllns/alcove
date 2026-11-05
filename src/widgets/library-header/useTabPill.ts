@@ -5,7 +5,7 @@ import {
   type CSSProperties,
   type RefObject,
 } from 'react';
-import { turnBegun } from '@/shared/lib/stillWhileTurning';
+import { turnBegun } from '@/shared/lib/pageTurn';
 
 // Where the open tab's shading goes: over the tab in `list` for section
 // `shown` (data-section), measured again whenever the tabs change size.

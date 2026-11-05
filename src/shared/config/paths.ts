@@ -19,6 +19,8 @@ export const paths = {
   // One of the lists every reader sees (Open Library's)
   featuredList: (id: string) => `/library/lists/featured/${id}`,
   addBook: '/library/add',
+  // Books brought over from Goodreads or StoryGraph
+  importBooks: '/library/import',
   settings: '/settings',
   welcome: '/welcome',
   book: (id: string) => `/library/books/${id}`,

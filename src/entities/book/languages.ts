@@ -81,6 +81,16 @@ const terminology: Record<string, string> = {
   wel: 'cym',
 };
 
+// A language as Wikipedia names its own: "de" for "ger"; none when not known
+export function wikiLanguage(code: string | undefined) {
+  if (!code) return undefined;
+  try {
+    return new Intl.Locale(terminology[code] ?? code).language;
+  } catch {
+    return undefined;
+  }
+}
+
 // A language named in itself: "Deutsch", "Русский"; in English when the
 // browser can't (asked in a language it doesn't speak, it would answer in
 // the reader's own instead)

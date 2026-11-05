@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { easeChange } from '@/shared/lib/easeChange';
 import { reducedMotionNow } from '@/shared/lib/motion';
-import { readStored, store } from '@/shared/lib/storage';
+import { readOwn, storeOwn } from '@/shared/lib/storage';
 
 // The ways to look at the shelves. The universe is the default: every book
 // a star, scattered across a sky you can drag and zoom.
@@ -37,7 +37,7 @@ const KEY = 'alcove.books-view';
 // Anything unknown in what's stored (or anything broken) is ignored
 function read(): Choices {
   try {
-    const saved = JSON.parse(readStored(KEY) ?? '{}') as Partial<
+    const saved = JSON.parse(readOwn(KEY) ?? '{}') as Partial<
       Record<keyof Choices, string>
     >;
     const valid = Object.entries(saved).filter(
@@ -67,7 +67,7 @@ export function useBookView() {
   const choose = (view: BookView) => {
     if (view === choices.current) return;
     const next = { ...choices, current: view, [kindOf(view)]: view };
-    store(KEY, JSON.stringify(next));
+    storeOwn(KEY, JSON.stringify(next));
     // Another size of grid or layout of list: each card glides to where it
     // now goes. Between the grid and the list: each cover in sight flies
     // across. To or from the sky, too far apart for that: the old view

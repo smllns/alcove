@@ -4,7 +4,12 @@ import { unaccented } from '../lib/text.js';
 import type { BookInput } from './schemas.js';
 
 // What the client sees of a book
-export const toPublicBook = ({ _id, userId: _userId, ...book }: BookDoc) => ({
+export const toPublicBook = ({
+  _id,
+  userId: _userId,
+  importId: _importId,
+  ...book
+}: BookDoc) => ({
   ...book,
   id: _id.toHexString(),
   createdAt: book.createdAt.toISOString(),
@@ -27,16 +32,22 @@ function placedAt(copy: BookInput['copy'], before?: BookDoc['copy']) {
   return told && Math.abs(Date.parse(told) - Date.now()) < FRESH ? told : now;
 }
 
+// A new book as it's kept, added at `at`
+export const newBookDoc = (
+  userId: ObjectId,
+  input: BookInput,
+  at = new Date(),
+): BookDoc => ({
+  _id: new ObjectId(),
+  userId,
+  ...input,
+  copy: input.copy && { ...input.copy, placedAt: placedAt(input.copy) },
+  createdAt: at,
+  updatedAt: at,
+});
+
 export async function addBook(userId: ObjectId, input: BookInput) {
-  const now = new Date();
-  const book: BookDoc = {
-    _id: new ObjectId(),
-    userId,
-    ...input,
-    copy: input.copy && { ...input.copy, placedAt: placedAt(input.copy) },
-    createdAt: now,
-    updatedAt: now,
-  };
+  const book = newBookDoc(userId, input);
   await books().insertOne(book);
   return book;
 }
@@ -154,12 +165,14 @@ export const deleteBook = (userId: ObjectId, id: ObjectId) =>
 // The covers in our storage (uploaded photos, copied catalogue covers)
 // that a book still shows
 export const storedCoversInUse = async (userId: ObjectId) =>
-  new Set(
-    await books().distinct('cover.url', {
-      userId,
-      'cover.source': { $in: storedCoverSources },
-    }),
-  );
+  new Set(await storedCoversWhere({ userId }));
+
+// The same, of the books `filter` finds
+export const storedCoversWhere = (filter: Filter<BookDoc>): Promise<string[]> =>
+  books().distinct('cover.url', {
+    ...filter,
+    'cover.source': { $in: storedCoverSources },
+  });
 
 // Everything on a reader's shelves, when their account goes
 export const deleteAllBooks = (userId: ObjectId) =>

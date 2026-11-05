@@ -21,6 +21,8 @@ export type ListedWork = {
   coverUrl?: string;
   firstPublishYear?: number;
   editionCount: number;
+  // One kept as it came from another site (typed-…): the ISBN it came with
+  isbn?: string;
 };
 
 // Another reader's public list, as it's found: whose it is (as they're

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { GuestOnly, RequireAuth } from '@/features/auth';
 import { AddBookPage } from '@/pages/add-book/AddBookPage';
+import { ImportPage } from '@/pages/import-books/ImportPage';
 import { AuthPage } from '@/pages/auth/AuthPage';
 import { BookPage } from '@/pages/book/BookPage';
 import { EditBookPage } from '@/pages/book/EditBookPage';
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
             handle: { page: 'library' },
           })),
           { path: paths.addBook, element: <AddBookPage /> },
+          { path: paths.importBooks, element: <ImportPage /> },
           { path: paths.book(':id'), element: <BookPage /> },
           { path: paths.editBook(':id'), element: <EditBookPage /> },
           { path: paths.work(':workKey'), element: <WorkPage /> },

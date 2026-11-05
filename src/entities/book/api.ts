@@ -14,6 +14,8 @@ import type {
   ReadersListPage,
   SimilarBook,
 } from './types';
+import type { AuthorAsk } from './authorAsk';
+import type { OurEdition } from './ourEdition';
 
 export type BooksPage = {
   books: Book[];
@@ -101,10 +103,14 @@ export const fetchOwnedWork = async (workKey: string) =>
   (await request<{ bookId: string | null }>(`/books/by-work/${workKey}`))
     .bookId;
 
+// What a search finds: the catalogue's books, the exact printing an ISBN
+// is of, and alcove's own printings Open Library doesn't know
 export const searchCatalogue = (query: string) =>
-  request<{ results: CatalogueWork[]; isbnEdition: CatalogueEdition | null }>(
-    `/lookup/search?q=${encodeURIComponent(query)}`,
-  );
+  request<{
+    results: CatalogueWork[];
+    isbnEdition: CatalogueEdition | null;
+    ours: OurEdition[];
+  }>(`/lookup/search?q=${encodeURIComponent(query)}`);
 
 export const searchAuthors = async (query: string) =>
   (
@@ -135,13 +141,22 @@ export const fetchWorkRatings = async (workKey: string) =>
     )
   ).ratings;
 
-// Who wrote the book; null if the catalogue doesn't say
-export const fetchWorkAuthor = async (workKey: string) =>
-  (
-    await request<{ author: CatalogueAuthor | null }>(
-      `/lookup/works/${workKey}/author`,
-    )
+// Who wrote the book, told of in a language the reader reads; null if
+// neither the catalogue nor Wikipedia says
+export async function fetchAuthor(ask: AuthorAsk) {
+  const params = new URLSearchParams();
+  const add = (key: string, value: string | undefined) =>
+    value && params.set(key, value);
+  add('title', ask.title);
+  add('original_title', ask.originalTitle);
+  add('read', ask.read);
+  add('original', ask.original);
+  if (!ask.work) add('name', ask.name);
+  const path = ask.work ? `/lookup/works/${ask.work}/author` : '/lookup/writer';
+  return (
+    await request<{ author: CatalogueAuthor | null }>(`${path}?${params}`)
   ).author;
+}
 
 // Books to read next: on the same themes, and by the same author
 export const fetchSimilarBooks = (workKey: string) =>

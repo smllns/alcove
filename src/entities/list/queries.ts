@@ -14,10 +14,14 @@ import {
   saveList,
   unsaveList,
   changeList,
+  importWanted,
   searchSharedLists,
+  WANTED_BATCH,
   type ListChange,
+  type WantedEntry,
   type WorksChange,
 } from './api';
+import { inBatches } from '@/shared/lib/inBatches';
 import { isSaved } from './opening';
 import type { BookList, Lists, SavedList } from './types';
 
@@ -84,6 +88,34 @@ export function useDeleteList() {
     onSuccess: (lists) => {
       client.setQueryData<Lists>(listKeys.all, lists);
       void client.invalidateQueries({ queryKey: ['books'] });
+    },
+  });
+}
+
+// Books wanted, brought over batch after batch, how far it's got told as
+// it goes (`onBatch`); the lists, and the shelf (a copy marked as wanted),
+// asked afresh once they're in
+export function useImportWanted() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      books,
+      importId,
+      onBatch,
+    }: {
+      books: WantedEntry[];
+      importId: string;
+      onBatch: (done: number) => void;
+    }) =>
+      inBatches(
+        books,
+        WANTED_BATCH,
+        (batch) => importWanted(batch, importId),
+        onBatch,
+      ),
+    onSettled: () => {
+      void client.invalidateQueries({ queryKey: ['books'] });
+      return client.invalidateQueries({ queryKey: ['lists'] });
     },
   });
 }

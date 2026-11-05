@@ -13,6 +13,7 @@ import { letGo } from './leaving';
 import { SkyControls } from './SkyControls';
 import { SkyDust } from './SkyDust';
 import { SkyLinks } from './SkyLinks';
+import { SkyLoading } from './SkyLoading';
 import { useSkyShape } from './shape';
 import { SkyStar } from './SkyStar';
 import { SkyVeil } from './SkyVeil';
@@ -34,7 +35,9 @@ const FADE_OUT_MS = 450;
 // searching, the books in `lit` shine and the rest fade, and the view
 // glides over to them. Other books chosen (`show`: every one, or the
 // physical ones alone), the stars fade out and the new ones in, the sky
-// behind them staying.
+// behind them staying. Until every book is in (`ready`), the stars wait
+// unseen under a quiet spinner, to come in all at once rather than a page
+// at a time.
 export function Universe({
   books,
   lit = null,
@@ -42,6 +45,7 @@ export function Universe({
   notice,
   insetTop = 0,
   show,
+  ready = true,
 }: {
   books: Book[];
   lit?: Set<string> | null;
@@ -55,11 +59,13 @@ export function Universe({
   insetTop?: number;
   // Which books are chosen to be shown, for a change of them to fade
   show: ShelfShow;
+  // Every book is in
+  ready?: boolean;
 }) {
   const sky = useRef<HTMLDivElement>(null);
   const [drawn, fading] = useFadeSwap(books, show, FADE_OUT_MS);
   const layout = useMemo(() => layoutSky(drawn), [drawn]);
-  const [shape, nextShape] = useSkyShape();
+  const [shape, nextShape, reshaping] = useSkyShape();
   const litStars = useMemo(
     () => (lit ? layout.stars.filter((star) => lit.has(star.book.id)) : []),
     [layout, lit],
@@ -123,6 +129,7 @@ export function Universe({
       aria-label='Your books, scattered like stars. Drag to look around, use + and − to zoom.'
       data-dragging={dragging || undefined}
       data-shape={shape}
+      data-reshaping={reshaping || undefined}
       data-searching={lit ? true : undefined}
       className='sky relative flex-1 cursor-grab touch-none select-none overflow-hidden outline-none data-dragging:cursor-grabbing'
       {...handlers}
@@ -144,7 +151,7 @@ export function Universe({
           // chosen, fades softly out and in again with them
           'transition-opacity ease-in-out',
           fading ? 'duration-450' : 'duration-800',
-          (placed || eased) && !fading ? 'opacity-100' : 'opacity-0',
+          (placed || eased) && ready && !fading ? 'opacity-100' : 'opacity-0',
         )}
         style={{
           transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`,
@@ -161,6 +168,7 @@ export function Universe({
           />
         ))}
       </div>
+      <SkyLoading ready={ready} insetTop={insetTop} />
       {notice && (
         <div
           className='pointer-events-none absolute inset-x-0 z-2 flex justify-center px-6'

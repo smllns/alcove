@@ -54,20 +54,37 @@ function once<T>(key: string, job: () => Promise<T>): Promise<T> {
   return started;
 }
 
-async function store<T>(key: string, value: T, days: number, keptDays = days) {
+// What's kept for a value: it, and till when it's fresh and kept at all
+const kept = <T>(value: T, days: number, keptDays = days) => {
   const now = Date.now();
+  return {
+    value,
+    freshUntil: new Date(now + days * DAY_MS),
+    expiresAt: new Date(now + keptDays * DAY_MS),
+  };
+};
+
+async function store<T>(key: string, value: T, days: number, keptDays = days) {
   await lookupCache().updateOne(
     { _id: key },
-    {
-      $set: {
-        value,
-        freshUntil: new Date(now + days * DAY_MS),
-        expiresAt: new Date(now + keptDays * DAY_MS),
-      },
-    },
+    { $set: kept(value, days, keptDays) },
     { upsert: true },
   );
   return value;
+}
+
+// Values worked out elsewhere (many at once, say) kept, by key, in one go
+export async function keepAll<T>(values: Map<string, T>, days: number) {
+  if (!values.size) return;
+  await lookupCache().bulkWrite(
+    [...values].map(([key, value]) => ({
+      updateOne: {
+        filter: { _id: key },
+        update: { $set: kept(value, days) },
+        upsert: true,
+      },
+    })),
+  );
 }
 
 // What's kept for each of `keys` that's still good, by key, without

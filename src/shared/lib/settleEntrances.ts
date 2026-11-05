@@ -6,13 +6,12 @@
 // whatever turns up while it's still rising (once its data loads, say). More
 // than tidier: as a transition ends, WebKit (Safari, every iPhone browser)
 // draws a frame of any entrance still under way back at its start, a visible
-// blink. Only what plays once is settled; the sky's endless drifting is held
-// still instead (stillWhileTurning). Called once, it watches every view
+// blink. Only what plays once is settled. Called once, it watches every view
 // transition, the router's included, keeps one the browser gives up on from
 // turning into an error, and ends one that's stuck rather than leave it hanging
 // over the page.
 
-import { pageTurning } from './stillWhileTurning';
+import { pageTurning } from './pageTurn';
 
 // Plays once, on the page itself (not the transition's own sheet), and
 // isn't part of the change itself (data-moves-along: the library's tabs'

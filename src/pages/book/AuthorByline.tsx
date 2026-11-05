@@ -1,6 +1,7 @@
 import { ArrowDown } from 'lucide-react';
 import { lifespan } from '@/entities/book/authors';
-import { useWorkAuthor } from '@/entities/book/catalogueQueries';
+import { authorAskOf } from '@/entities/book/authorAsk';
+import { useBookAuthor } from '@/entities/book/catalogueQueries';
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
@@ -26,7 +27,7 @@ const bioText =
 // before), and how many more of theirs the reader has, which leads down
 // to them.
 export function AuthorByline({ book }: { book: Book }) {
-  const authorQuery = useWorkAuthor(book.openLibrary?.work, book.authors[0]);
+  const authorQuery = useBookAuthor(authorAskOf(book));
   const author = authorQuery.data;
   const { others, known } = useTheirOthers(book);
   const years = lifespan(author);
@@ -72,9 +73,11 @@ export function AuthorByline({ book }: { book: Book }) {
               )}
               {author?.bio && (
                 <>
-                  <Fold lines={3} className={bioText}>
-                    {author.bio}
-                  </Fold>
+                  <div lang={author.bioLanguage}>
+                    <Fold lines={3} className={bioText}>
+                      {author.bio}
+                    </Fold>
+                  </div>
                   {author.wikipedia && (
                     <SourceCredit
                       source='Wikipedia'

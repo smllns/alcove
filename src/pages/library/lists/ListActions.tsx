@@ -8,6 +8,7 @@ import { Button } from '@/shared/ui/Button';
 import { ChoiceCapsule } from '@/shared/ui/ChoiceCapsule';
 import { ChoiceToggle } from '@/shared/ui/ChoiceToggle';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { dangerPillClass } from '@/shared/ui/buttonStyles';
 
 // Under a list of the reader's: changing it (`editing`, turned on and off by
 // `onEdit`), its name and what's in it at once; letting other readers find it
@@ -18,6 +19,7 @@ export function ListActions({
   editing,
   onEdit,
   kept = true,
+  removable = true,
   onOpen,
 }: {
   list: BookList;
@@ -25,6 +27,8 @@ export function ListActions({
   onEdit: (on: boolean) => void;
   // Kept already; one only being begun has nothing to delete
   kept?: boolean;
+  // One that stays whatever's done (Want to read) can't be deleted
+  removable?: boolean;
   // Made public or private, for one being begun: kept to make it with
   onOpen?: (open: boolean) => void;
 }) {
@@ -41,11 +45,11 @@ export function ListActions({
           icon={<SquarePen size={14} />}
           label={editing ? 'Done' : 'Edit list'}
         />
-        {kept && (
+        {kept && removable && (
           <Button
             variant='pill'
             onClick={() => setAsking(true)}
-            className='hover:border-danger hover:text-danger'
+            className={dangerPillClass}
           >
             <Trash2 size={14} />
             Delete list

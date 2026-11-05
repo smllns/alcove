@@ -6,13 +6,14 @@ import {
   fetchBookQuotes,
   fetchEditions,
   fetchSimilarBooks,
-  fetchWorkAuthor,
+  fetchAuthor,
   fetchWorkDetails,
   fetchWorkRatings,
   fetchWorkSummary,
   searchAuthors,
   searchCatalogue,
 } from './api';
+import type { AuthorAsk } from './authorAsk';
 import type { CatalogueAuthor, CatalogueWork } from './types';
 
 // What's asked of the book catalogues (Open Library, Wikiquote) about books
@@ -27,7 +28,14 @@ const catalogueKeys = {
   about: (workKey: string) => ['catalogue', 'about2', workKey] as const,
   ratings: (workKey: string) => ['catalogue', 'ratings', workKey] as const,
   similar: (workKey: string) => ['catalogue', 'similar', workKey] as const,
-  author: (workKey: string) => ['catalogue', 'author', workKey] as const,
+  author: ({ work, name, title, read, original }: AuthorAsk) =>
+    [
+      'catalogue',
+      'author2',
+      work ?? `${name}|${title}`,
+      read ?? '',
+      original ?? '',
+    ] as const,
   quotes: (title: string, author: string) =>
     ['catalogue', 'quotes', title, author] as const,
 };
@@ -63,12 +71,17 @@ export const useEditions = (workKey: string | undefined) =>
 
 // A work in short, for its page: there at once when the page before had it
 // (`known`), asked for when the page is opened straight from its address
-export const useWorkSummary = (workKey: string, known?: CatalogueWork) =>
+export const useWorkSummary = (
+  workKey: string,
+  known?: CatalogueWork,
+  enabled = true,
+) =>
   useQuery({
     queryKey: ['catalogue', 'work', workKey],
     queryFn: () => fetchWorkSummary(workKey),
     initialData: known?.workKey === workKey ? known : undefined,
     staleTime: Infinity,
+    enabled,
   });
 
 // What the catalogue says the book is about, and its genres. Asked once
@@ -105,12 +118,13 @@ const nameKey = (name: string) => [
 // writer's name too (theirs as the book has it, and as the catalogue does),
 // so another book of theirs opened next shows them at once, while its own
 // answer is asked for (in case the catalogue tells it differently)
-export function useWorkAuthor(workKey: string | undefined, name?: string) {
+export function useBookAuthor(ask: AuthorAsk) {
+  const { name } = ask;
   const client = useQueryClient();
   const query = useQuery({
-    queryKey: catalogueKeys.author(workKey ?? ''),
-    queryFn: () => fetchWorkAuthor(workKey!),
-    enabled: Boolean(workKey),
+    queryKey: catalogueKeys.author(ask),
+    queryFn: () => fetchAuthor(ask),
+    enabled: Boolean(ask.work || name),
     staleTime: Infinity,
     placeholderData: () =>
       name ? client.getQueryData<CatalogueAuthor>(nameKey(name)) : undefined,

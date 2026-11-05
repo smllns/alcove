@@ -21,7 +21,7 @@ export function monthly(
   months: Book[][],
   year: number,
   soFar: number,
-  read: boolean,
+  read = false,
 ) {
   const total = months.flat().length;
   const now = year === new Date().getFullYear();
@@ -77,7 +77,8 @@ export function spanned(decades: NonNullable<ReturnType<typeof byDecade>>) {
   if (!span)
     return (
       <>
-        All of them came out in <Mark>{yearOf(decades.oldest)}</Mark>.
+        {decades.oldest === decades.newest ? 'It' : 'All of them'} came out in{' '}
+        <Mark>{yearOf(decades.oldest)}</Mark>.
       </>
     );
   return (
@@ -92,12 +93,16 @@ export function leaning(genres: Tally[]) {
   const [first, ...next] = genres
     .slice(0, 3)
     .map((genre) => genre.name.toLowerCase());
+  // Only the one book with a genre given: what it is, not a leaning
+  const one = new Set(genres.flatMap((genre) => genre.books)).size === 1;
   return (
     <>
-      Your shelves lean towards <Mark>{first}</Mark>
+      {one ? 'Your one book is' : 'Your shelves lean towards'}{' '}
+      <Mark>{first}</Mark>
       {next.length > 0 && (
         <>
-          , then <Mark>{next[0]}</Mark>
+          {one ? (next[1] ? ', ' : ' and ') : ', then '}
+          <Mark>{next[0]}</Mark>
           {next[1] && (
             <>
               {' '}
@@ -124,8 +129,8 @@ export function spoken(languages: Tally[]) {
   if (languages.length === 1)
     return (
       <>
-        All of them were first written in{' '}
-        <Mark>{nativeName(languages[0].name)}</Mark>.
+        {languages[0].books.length === 1 ? 'It was' : 'All of them were'} first
+        written in <Mark>{nativeName(languages[0].name)}</Mark>.
       </>
     );
   return (

@@ -114,3 +114,7 @@ export const copySchema = z
       ...dates,
     };
   });
+
+// Whether the reader has begun a book: being read, or read
+export const begun = (reading: ReadingState | undefined) =>
+  reading === 'read' || reading === 'reading';

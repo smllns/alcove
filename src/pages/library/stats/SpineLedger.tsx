@@ -11,9 +11,6 @@ import { LedgerWithMore } from './Ledger';
 import { RisingSpine } from './ToneSpine';
 import { useBooksDrawer } from './useBooksDrawer';
 
-// The most spines a row stands; past that, one stands for several books,
-// so the longest still fits a phone's width
-const WIDEST = 36;
 // How tall the spines stand against their formats, in the finer lines less
 const TALL = 0.6;
 const TALL_FINE = 0.28;
@@ -40,9 +37,6 @@ export function SpineLedger({
 }) {
   const hover = useMediaQuery(HOVER);
   const drawer = useBooksDrawer();
-  const every = Math.ceil(
-    Math.max(...rows.map((row) => row.books.length)) / WIDEST,
-  );
   // The books counted, each once, for each line's share
   const sorted = new Set(rows.flatMap((row) => row.books)).size;
   const open = (row: Tally) => drawer.show(row.name, row.books);
@@ -68,7 +62,6 @@ export function SpineLedger({
                 place={ranked ? place : undefined}
                 line={line}
                 share={line.books.length / sorted}
-                every={every}
                 fine={fine}
               />
             </HoverBooks>
@@ -104,13 +97,11 @@ function Row({
   place,
   line,
   share,
-  every,
   fine,
 }: {
   place?: number;
   line: Tally;
   share: number;
-  every: number;
   fine: boolean;
 }) {
   const plank = useRef<HTMLSpanElement>(null);
@@ -148,19 +139,16 @@ function Row({
           fine ? 'gap-px border-b-[1.5px]' : 'gap-0.5 border-b-3 max-sm:gap-px',
         )}
       >
-        {line.books
-          .filter((_, i) => i % every === 0)
-          .slice(0, room)
-          .map((book) => (
-            <RisingSpine
-              key={book.id}
-              book={book}
-              height={Math.round(
-                spineSize(book).height * (fine ? TALL_FINE : TALL),
-              )}
-              className={cn('shrink-0', fine ? 'w-1' : 'w-1.5 max-sm:w-1')}
-            />
-          ))}
+        {line.books.slice(0, room).map((book) => (
+          <RisingSpine
+            key={book.id}
+            book={book}
+            height={Math.round(
+              spineSize(book).height * (fine ? TALL_FINE : TALL),
+            )}
+            className={cn('shrink-0', fine ? 'w-1' : 'w-1.5 max-sm:w-1')}
+          />
+        ))}
       </span>
       <span
         className={cn(

@@ -10,8 +10,8 @@ import { BookSection } from './BookSection';
 type Entry = [label: string, value: ReactNode];
 
 // The book itself, as a library would file it: a catalogue card of its
-// genres, when it came out, who published it, how long it is,
-// what language it's in, and its number
+// genres, the series it's part of (and which of it), when it came out,
+// who published it, how long it is, what language it's in, and its number
 export function EditionFacts({ book }: { book: Book }) {
   const translated =
     book.language &&
@@ -30,6 +30,20 @@ export function EditionFacts({ book }: { book: Book }) {
     .join(', ');
 
   const entries: Entry[] = [
+    [
+      'Series',
+      book.series && (
+        <>
+          {book.series.name}
+          {book.series.number !== undefined && (
+            <span className='text-muted'>
+              {' '}
+              · book {book.series.number.toLocaleString('en')}
+            </span>
+          )}
+        </>
+      ),
+    ],
     [
       'Published',
       (book.firstPublishedYear || book.publishedYear) && (

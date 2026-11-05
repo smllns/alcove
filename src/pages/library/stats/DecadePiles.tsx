@@ -8,7 +8,7 @@ import { BooksDrawer } from './BooksDrawer';
 import { HoverBooks } from './HoverBooks';
 import { sideAt } from './cardSide';
 import { Pile, PileCount } from './Pile';
-import { thinned } from './piles';
+import { drawnOf, pilesWidth } from './piles';
 import { useBooksDrawer } from './useBooksDrawer';
 
 // How wide a fold of empty decades is, against a decade's width
@@ -44,7 +44,7 @@ export function DecadePiles({
   decades: NonNullable<ReturnType<typeof byDecade>>;
 }) {
   const { columns, oldest, newest } = decades;
-  const drawn = thinned(columns.map((column) => column.books));
+  const drawn = columns.map((column) => drawnOf(column.books));
   const hover = useMediaQuery(HOVER);
   const drawer = useBooksDrawer();
   // Each column's share of the width, a fold narrower than a decade, and
@@ -66,84 +66,94 @@ export function DecadePiles({
   );
   return (
     <>
-      <div
-        className='grid items-end gap-x-1.5'
-        style={{
-          gridTemplateColumns: widths.map((width) => `${width}fr`).join(' '),
-        }}
-      >
-        {columns.map((column, i) => {
-          const { from, older, books } = column;
-          // A fold, nothing in it to open
-          if (folded(column)) return <span key={from} />;
-          const name = older ? `Before ${from + 10}` : `The ${from}s`;
-          return (
-            <HoverBooks
-              key={from}
-              heading={name}
-              books={books}
-              side={sideAt(i, columns.length)}
-              hover={hover}
-              onOpen={() => drawer.show(name, books)}
-              detail={yearWritten}
-              className='items-stretch'
-              over={<PileCount count={books.length} />}
-            >
-              <Pile books={drawn[i]} />
-            </HoverBooks>
-          );
-        })}
-      </div>
-      <div className='relative mt-2 h-8 border-t border-(--fine)'>
-        {columns.map((column, i) => {
-          const left = `${middles[i]}%`;
-          // A fold, the ruler broken across it as a drawing breaks a line
-          // too long to draw: two slants over a gap in it
-          if (folded(column))
+      <div style={{ maxWidth: pilesWidth(whole) }}>
+        <div
+          className='grid items-end gap-x-1.5'
+          style={{
+            gridTemplateColumns: widths.map((width) => `${width}fr`).join(' '),
+          }}
+        >
+          {columns.map((column, i) => {
+            const { from, older, books } = column;
+            // A fold, nothing in it to open
+            if (folded(column)) return <span key={from} />;
+            const name = older ? `Before ${from + 10}` : `The ${from}s`;
             return (
-              <svg
-                key={column.from}
-                aria-hidden
-                viewBox='0 0 16 14'
-                className='absolute -top-[7px] h-3.5 w-4 -translate-x-1/2 text-(--fine)'
-                style={{ left }}
+              <HoverBooks
+                key={from}
+                heading={name}
+                books={books}
+                side={sideAt(i, columns.length)}
+                hover={hover}
+                onOpen={() => drawer.show(name, books)}
+                detail={yearWritten}
+                className='items-stretch'
+                over={<PileCount count={books.length} />}
               >
-                <rect x='3' y='5' width='10' height='4' fill='var(--bg-mid)' />
-                <path
-                  d='M2 12 L7 2 M9 12 L14 2'
-                  stroke='currentColor'
-                  strokeWidth='1.2'
-                  fill='none'
-                />
-              </svg>
+                <Pile books={drawn[i]} />
+              </HoverBooks>
             );
-          const last = i === columns.length - 1;
-          return (
-            <span key={column.from}>
-              <i
-                className='absolute -top-1 h-2 w-px bg-(--fine)'
-                style={{ left }}
-              />
-              <em
-                className={cn(
-                  'absolute top-2.5 -translate-x-1/2 text-[11px] whitespace-nowrap text-muted not-italic',
-                  !written[i] && !last && 'max-sm:hidden',
-                )}
-                // Kept within the ruler at its ends
-                style={{ left: `clamp(1.3rem, ${left}, calc(100% - 1.3rem))` }}
-              >
-                {decadeName(
-                  column.from,
-                  column.older,
-                  // The decade drawn before it, past any fold
-                  i > 0
-                    ? columns[folded(columns[i - 1]) ? i - 2 : i - 1]?.from
-                    : undefined,
-                )}
-              </em>
-            </span>
-          );
-        })}
+          })}
+        </div>
+        <div className='relative mt-2 h-8 border-t border-(--fine)'>
+          {columns.map((column, i) => {
+            const left = `${middles[i]}%`;
+            // A fold, the ruler broken across it as a drawing breaks a line
+            // too long to draw: two slants over a gap in it
+            if (folded(column))
+              return (
+                <svg
+                  key={column.from}
+                  aria-hidden
+                  viewBox='0 0 16 14'
+                  className='absolute -top-[7px] h-3.5 w-4 -translate-x-1/2 text-(--fine)'
+                  style={{ left }}
+                >
+                  <rect
+                    x='3'
+                    y='5'
+                    width='10'
+                    height='4'
+                    fill='var(--bg-mid)'
+                  />
+                  <path
+                    d='M2 12 L7 2 M9 12 L14 2'
+                    stroke='currentColor'
+                    strokeWidth='1.2'
+                    fill='none'
+                  />
+                </svg>
+              );
+            const last = i === columns.length - 1;
+            return (
+              <span key={column.from}>
+                <i
+                  className='absolute -top-1 h-2 w-px bg-(--fine)'
+                  style={{ left }}
+                />
+                <em
+                  className={cn(
+                    'absolute top-2.5 -translate-x-1/2 text-[11px] whitespace-nowrap text-muted not-italic',
+                    !written[i] && !last && 'max-sm:hidden',
+                  )}
+                  // Kept within the ruler at its ends
+                  style={{
+                    left: `clamp(1.3rem, ${left}, calc(100% - 1.3rem))`,
+                  }}
+                >
+                  {decadeName(
+                    column.from,
+                    column.older,
+                    // The decade drawn before it, past any fold
+                    i > 0
+                      ? columns[folded(columns[i - 1]) ? i - 2 : i - 1]?.from
+                      : undefined,
+                  )}
+                </em>
+              </span>
+            );
+          })}
+        </div>
       </div>
       <div className='mt-8'>
         <BookEnds

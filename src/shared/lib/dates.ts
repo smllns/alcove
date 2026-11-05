@@ -68,3 +68,64 @@ export function daysFromToday(day: string) {
   const now = fromDay(today());
   return date && now ? Math.round((+date - +now) / DAY_MS) : null;
 }
+
+const MONTHS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+];
+
+// A year as typed: in full, or by its last two figures, taken as this
+// century's unless that's still to come
+function fullYear(typed: string) {
+  const year = Number(typed);
+  if (typed.length !== 2) return year;
+  const now = new Date().getFullYear();
+  return year + 2000 > now ? year + 1900 : year + 2000;
+}
+
+// A day as someone types it, the day before the month as in Britain:
+// "25 December 2019", "25 Dec 19", "December 25, 2019", "25/12/2019",
+// "25.12.19", or as stored, "2019-12-25". Null for anything else, or a day
+// no calendar has (the 31st of April).
+export function parseDay(text: string) {
+  const typed = text
+    .trim()
+    .toLowerCase()
+    .replace(/(\d)(st|nd|rd|th)\b/, '$1');
+  const monthOf = (name: string) => MONTHS.indexOf(name.slice(0, 3)) + 1;
+  const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(typed);
+  const figures = /^(\d{1,2})[/.\-\s](\d{1,2})[/.\-\s](\d{2}|\d{4})$/.exec(
+    typed,
+  );
+  const dayFirst = /^(\d{1,2})\s+([a-z]{3,})\.?,?\s+(\d{2}|\d{4})$/.exec(typed);
+  const monthFirst = /^([a-z]{3,})\.?\s+(\d{1,2}),?\s+(\d{2}|\d{4})$/.exec(
+    typed,
+  );
+  // Day, month, year, each as typed
+  const parts: [string, string | number, string] | null = iso
+    ? [iso[3], iso[2], iso[1]]
+    : figures
+      ? [figures[1], figures[2], figures[3]]
+      : dayFirst
+        ? [dayFirst[1], monthOf(dayFirst[2]), dayFirst[3]]
+        : monthFirst
+          ? [monthFirst[2], monthOf(monthFirst[1]), monthFirst[3]]
+          : null;
+  if (!parts) return null;
+  const day = Number(parts[0]);
+  const month = Number(parts[1]) - 1;
+  const date = new Date(fullYear(parts[2]), month, day);
+  // A day no calendar has rolls over into the next month
+  if (date.getMonth() !== month || date.getDate() !== day) return null;
+  return toDay(date);
+}

@@ -64,6 +64,11 @@ export async function deleteCover(url: string) {
   if (uploadsEnabled()) await del(url, auth);
 }
 
+// Several at once, as books go together (an import undone, say)
+export async function deleteCovers(urls: string[]) {
+  if (urls.length && uploadsEnabled()) await del(urls, auth);
+}
+
 // Whether `url` is one of this reader's own uploads
 function isOwnCover(userId: ObjectId, url: string) {
   try {

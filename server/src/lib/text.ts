@@ -10,3 +10,7 @@ export const escapedForRegex = (text: string) =>
 
 // A name with its spaces tidied: none at the ends, one between words
 export const tidyName = (name: string) => name.trim().replace(/\s+/g, ' ');
+
+// Two names the same but for capitals: "Summer reads", "summer Reads"
+export const sameButCase = (a: string, b: string) =>
+  a.localeCompare(b, 'en', { sensitivity: 'accent' }) === 0;

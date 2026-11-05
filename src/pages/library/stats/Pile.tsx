@@ -44,11 +44,12 @@ export function Pile({
   );
 }
 
-// How many books a pile holds, written over it, darkening as its group is
-// pointed at; none written over an empty one
+// How many books a pile holds, written over it, high enough that the top
+// book, lifting as its group is pointed at, never reaches it, and darkening
+// then too; none written over an empty one
 export function PileCount({ count }: { count: number }) {
   return (
-    <span className='mb-1.5 text-center font-serif text-[13px] text-faint transition-colors duration-500 ease-soft group-hover/books:text-ink'>
+    <span className='mb-4 text-center font-serif text-[13px] text-faint transition-colors duration-500 ease-soft group-hover/books:text-ink'>
       {count || ''}
     </span>
   );

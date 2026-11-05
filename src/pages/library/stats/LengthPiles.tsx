@@ -8,7 +8,7 @@ import { BooksDrawer } from './BooksDrawer';
 import { HoverBooks } from './HoverBooks';
 import { sideAt } from './cardSide';
 import { Pile, PileCount } from './Pile';
-import { thinned } from './piles';
+import { drawnOf, pilesWidth } from './piles';
 import { useBooksDrawer } from './useBooksDrawer';
 
 // How high the highest pile stands, and how thin a book may lie in one
@@ -48,7 +48,7 @@ export function LengthPiles({
   const { piles, average, shortest, longest } = found;
   const hover = useMediaQuery(HOVER);
   const drawer = useBooksDrawer();
-  const drawn = thinned(piles.map((pile) => pile.books));
+  const drawn = piles.map((pile) => drawnOf(pile.books));
   const deepest = Math.max(...drawn.map(pagesIn));
   const scale = Math.min(1 / 90, HIGHEST / deepest);
   // The ruler's marks, a hundred pages apart, where the piles meet: from
@@ -66,72 +66,74 @@ export function LengthPiles({
   );
   return (
     <>
-      <div
-        className='grid items-end gap-x-1.5'
-        style={{ gridTemplateColumns: `repeat(${piles.length}, 1fr)` }}
-      >
-        {piles.map((pile, i) => (
-          <HoverBooks
-            key={pile.from}
-            heading={pileName(pile)}
-            books={pile.books}
-            side={sideAt(i, piles.length)}
-            hover={hover}
-            onOpen={() => drawer.show(pileName(pile), pile.books)}
-            detail={pagesOf}
-            className='items-stretch'
-            over={<PileCount count={pile.books.length} />}
-          >
-            {/* The slimmest on top, the thickest at the bottom */}
-            <Pile
-              books={drawn[i]}
-              thickness={(book) =>
-                Math.max(THINNEST, Math.round(book.pages! * scale))
-              }
-            />
-          </HoverBooks>
-        ))}
-      </div>
-      <div className='relative mt-2 h-14 border-t border-(--fine)'>
-        {marks.map((pages, i) => {
-          const left = `${(i / piles.length) * 100}%`;
-          return (
-            <span key={pages}>
-              <i
-                className='absolute -top-1 h-2 w-px bg-(--fine)'
-                style={{ left }}
-              />
-              <em
-                className={cn(
-                  'absolute top-2.5 text-[11px] whitespace-nowrap text-muted not-italic',
-                  // The ends kept within the ruler
-                  i === 0
-                    ? ''
-                    : i === marks.length - 1 && !last.more
-                      ? '-translate-x-full'
-                      : '-translate-x-1/2',
-                  i % 2 === 1 && i !== marks.length - 1 && 'max-sm:hidden',
-                )}
-                style={{ left }}
-              >
-                {pages}
-              </em>
-            </span>
-          );
-        })}
-        {/* The average, a gold mark across the ruler and its pages under it */}
-        <i
-          className='absolute -top-2 h-4 w-0.5 -translate-x-1/2 rounded-full bg-gold'
-          style={{ left: `${at}%` }}
-        />
-        <em
-          className='absolute top-8 -translate-x-1/2 font-serif text-[13px] whitespace-nowrap text-ink-soft not-italic'
-          style={{
-            left: `clamp(4.5rem, ${at}%, calc(100% - 4.5rem))`,
-          }}
+      <div style={{ maxWidth: pilesWidth(piles.length) }}>
+        <div
+          className='grid items-end gap-x-1.5'
+          style={{ gridTemplateColumns: `repeat(${piles.length}, 1fr)` }}
         >
-          average · {counted(average, 'page')}
-        </em>
+          {piles.map((pile, i) => (
+            <HoverBooks
+              key={pile.from}
+              heading={pileName(pile)}
+              books={pile.books}
+              side={sideAt(i, piles.length)}
+              hover={hover}
+              onOpen={() => drawer.show(pileName(pile), pile.books)}
+              detail={pagesOf}
+              className='items-stretch'
+              over={<PileCount count={pile.books.length} />}
+            >
+              {/* The slimmest on top, the thickest at the bottom */}
+              <Pile
+                books={drawn[i]}
+                thickness={(book) =>
+                  Math.max(THINNEST, Math.round(book.pages! * scale))
+                }
+              />
+            </HoverBooks>
+          ))}
+        </div>
+        <div className='relative mt-2 h-14 border-t border-(--fine)'>
+          {marks.map((pages, i) => {
+            const left = `${(i / piles.length) * 100}%`;
+            return (
+              <span key={pages}>
+                <i
+                  className='absolute -top-1 h-2 w-px bg-(--fine)'
+                  style={{ left }}
+                />
+                <em
+                  className={cn(
+                    'absolute top-2.5 text-[11px] whitespace-nowrap text-muted not-italic',
+                    // The ends kept within the ruler
+                    i === 0
+                      ? ''
+                      : i === marks.length - 1 && !last.more
+                        ? '-translate-x-full'
+                        : '-translate-x-1/2',
+                    i % 2 === 1 && i !== marks.length - 1 && 'max-sm:hidden',
+                  )}
+                  style={{ left }}
+                >
+                  {pages}
+                </em>
+              </span>
+            );
+          })}
+          {/* The average, a gold mark across the ruler and its pages under it */}
+          <i
+            className='absolute -top-2 h-4 w-0.5 -translate-x-1/2 rounded-full bg-gold'
+            style={{ left: `${at}%` }}
+          />
+          <em
+            className='absolute top-8 -translate-x-1/2 font-serif text-[13px] whitespace-nowrap text-ink-soft not-italic'
+            style={{
+              left: `clamp(4.5rem, ${at}%, calc(100% - 4.5rem))`,
+            }}
+          >
+            average · {counted(average, 'page')}
+          </em>
+        </div>
       </div>
       <div className='mt-8'>
         <BookEnds

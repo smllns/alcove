@@ -24,9 +24,11 @@ import { QuoteSuggestions } from './QuoteSuggestions';
 import { SameAuthor } from './SameAuthor';
 import { ReadNext } from './ReadNext';
 import { AddToList } from './AddToList';
+import { WantToRead } from './WantToRead';
 import { AddWork } from './AddWork';
 import { OwnBookActions } from './OwnBookActions';
 import { YourCopy } from './YourCopy';
+import { inCatalogue } from '@/entities/book/catalogueBook';
 import { paths } from '@/shared/config/paths';
 
 // One book laid out: on a wide screen the cover stays beside everything
@@ -40,6 +42,9 @@ export function BookView({
   ...on
 }: { book: Book } & ({ editPath: string } | { work: CatalogueWork })) {
   const owned = 'editPath' in on;
+  // Known to the catalogue (all but one kept only as it came from another
+  // site): what the catalogue says of it, and what's like it
+  const catalogued = owned || inCatalogue(on.work.workKey);
   const [removing, setRemoving] = useState(false);
   // A first review being written, from the button beside the cover
   const [reviewing, setReviewing] = useState(false);
@@ -108,7 +113,8 @@ export function BookView({
           ) : (
             <>
               <AddWork work={on.work} />
-              <AddToList book={book} />
+              <WantToRead book={book} />
+              {catalogued && <AddToList book={book} />}
             </>
           )}
         </div>
@@ -126,7 +132,17 @@ export function BookView({
           className='flex animate-rise flex-col gap-10'
           style={{ animationDelay: '240ms' }}
         >
-          {owned ? <AboutBook book={book} /> : <AboutWork book={book} />}
+          {owned ? (
+            <AboutBook book={book} />
+          ) : catalogued ? (
+            <AboutWork book={book} />
+          ) : (
+            <p className='max-w-xl text-sm leading-relaxed text-muted'>
+              Open Library doesn’t know this book, so it’s here as it came, by
+              its title and author{book.isbn && <>, ISBN {book.isbn}</>}. Add it
+              to your library to find its edition.
+            </p>
+          )}
           {owned && (
             <>
               <BookPassages
@@ -142,9 +158,13 @@ export function BookView({
               <BookLinks book={book} />
             </>
           )}
-          <BookLists book={book} />
-          <SameAuthor book={book} />
-          <ReadNext book={book} />
+          {catalogued && (
+            <>
+              <BookLists book={book} />
+              <SameAuthor book={book} />
+              <ReadNext book={book} />
+            </>
+          )}
           {/* Last, more lines to keep, for a copy to keep them in */}
           {owned && <QuoteSuggestions book={book} />}
         </div>

@@ -23,6 +23,10 @@ export type ListedWorkNode = {
   coverUrl?: string;
   firstPublishYear?: number;
   editionCount?: number;
+  // One kept as it came from another site (typed-…): the ISBN it came with
+  isbn?: string;
+  // Put in by an import from another site, which one (to undo it by)
+  importId?: string;
 };
 export type ListsDoc = {
   _id: ObjectId;

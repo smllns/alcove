@@ -79,3 +79,16 @@ export const unsaveList = async ({ kind, ref }: SavedList) =>
       { method: 'DELETE' },
     )
   ).saved;
+
+// Books the reader wants to read, brought over from another site a few at
+// a time (no more than WANTED_BATCH, as the server has it): found in the
+// catalogue by ISBN, or put in as they came. How many went in, and how
+// many of them as they came.
+export const WANTED_BATCH = 40;
+export type WantedEntry = { title: string; authors: string[]; isbn?: string };
+export type WantedCounts = { added: number; unfound: number };
+export const importWanted = (books: WantedEntry[], importId: string) =>
+  request<WantedCounts>('/lists/want-to-read/import', {
+    method: 'POST',
+    body: { books, importId },
+  });

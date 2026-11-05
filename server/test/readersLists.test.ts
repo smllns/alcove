@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { api, signUp } from './api.js';
+import { stubOpenLibrary } from './sites.js';
 
 // Open Library as it answers about readers' lists: one list of editions,
 // which it gives, said something of by its maker; one holding works,
@@ -44,15 +45,10 @@ const answers: Record<string, () => Response> = {
     }),
 };
 
-const realFetch = globalThis.fetch;
 const asked: string[] = [];
-vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
-  const url = new URL(String(input));
-  if (url.hostname !== 'openlibrary.org') return realFetch(input, init);
+stubOpenLibrary((url) => {
   asked.push(url.pathname);
-  return Promise.resolve(
-    answers[url.pathname]?.() ?? new Response('', { status: 404 }),
-  );
+  return answers[url.pathname]?.();
 });
 afterEach(() => void (asked.length = 0));
 

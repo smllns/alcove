@@ -8,10 +8,10 @@ import { createPacker, type Box } from './packing';
 // first free spot along a spiral out from the middle, so a new book never
 // moves the ones already there: it fills a gap or joins the edge. Every
 // cover keeps clear of the others, with sky between them however they're
-// tilted or wander. A scatter, a tilt and a drift per book, all derived
-// from its id, keep it loose and the same on every visit. A writer's books
-// go wherever their turn puts them, like any others, and lines join them,
-// however far apart, into a constellation (constellations.ts).
+// tilted. A scatter and a tilt per book, both derived from its id, keep it
+// loose and the same on every visit. A writer's books go wherever their
+// turn puts them, like any others, and lines join them, however far apart,
+// into a constellation (constellations.ts).
 
 // The golden angle: consecutive spots land as far apart as they can
 const GOLDEN = Math.PI * (3 - Math.sqrt(5));
@@ -25,9 +25,8 @@ const SPREAD = 0.6;
 // as far as a tilt goes (its half width is 0.5, its half height 0.75)
 const REACH_W = 0.62;
 const REACH_H = 0.83;
-// The sky kept between two covers (sky pixels): enough that two wandering
-// towards each other never touch, and some more of its own for each book,
-// up to SPARE, which keeps the whole from looking like a grid
+// The sky kept between two covers (sky pixels), and some more of its own
+// for each book, up to SPARE, which keeps the whole from looking like a grid
 const GAP = 28;
 const SPARE = 16;
 // How far a book may land from its spot, as a share of the spacing there
@@ -45,14 +44,6 @@ export type SkyStar = {
   y: number;
   width: number;
   tilt: number;
-  // Slow wandering in a small loop about its place, swaying as it goes
-  driftX: number;
-  driftY: number;
-  driftSeconds: number;
-  sway: number;
-  // How far into its wandering and twinkling it starts (a negative delay),
-  // so the stars don't all move together
-  phase: number;
   // Its writer, when there's more than one of their books in the sky
   group?: string;
 };
@@ -154,11 +145,6 @@ export function layoutSky(books: Book[]) {
       y: box.y,
       width,
       tilt: (random() - 0.5) * 20,
-      driftX: (random() - 0.5) * 24,
-      driftY: (random() - 0.5) * 24,
-      driftSeconds: 6 + random() * 6,
-      sway: (random() - 0.5) * 4,
-      phase: random() * -12,
       group: writer || undefined,
     };
   });

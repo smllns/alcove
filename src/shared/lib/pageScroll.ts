@@ -1,7 +1,7 @@
 // Each page scrolls in a box of its own (app/PageScroll), never the
 // window. Where the page is scrolled to is read and set here.
 
-import { isTurning } from './stillWhileTurning';
+import { isTurning } from './pageTurn';
 
 const BOX = '[data-page-scroll]';
 

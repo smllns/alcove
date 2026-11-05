@@ -10,14 +10,14 @@ import { SpineLedger } from './SpineLedger';
 import { ArrivalWays } from './ArrivalWays';
 import * as kept from './copySayings';
 import { byCondition, publishers } from './copyStats';
-import { byArrival, cameOn, finishedOn } from './growth';
+import { byArrival } from './growth';
 import { AuthorsLedger, LanguagesLedger } from './Ledgers';
 import { authors, byDecade, extremes } from './libraryStats';
 import { tally } from './tallies';
 import { MonthsChapter } from './MonthsChapter';
 import * as words from './readingSayings';
 import { byReading, byStars, byWay } from './readingStats';
-import { ReadingYear } from './ReadingYear';
+import { ReadingChapter } from './ReadingChapter';
 import { readSpans } from './readingYears';
 import * as say from './sayings';
 import { StackChapter } from './StackChapter';
@@ -91,7 +91,6 @@ function Chapters({ books }: { books: Book[] }) {
         <>
           <MonthsChapter
             books={shelved}
-            dayOf={cameOn}
             more={kept.cameBy(found.arrival.rows)}
           />
           <ArrivalWays {...found.arrival} total={shelved.length} />
@@ -115,13 +114,8 @@ function Chapters({ books }: { books: Book[] }) {
   const reading = shown([
     {
       key: 'read',
-      title: 'Read each month',
-      body: <MonthsChapter books={found.read} dayOf={finishedOn} read />,
-    },
-    found.spans.length > 0 && {
-      key: 'spans',
-      title: 'Start to finish',
-      body: <ReadingYear spans={found.spans} read={found.read.length} />,
+      title: 'Your reading year',
+      body: <ReadingChapter books={found.read} spans={found.spans} />,
     },
     {
       key: 'unread',

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { api, signUp } from './api.js';
+import { stubOpenLibrary } from './sites.js';
+
+// No test asks the real catalogue (a book with a work warms its lists)
+stubOpenLibrary();
 
 const work = (workKey: string, title: string) => ({
   workKey,
@@ -38,11 +42,11 @@ describe('a reader’s lists', () => {
     expect(added.status).toBe(200);
     expect(added.body.counts[id]).toBe(2);
     expect(
-      added.body.lists[0].works.map((w: { title: string }) => w.title),
+      added.body.lists[1].works.map((w: { title: string }) => w.title),
     ).toEqual(['The Dispossessed', 'Tehanu']);
 
     const taken = await works({ remove: ['OL59796W'] });
-    expect(taken.body.lists[0].works).toHaveLength(1);
+    expect(taken.body.lists[1].works).toHaveLength(1);
     expect(taken.body.counts[id]).toBe(1);
 
     expect(
@@ -94,7 +98,7 @@ describe('a reader’s lists', () => {
       cookie: owner.cookie,
       body: { public: true, description: '  For the long nights.  ' },
     });
-    expect(made.body.lists[0]).toMatchObject({
+    expect(made.body.lists[1]).toMatchObject({
       name: 'Winter classics',
       description: 'For the long nights.',
       public: true,
@@ -135,7 +139,7 @@ describe('a reader’s lists', () => {
       cookie: owner.cookie,
       body: { description: '' },
     });
-    expect(emptied.body.lists[0]).not.toHaveProperty('description');
+    expect(emptied.body.lists[1]).not.toHaveProperty('description');
     expect(
       (
         await api(`/lists/${open}`, {
@@ -190,6 +194,10 @@ describe('a reader’s lists', () => {
     });
     expect(gone.body.saved).toHaveLength(1);
     // Its own lists untouched
-    expect((await api('/lists', { cookie })).body.lists).toEqual([]);
+    expect(
+      (await api('/lists', { cookie })).body.lists.map(
+        (list: { id: string }) => list.id,
+      ),
+    ).toEqual(['want-to-read']);
   });
 });

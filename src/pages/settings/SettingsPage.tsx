@@ -8,6 +8,7 @@ import { InnerPage } from '@/shared/ui/InnerPage';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { DeleteAccount } from './DeleteAccount';
+import { LibrarySettings } from './LibrarySettings';
 import { PlacesSettings } from './PlacesSettings';
 import { ProfileGroup } from './ProfileGroup';
 import { rowLinkClass } from './rowLink';
@@ -21,6 +22,7 @@ const groups = [
   { id: 'profile', label: 'Profile' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'places', label: 'Places' },
+  { id: 'library', label: 'Library' },
   { id: 'sign-in', label: 'Sign-in' },
   { id: 'leaving', label: 'Leaving', danger: true },
 ];
@@ -77,8 +79,11 @@ export function SettingsPage() {
           >
             <PlacesSettings />
           </SettingsGroup>
-          <SignInGroup user={user} delay={delay(3)} />
-          <DeleteAccount id='leaving' delay={delay(4)} />
+          <SettingsGroup id='library' title='Library' delay={delay(3)}>
+            <LibrarySettings />
+          </SettingsGroup>
+          <SignInGroup user={user} delay={delay(4)} />
+          <DeleteAccount id='leaving' delay={delay(5)} />
         </div>
       </div>
       <BackToTop after={top} />

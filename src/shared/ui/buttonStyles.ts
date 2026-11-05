@@ -25,6 +25,9 @@ export const buttonClass = (variant: ButtonVariant, className?: string) =>
     className,
   );
 
+// A pill for something that takes things away, reddening as it's pointed at
+export const dangerPillClass = 'hover:border-danger hover:text-danger';
+
 // Round, outlined control for a single icon; shared with icon links
 export const iconButtonClass = (className?: string) =>
   cn(

@@ -108,6 +108,8 @@ export type CatalogueWork = {
   firstPublishYear?: number;
   coverUrl?: string;
   editionCount: number;
+  // One kept in a list as it came from another site: its ISBN, if any
+  isbn?: string;
 };
 
 // A writer the catalogue knows, as a search finds them. Mirrors
@@ -156,14 +158,18 @@ export type ReadersListPage = {
 
 // Who wrote a book, as the catalogue knows them. `wikipedia`: the article
 // the lines about them come from, when they do, to credit.
+// Who wrote a book. `key`: theirs in the catalogue, unless only Wikipedia
+// knows them; `bioLanguage`: what the lines about them are written in,
+// when they're from Wikipedia ("en", "ru")
 export type CatalogueAuthor = {
-  key: string;
+  key?: string;
   name: string;
   born?: number;
   died?: number;
   bio?: string;
   photoUrl?: string;
   wikipedia?: string;
+  bioLanguage?: string;
 };
 
 // A book to read next, and its id if it's on the reader's shelves already
@@ -171,10 +177,12 @@ export type SimilarBook = CatalogueWork & { bookId?: string };
 
 // What the page for adding a book may be opened with: one already found in
 // the catalogue (a book to read next, say), to start from its details, and
-// the printing an ISBN found, if it was found so
+// the printing an ISBN found, if it was found so; or words to search the
+// catalogue for (a book kept only by its title)
 export type AddBookState = {
   work?: CatalogueWork;
   isbnEdition?: CatalogueEdition;
+  query?: string;
 };
 
 // From the catalogue: one specific printing

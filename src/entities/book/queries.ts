@@ -28,10 +28,11 @@ export const bookKeys = {
 };
 
 // The reader's own copy of a work from the catalogue: its id, or null
-export const useOwnedWork = (workKey: string) =>
+export const useOwnedWork = (workKey: string, enabled = true) =>
   useQuery({
     queryKey: bookKeys.byWork(workKey),
     queryFn: () => fetchOwnedWork(workKey),
+    enabled,
   });
 
 // Changes the books already loaded onto the shelf, before the refetch

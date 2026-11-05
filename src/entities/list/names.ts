@@ -1,3 +1,8 @@
+// The list every reader has from the start, of books to read next: it
+// can be emptied, never renamed or removed. Mirrors WANT_LIST in
+// server/src/lists/repository.ts.
+export const WANT_LIST = 'want-to-read';
+
 // A list's name as it's kept: its spaces tidied, as the server keeps it
 // (server/src/lib/validation.ts nameOf)
 export const tidyListName = (name: string) => name.trim().replace(/\s+/g, ' ');

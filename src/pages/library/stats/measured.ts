@@ -14,6 +14,8 @@ export const ordinal = (storey: number) => ORDINALS[storey] ?? `${storey}th`;
 
 // Short of a storey, what the stack comes up to beside the reader
 function low(height: number) {
+  if (height < 0.12) return 'about as tall as a mug';
+  if (height < 0.32) return 'about as tall as a wine bottle';
   if (height < 0.55) return 'about knee‑high';
   if (height < 1.1) return 'about waist‑high';
   if (height < 1.5) return 'up to your shoulders';

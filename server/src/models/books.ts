@@ -101,6 +101,8 @@ export type BookDoc = {
   // Where the details came from, for refreshing them later
   openLibrary?: { work?: string; edition?: string };
   copy?: CopyDetails;
+  // Brought over from another site, in which import (to undo it by)
+  importId?: string;
   createdAt: Date;
   updatedAt: Date;
 };

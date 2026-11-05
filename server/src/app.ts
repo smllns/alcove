@@ -42,12 +42,18 @@ export function createApp() {
   if (config.isProduction) app.set('trust proxy', 1);
 
   const api = express.Router();
-  // Small bodies everywhere, except cover photos (already shrunk in the browser)
+  // Small bodies everywhere, except cover photos (already shrunk in the
+  // browser) and books brought over from another site, a batch at a time
   const smallJson = express.json({ limit: '100kb' });
   const photoJson = express.json({ limit: '3mb' });
-  api.use((req, res, next) =>
-    (req.path.startsWith('/uploads/') ? photoJson : smallJson)(req, res, next),
-  );
+  const importJson = express.json({ limit: '2mb' });
+  const bodyFor = (path: string) =>
+    path.startsWith('/uploads/')
+      ? photoJson
+      : path === '/books/import'
+        ? importJson
+        : smallJson;
+  api.use((req, res, next) => bodyFor(req.path)(req, res, next));
   api.use(cookieParser(), requireJson, loadUser);
   api.get('/health', async (_req, res) => {
     await pingDb();
