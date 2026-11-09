@@ -1,12 +1,16 @@
 import type { Ref } from 'react';
 import type { Book } from '@/entities/book/types';
+import { textLinkClass } from '@/shared/ui/buttonStyles';
+import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { BookRows } from './BookRows';
+import type { GroupPage } from './useBooksDrawer';
 
 // What's in the card over a group of books (a month, a decade): its name
 // in serif, a word on it (the year, how many) under a fine rule, then its
 // books one under another, each its cover with its title and author
 // beside it; past a few, scrolled through (`scroller`, the box they
-// scroll in, `room`, how tall it may be; `detail`, a word on each book)
+// scroll in, `room`, how tall it may be; `detail`, a word on each book).
+// Under its name, the way to its own `page`, if it has one.
 export function BooksCard({
   heading,
   meta,
@@ -14,6 +18,7 @@ export function BooksCard({
   scroller,
   room,
   detail,
+  page,
 }: {
   heading: string;
   meta: string;
@@ -21,6 +26,7 @@ export function BooksCard({
   scroller?: Ref<HTMLDivElement>;
   room: number;
   detail?: (book: Book) => string;
+  page?: GroupPage;
 }) {
   return (
     <>
@@ -32,6 +38,14 @@ export function BooksCard({
           {meta}
         </p>
       </div>
+      {page && (
+        <TransitionLink
+          to={page.to}
+          className={`mb-1 inline-block text-xs text-muted ${textLinkClass}`}
+        >
+          {page.label} →
+        </TransitionLink>
+      )}
       <div
         ref={scroller}
         className='-mr-3 overflow-y-auto pr-3'

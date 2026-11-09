@@ -6,7 +6,6 @@ import { pagesIn, pagesOf, type extremes } from './libraryStats';
 import { BookEnds } from './BookEnds';
 import { BooksDrawer } from './BooksDrawer';
 import { HoverBooks } from './HoverBooks';
-import { sideAt } from './cardSide';
 import { Pile, PileCount } from './Pile';
 import { drawnOf, pilesWidth } from './piles';
 import { useBooksDrawer } from './useBooksDrawer';
@@ -76,7 +75,6 @@ export function LengthPiles({
               key={pile.from}
               heading={pileName(pile)}
               books={pile.books}
-              side={sideAt(i, piles.length)}
               hover={hover}
               onOpen={() => drawer.show(pileName(pile), pile.books)}
               detail={pagesOf}

@@ -10,6 +10,7 @@ import {
 import { DESCRIPTION_MAX } from '../lookup/description.js';
 import { copySchema } from './copy.js';
 import { ISBNS_AT_ONCE } from '../lookup/byIsbn.js';
+import { TYPED_KEY } from '../lists/typedKey.js';
 
 // Covers may only come from the catalogue or our own upload storage
 export const coverHost = (url: string) => {
@@ -113,6 +114,9 @@ const bookFields = z.object({
     z.object({
       work: maybe(z.string().regex(WORK_KEY)),
       edition: maybe(z.string().regex(EDITION_KEY)),
+      // The same book as other works the catalogue keeps apart (its
+      // translations), as the reader said
+      also: maybe(z.array(z.string().regex(WORK_KEY)).max(20)),
     }),
   ),
   copy: maybe(copySchema),
@@ -128,12 +132,28 @@ const unbound = <
 
 export const bookInputSchema = bookFields.transform(unbound);
 
+// A book wanted that the catalogue doesn't have, typed in by hand and kept
+// in a list (typed-…): all there is to say of the book itself, none of a
+// copy of it
+export const wantedBookSchema = bookFields.omit({
+  lists: true,
+  copy: true,
+  openLibrary: true,
+});
+
+export type WantedBook = z.infer<typeof wantedBookSchema>;
+
 export type BookInput = z.infer<typeof bookInputSchema>;
 
 // Adding asks first when the book is already on the shelves; `anotherCopy`
 // is the reader saying yes, they have two
+// `typed`, a book wanted that it's the copy of, kept in lists by hand
+// (typed-…), to take its place there
 export const addBookSchema = bookFields
-  .extend({ anotherCopy: z.boolean().default(false) })
+  .extend({
+    anotherCopy: z.boolean().default(false),
+    typed: maybe(z.string().regex(TYPED_KEY)),
+  })
   .transform(unbound);
 
 // A batch of things brought over from another site (books, books wanted):

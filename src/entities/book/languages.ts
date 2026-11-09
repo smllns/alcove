@@ -97,19 +97,3 @@ export function wikiLanguage(code: string | undefined) {
 export const titleLanguage = (book: { title: string; language?: string }) =>
   wikiLanguage(book.language) ??
   (/\p{Script=Cyrillic}/u.test(book.title) ? 'ru' : undefined);
-
-// A language named in itself: "Deutsch", "Русский"; in English when the
-// browser can't (asked in a language it doesn't speak, it would answer in
-// the reader's own instead)
-export function nativeName(code: string) {
-  const tag = terminology[code] ?? code;
-  try {
-    if (Intl.DisplayNames.supportedLocalesOf(tag).length) {
-      const name = new Intl.DisplayNames([tag], { type: 'language' }).of(tag);
-      if (name && name !== tag) return name[0].toUpperCase() + name.slice(1);
-    }
-  } catch {
-    // Not a language the browser knows
-  }
-  return languageName(code);
-}

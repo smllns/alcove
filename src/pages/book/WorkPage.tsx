@@ -31,7 +31,7 @@ export function WorkPage() {
   const kept = lists.data?.lists
     .flatMap((list) => list.works ?? [])
     .find((work) => work.workKey === workKey);
-  const work = known ? summary.data : (handed ?? kept);
+  const work = known ? summary.data : (kept ?? handed);
   const book = work && catalogueBook(work);
   // Not in any list, once they're all in: as a book that isn't there
   const missing =

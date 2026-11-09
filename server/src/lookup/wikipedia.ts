@@ -1,5 +1,6 @@
 import { unaccented } from '../lib/text.js';
 import { fromWikimedia } from './wikimedia.js';
+import { entities } from './wikidata.js';
 
 // Wikipedia, for a few lines about a book's author when the catalogue has
 // none, in a language the reader reads: the English article, or else the
@@ -33,6 +34,8 @@ type Article = {
   photo?: string;
   // The language it's written in
   language: string;
+  // Who it's about, on Wikidata
+  item?: string;
 };
 
 type Summary = {
@@ -40,6 +43,7 @@ type Summary = {
   extract?: string;
   thumbnail?: { source?: string };
   content_urls?: { desktop?: { page?: string } };
+  wikibase_item?: string;
 };
 
 // An article's opening, address and picture; none for a page that only
@@ -55,6 +59,7 @@ async function article(title: string, lang: string): Promise<Article | null> {
     url: page.content_urls?.desktop?.page,
     photo: page.thumbnail?.source,
     language: lang,
+    item: page.wikibase_item,
   };
 }
 
@@ -76,21 +81,12 @@ export async function articleOnItem(
   languages: Languages,
 ) {
   const wanted = readable(languages, name);
-  const entity = await fromWikimedia<{
-    entities?: Record<
-      string,
-      { sitelinks?: Record<string, { title: string } | undefined> }
-    >;
-  }>(
-    `https://www.wikidata.org/w/api.php?${new URLSearchParams({
-      action: 'wbgetentities',
-      ids: item,
-      props: 'sitelinks',
-      sitefilter: wanted.map((lang) => `${lang}wiki`).join('|'),
-      format: 'json',
-    })}`,
-  );
-  const links = entity.entities?.[item]?.sitelinks ?? {};
+  const links =
+    (
+      await entities([item], 'sitelinks', {
+        sitefilter: wanted.map((lang) => `${lang}wiki`).join('|'),
+      })
+    )[item]?.sitelinks ?? {};
   for (const lang of wanted) {
     const title = links[`${lang}wiki`]?.title;
     if (title) return article(title, lang);
@@ -100,7 +96,7 @@ export async function articleOnItem(
 
 // The words of a name, without case, accents or punctuation ("Алёхина,
 // Мария Владимировна": алехина, мария, владимировна)
-const words = (text: string) =>
+export const words = (text: string) =>
   unaccented(text)
     .split(/[^\p{L}]+/u)
     .filter(Boolean);

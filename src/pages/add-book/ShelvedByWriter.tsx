@@ -28,6 +28,7 @@ export function ShelvedByWriter({ writer }: { writer: string | undefined }) {
               title={book.title}
               byline=''
               details={[`Added ${monthName(new Date(book.createdAt))}`]}
+              rating={book.copy?.rating}
               coverUrl={book.cover?.url}
               size='sm'
             />

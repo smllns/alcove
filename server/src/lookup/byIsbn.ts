@@ -4,7 +4,9 @@ import { keepAll, peek } from './cache.js';
 import {
   cleanIsbn,
   fromOpenLibrary,
+  isWork,
   looksLikeIsbn,
+  WORK_KEY,
   SEARCH_FIELDS,
   toWork,
   type SearchDoc,
@@ -55,7 +57,7 @@ async function ask(isbns: string[]) {
   const found = new Map<string, WorkResult | null>(
     isbns.map((isbn) => [isbn, null]),
   );
-  for (const doc of docs)
+  for (const doc of docs.filter(isWork))
     for (const isbn of doc.isbn ?? [])
       if (found.get(isbn) === null) found.set(isbn, toWork(doc));
   return found;
@@ -97,9 +99,12 @@ export async function worksByIsbns(isbns: (string | undefined)[]) {
   return found;
 }
 
-// The book one ISBN is of, from what worksByIsbns found
-export const workOf = (
+// The book one ISBN is of, from what worksByIsbns found (not a printing
+// under no work, kept from before they were left out)
+export function workOf(
   found: Map<string, WorkResult | null>,
   isbn: string | undefined,
-) =>
-  isbn && looksLikeIsbn(isbn) ? (found.get(cleanIsbn(isbn)) ?? null) : null;
+) {
+  const work = isbn && looksLikeIsbn(isbn) ? found.get(cleanIsbn(isbn)) : null;
+  return work && WORK_KEY.test(work.workKey) ? work : null;
+}

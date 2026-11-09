@@ -3,8 +3,10 @@ import { GuestOnly, RequireAuth } from '@/features/auth';
 import { AddBookPage } from '@/pages/add-book/AddBookPage';
 import { ImportPage } from '@/pages/import-books/ImportPage';
 import { AuthPage } from '@/pages/auth/AuthPage';
+import { AuthorPage } from '@/pages/book/author/AuthorPage';
 import { BookPage } from '@/pages/book/BookPage';
 import { EditBookPage } from '@/pages/book/EditBookPage';
+import { EditWorkPage } from '@/pages/book/EditWorkPage';
 import { WorkPage } from '@/pages/book/WorkPage';
 import { LandingPage } from '@/pages/landing/LandingPage';
 import { LibraryPage } from '@/pages/library/LibraryPage';
@@ -50,6 +52,8 @@ export const router = createBrowserRouter([
           { path: paths.book(':id'), element: <BookPage /> },
           { path: paths.editBook(':id'), element: <EditBookPage /> },
           { path: paths.work(':workKey'), element: <WorkPage /> },
+          { path: paths.author(':name'), element: <AuthorPage /> },
+          { path: paths.editWork(':workKey'), element: <EditWorkPage /> },
           { path: paths.list(':id'), element: <ListPage /> },
           { path: paths.featuredList(':id'), element: <FeaturedListPage /> },
           { path: paths.sharedList(':id'), element: <SharedListPage /> },

@@ -27,6 +27,8 @@ type BookStepProps = {
   workKey?: string;
   // The buttons at the bottom, and anything above them
   footer: ReactNode;
+  // Only wanted, not had: nothing to ask of having it
+  wanted?: boolean;
 };
 
 // Step one: the book itself, as the catalogue (or the reader) describes it
@@ -39,10 +41,11 @@ export function BookStep({
   onGenresChange,
   workKey,
   footer,
+  wanted = false,
 }: BookStepProps) {
   return (
     <div className='flex flex-col gap-6'>
-      <HaveItFields form={form} />
+      {!wanted && <HaveItFields form={form} />}
       {editions.length > 0 && (
         <EditionSelect
           editions={editions}

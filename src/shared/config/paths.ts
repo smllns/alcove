@@ -26,6 +26,12 @@ export const paths = {
   book: (id: string) => `/library/books/${id}`,
   // A book from the catalogue, not on the reader's shelves (yet)
   work: (workKey: string) => `/library/works/${workKey}`,
+  // One of those typed into the lists by hand, changed
+  editWork: (workKey: string) => `/library/works/${workKey}/edit`,
+  // A writer, by their name as one of the reader's books has it (spelled
+  // out safely, but for the router's pattern, ':name')
+  author: (name: string) =>
+    `/library/authors/${name.startsWith(':') ? name : encodeURIComponent(name)}`,
   // `step`: open on the reader's own copy, rather than the book itself
   editBook: (id: string, step?: 'copy') =>
     `/library/books/${id}/edit${step ? `?step=${step}` : ''}`,

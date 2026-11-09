@@ -5,7 +5,6 @@ import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { BooksDrawer } from './BooksDrawer';
-import { sideAt } from './cardSide';
 import { HoverBooks } from './HoverBooks';
 import { RisingSpine } from './ToneSpine';
 import { useBooksDrawer } from './useBooksDrawer';
@@ -49,7 +48,6 @@ export function MonthShelf({
               heading={monthOfYear(m)}
               meta={`${year} · ${many}`}
               books={books}
-              side={sideAt(m, 12)}
               hover={hover}
               onOpen={() => open(m)}
               detail={detail}

@@ -4,6 +4,7 @@ import { PageContents } from '@/shared/ui/PageContents';
 import { useAuth } from '@/features/auth';
 import { paths } from '@/shared/config/paths';
 import { BackToTop } from '@/shared/ui/BackToTop';
+import { BackLink } from '@/shared/ui/BackLink';
 import { InnerPage } from '@/shared/ui/InnerPage';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
@@ -29,8 +30,8 @@ const groups = [
 // Each group rises in a beat after the one above
 const delay = (i: number) => 160 + i * 80;
 
-// The account's settings: on a wide screen, the title and an index of the
-// groups stay on the left as the groups go by on the right
+// The account's settings: on a wide screen, the way back, the title and an
+// index of the groups stay on the left as the groups go by on the right
 export function SettingsPage() {
   const { user } = useAuth();
   // The title: the way back up shows once it's scrolled away
@@ -40,9 +41,13 @@ export function SettingsPage() {
   if (!user) return null;
 
   return (
-    <InnerPage width='wide'>
+    <InnerPage width='wide' backBeside>
       <div className='grid gap-10 lg:grid-cols-[16rem_1fr] lg:gap-16 xl:gap-24'>
         <div className='lg:sticky lg:top-10 lg:self-start'>
+          {/* Staying with the index as the groups go by */}
+          <div className='hidden lg:block'>
+            <BackLink to={paths.library} returns />
+          </div>
           <Eyebrow rise={0}>Settings</Eyebrow>
           <div ref={setTop}>
             <PageTitle rise={80} size='sm' className='mt-3 sm:mt-4'>

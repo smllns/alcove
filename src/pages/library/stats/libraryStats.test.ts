@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Book } from '@/entities/book/types';
 import { byArrival, byMonth, cameOn, finishedOn } from './growth';
-import { authors, byDecade, extremes, figures } from './libraryStats';
+import { byDecade, extremes, figures } from './libraryStats';
 import { tally } from './tallies';
 
 let made = 0;
@@ -98,18 +98,6 @@ describe('library stats', () => {
       [800, true, 1],
     ]);
     expect(extremes([book({ pages: 10 })])).toBeNull();
-  });
-
-  it('ranks authors by how many books, the better rated first', () => {
-    const rated = (rating: number) => ({ status: 'shelf' as const, rating });
-    const found = authors([
-      book({ authors: ['Low'], copy: rated(2) }),
-      book({ authors: ['Low'] }),
-      book({ authors: ['High'], copy: rated(5) }),
-      book({ authors: ['High'] }),
-      book({ authors: ['Once'] }),
-    ]);
-    expect(found.map((a) => a.name)).toEqual(['High', 'Low', 'Once']);
   });
 
   it('counts by month only the days the reader gave', () => {

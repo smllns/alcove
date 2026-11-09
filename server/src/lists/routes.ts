@@ -13,6 +13,9 @@ import {
 } from './repository.js';
 import { getSaved, saveList, unsaveList } from './saved.js';
 import { wantAll } from './wanted.js';
+import { changeTyped, putTyped } from './typed.js';
+import { TYPED_KEY } from './typedKey.js';
+import { wantedBookSchema } from '../books/schemas.js';
 import {
   listChangeSchema,
   newListSchema,
@@ -40,6 +43,13 @@ const keptList = () =>
     400,
     'list_kept',
     'Want to read stays. Take books out of it instead.',
+  );
+
+const listFull = () =>
+  new HttpError(
+    409,
+    'list_full',
+    'That’s a lot of books for one list. Take some out first.',
   );
 
 const noSuchList = () =>
@@ -146,17 +156,38 @@ listsRouter.post('/want-to-read/import', async (req, res) => {
   );
 });
 
+// A book the catalogue doesn't have, typed in by hand, put in the list;
+// with its key
+listsRouter.post('/:id/typed', async (req, res) => {
+  const result = await putTyped(
+    me(req),
+    req.params.id,
+    parseBody(wantedBookSchema, req.body),
+  );
+  if (result === 'missing') throw noSuchList();
+  if (result === 'full') throw listFull();
+  res.status(201).json({ ...(await everything(req)), ...result });
+});
+
+// One typed in, changed, in every list it's in
+listsRouter.put('/typed/:key', async (req, res) => {
+  const key = req.params.key;
+  const book = parseBody(wantedBookSchema, req.body);
+  if (!TYPED_KEY.test(key) || !(await changeTyped(me(req), key, book)))
+    throw new HttpError(
+      404,
+      'typed_not_found',
+      'That book isn’t in your lists any more.',
+    );
+  res.json(await everything(req));
+});
+
 // Books from the catalogue put in the list or taken out, the shelves as
 // they were
 listsRouter.patch('/:id/works', async (req, res) => {
   const { add, remove } = parseBody(listWorksSchema, req.body);
   const result = await changeListWorks(me(req), req.params.id, add, remove);
   if (result === 'missing') throw noSuchList();
-  if (result === 'full')
-    throw new HttpError(
-      409,
-      'list_full',
-      'That’s a lot of books for one list. Take some out first.',
-    );
+  if (result === 'full') throw listFull();
   res.json(await everything(req));
 });

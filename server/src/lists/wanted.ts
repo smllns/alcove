@@ -3,7 +3,7 @@ import { books, lists, type ListedWorkNode } from '../db.js';
 import { begun } from '../books/copy.js';
 import { sameButCase } from '../lib/text.js';
 import { changeListWorks, getLists, WANT_LIST } from './repository.js';
-import { TYPED } from './schemas.js';
+import { TYPED } from './typedKey.js';
 
 // Want to read, the list every reader has (WANT_LIST): books coming into
 // it from another site, going out of it as they're added or an import's

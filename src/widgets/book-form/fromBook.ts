@@ -1,5 +1,6 @@
 import type { Book } from '@/entities/book/types';
 import { ways } from '@/entities/book/acquired';
+import { inCatalogue } from '@/entities/book/catalogueBook';
 import {
   emptyFields,
   type DraftExtras,
@@ -72,7 +73,14 @@ export function draftFromBook(book: Book): {
       genres: book.genres,
       lists: book.lists,
       cover: book.cover && { url: book.cover.url, source: book.cover.source },
-      openLibrary: book.openLibrary,
+      // Not a printing taken for a work, as imports once did ("OL…M")
+      openLibrary: book.openLibrary && {
+        ...book.openLibrary,
+        work:
+          book.openLibrary.work && inCatalogue(book.openLibrary.work)
+            ? book.openLibrary.work
+            : undefined,
+      },
     },
     entries: {
       notes: passages(copy?.notes),

@@ -23,3 +23,7 @@ export const authorAskOf = (book: Book): AuthorAsk => ({
   read: wikiLanguage(book.language),
   original: wikiLanguage(book.originalLanguage),
 });
+
+// What a writer's page is opened with from a book of theirs: what to look
+// them up by, as that book's page did, so they're there at once
+export type WriterPageState = { ask: AuthorAsk };

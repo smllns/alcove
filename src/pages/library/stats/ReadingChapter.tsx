@@ -54,7 +54,8 @@ export function ReadingChapter({
   const unpaged = months.flat().filter((book) => !book.pages).length;
   // Books left out for want of a day, from the shelf or from start to finish
   const undated = dated < books.length;
-  const unspanned = spans.length < books.length;
+  const finishedSpans = spans.filter((each) => !each.reading).length;
+  const unspanned = finishedSpans < books.length;
   return (
     <>
       <p className={sayClass}>
@@ -96,8 +97,8 @@ export function ReadingChapter({
           )}
           {unspanned && (
             <>
-              From start to finish, {spans.length.toLocaleString('en')} of them,
-              those with both days.{' '}
+              From start to finish, {finishedSpans.toLocaleString('en')} of
+              them, those with both days.{' '}
             </>
           )}
           {(undated || unspanned) && (

@@ -30,7 +30,9 @@ export type Book = {
   // for a book the catalogue has no ratings for (those are asked afresh)
   averageRating?: number;
   cover?: BookCover;
-  openLibrary?: { work?: string; edition?: string };
+  // Where its details came from; and other works the catalogue keeps apart
+  // that the reader said are this same book (a translation)
+  openLibrary?: { work?: string; edition?: string; also?: string[] };
   copy?: CopyDetails;
   createdAt: string;
   updatedAt: string;
@@ -97,7 +99,19 @@ export type CopyDetails = {
 export type BookInput = Omit<Book, 'id' | 'createdAt' | 'updatedAt'> & {
   // Add it even though the same book is already on the shelves
   anotherCopy?: boolean;
+  // The book typed into lists by hand (typed-…) this is a copy of, to take
+  // its place there
+  typed?: string;
 };
+
+// A book wanted that the catalogue doesn't have, typed in by hand and kept
+// in a list (typed-…): all there is to say of the book, none of a copy.
+// Mirrors WantedBook on the server.
+export type WantedBook = Omit<
+  BookInput,
+  'copy' | 'lists' | 'openLibrary' | 'anotherCopy' | 'typed'
+>;
+export type WantedDetails = Omit<WantedBook, 'title' | 'authors'>;
 
 // From the catalogue: a book in general, across all its editions
 export type CatalogueWork = {
@@ -110,6 +124,8 @@ export type CatalogueWork = {
   editionCount: number;
   // One kept in a list as it came from another site: its ISBN, if any
   isbn?: string;
+  // One typed in by hand: everything said of it
+  details?: WantedDetails;
 };
 
 // A writer the catalogue knows, as a search finds them. Mirrors
@@ -172,8 +188,9 @@ export type CatalogueAuthor = {
   bioLanguage?: string;
 };
 
-// A book to read next, and its id if it's on the reader's shelves already
-export type SimilarBook = CatalogueWork & { bookId?: string };
+// A book to read next, and its id if it's on the reader's shelves already,
+// with the stars they gave it, if they have
+export type SimilarBook = CatalogueWork & { bookId?: string; rating?: number };
 
 // What the page for adding a book may be opened with: one already found in
 // the catalogue (a book to read next, say), to start from its details, and
@@ -183,6 +200,10 @@ export type AddBookState = {
   work?: CatalogueWork;
   isbnEdition?: CatalogueEdition;
   query?: string;
+  // Only to be kept in this list (by id), not added to the library
+  into?: string;
+  // Typed in by hand straight away, begun with this title
+  byHand?: string;
 };
 
 // From the catalogue: one specific printing

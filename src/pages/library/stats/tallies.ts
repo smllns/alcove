@@ -15,12 +15,14 @@ export function tally(books: Book[], keysOf: (book: Book) => string[]) {
       if (held) held.push(book);
       else by.set(key, [book]);
     }
-  return [...by]
-    .map(([name, held]): Tally => ({ name, books: held }))
-    .sort(
-      (a, b) => b.books.length - a.books.length || a.name.localeCompare(b.name),
-    );
+  return byMost([...by].map(([name, held]): Tally => ({ name, books: held })));
 }
+
+// The lines, the most books first, then by name
+export const byMost = (rows: Tally[]) =>
+  rows.sort(
+    (a, b) => b.books.length - a.books.length || a.name.localeCompare(b.name),
+  );
 
 // How many books there are in all the lines (each counted once a line)
 export const countIn = (rows: Tally[]) =>

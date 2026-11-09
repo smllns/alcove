@@ -9,6 +9,7 @@ import { BookGrid } from './views/BookGrid';
 import { BookList } from './views/BookList';
 import type { CardSize } from './views/BookCard';
 import { useEasedResults } from './views/useEasedResults';
+import { useShelfWindow } from './views/useShelfWindow';
 import { fadesBack, ordered, usual, type Arrangement } from './views/order';
 import type { BookView } from './views/views';
 
@@ -77,6 +78,7 @@ export function LibraryBooks({
     [found, order, reversed],
   );
   const shown = useEasedResults(sorted, sought, { ease: !universe });
+  const windowed = useShelfWindow(shown.books, shelf.paging);
   const faded = (book: Book) => fadesBack(book, fade);
 
   if (universe)
@@ -103,13 +105,13 @@ export function LibraryBooks({
       <Loading className='py-16' />
     );
 
-  const { paging } = shelf;
+  const { paging } = windowed;
   const size = gridSizes[view];
   const rise = !shown.eased && !viewEased;
   if (size)
     return (
       <BookGrid
-        books={shown.books}
+        books={windowed.books}
         size={size}
         rise={rise}
         faded={faded}
@@ -118,7 +120,7 @@ export function LibraryBooks({
     );
   return (
     <BookList
-      books={shown.books}
+      books={windowed.books}
       columns={view === 'list-columns'}
       rise={rise}
       faded={faded}

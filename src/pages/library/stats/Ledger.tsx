@@ -6,6 +6,7 @@ import { Collapse } from '@/shared/ui/Collapse';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
 import { HoverBooks } from './HoverBooks';
 import { LedgerColumns, LedgerNames } from './LedgerNames';
+import type { GroupPage } from './useBooksDrawer';
 import { FEW, type Tally } from './tallies';
 
 // Names and their numbers, one under another, dotted across from one to
@@ -33,7 +34,8 @@ const spacing = {
 // closer, in columns where there's room (LedgerColumns), then those with
 // one book each only named (LedgerNames). Each line drawn by `row`, told
 // whether it's one of the finer ones and its place; each named one called
-// `named` and opening its books by `onOpen`.
+// `named` and opening its books by `onOpen`, with its own page (`pageOf`),
+// if it has one.
 export function LedgerWithMore<T extends Tally>({
   items,
   shown = 5,
@@ -42,6 +44,7 @@ export function LedgerWithMore<T extends Tally>({
   hover,
   onOpen,
   named,
+  pageOf,
   drawn = false,
 }: {
   items: T[];
@@ -51,6 +54,7 @@ export function LedgerWithMore<T extends Tally>({
   hover: boolean;
   onOpen: (item: T) => void;
   named?: (item: T) => string;
+  pageOf?: (item: T) => GroupPage;
   drawn?: boolean;
 }) {
   const [all, setAll] = useState(false);
@@ -79,6 +83,7 @@ export function LedgerWithMore<T extends Tally>({
             hover={hover}
             onOpen={onOpen}
             named={named}
+            pageOf={pageOf}
           />
         )}
       </Collapse>
@@ -96,7 +101,8 @@ export function LedgerWithMore<T extends Tally>({
 // One line of it: `after` the number, a small drawing of what's counted;
 // `fine`, smaller and closer, for the lines opened out. Given its
 // `books`, they open as a month's do (HoverBooks): pointed at, in a card
-// over the line; tapped, in a drawer (`onOpen`).
+// over the line; tapped, in a drawer (`onOpen`); its own `page`, if it
+// has one, a click away.
 export function LedgerRow({
   name,
   value,
@@ -105,6 +111,7 @@ export function LedgerRow({
   books,
   hover = false,
   onOpen,
+  page,
 }: {
   name: string;
   value: ReactNode;
@@ -113,6 +120,7 @@ export function LedgerRow({
   books?: Book[];
   hover?: boolean;
   onOpen?: () => void;
+  page?: GroupPage;
 }) {
   const text = fine ? 'text-sm text-ink-soft' : 'text-lg';
   const line = (
@@ -134,9 +142,9 @@ export function LedgerRow({
       <HoverBooks
         heading={name}
         books={books}
-        side='start'
         hover={hover}
         onOpen={() => onOpen?.()}
+        page={page}
       >
         {line}
       </HoverBooks>

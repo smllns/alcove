@@ -136,3 +136,14 @@ export async function bookQuotes(
   );
   return quotes.length ? { quotes, source: pageUrl(authorPage) } : none;
 }
+
+// Quotes of the writer's own, from their page: those it sets in bold
+// first, none from what's said about them
+export async function writerQuotes(author: string): Promise<BookQuotes> {
+  const page = (await searchTitles(author)).find(
+    (title) => norm(title) === norm(author),
+  );
+  if (!page) return { quotes: [], source: null };
+  const quotes = pick(quotedLines((await wikitextOf(page)).split('\n')));
+  return { quotes, source: quotes.length ? pageUrl(page) : null };
+}

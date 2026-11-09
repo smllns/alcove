@@ -1,3 +1,5 @@
+import type { WantedDetails } from '@/entities/book/types';
+
 // The reader's own lists of books, named however they like. Mirrors the
 // lists on the server: a book on the shelves says which it's in
 // (Book.lists); a book from the catalogue that isn't is kept in the list
@@ -23,6 +25,8 @@ export type ListedWork = {
   editionCount: number;
   // One kept as it came from another site (typed-…): the ISBN it came with
   isbn?: string;
+  // One typed in by hand (typed-…): everything said of it
+  details?: WantedDetails;
 };
 
 // Another reader's public list, as it's found: whose it is (as they're

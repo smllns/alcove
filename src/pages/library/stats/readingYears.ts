@@ -1,19 +1,29 @@
 import type { Book } from '@/entities/book/types';
-import { DAY_MS, fromDay } from '@/shared/lib/dates';
+import { DAY_MS, fromDay, today } from '@/shared/lib/dates';
 
 // The books read from start to finish: each from the day the reader began
-// it to the day they finished it, for those with both days given
+// it to the day they finished it, for those with both days given; and
+// those being read now (`reading`), from the day they began to today
 
-export type Span = { book: Book; from: Date; to: Date; days: number };
+export type Span = {
+  book: Book;
+  from: Date;
+  to: Date;
+  days: number;
+  reading?: boolean;
+};
 
 export function readSpans(books: Book[]): Span[] {
   return books.flatMap((book) => {
     const copy = book.copy;
-    if (copy?.reading !== 'read' || !copy.started || !copy.finished) return [];
+    const reading = copy?.reading === 'reading';
+    if (!copy?.started || !(reading || copy.reading === 'read')) return [];
+    const ends = reading ? today() : copy.finished;
     const from = fromDay(copy.started);
-    const to = fromDay(copy.finished);
+    const to = ends && fromDay(ends);
     if (!from || !to || to < from) return [];
-    return [{ book, from, to, days: Math.round((+to - +from) / DAY_MS) + 1 }];
+    const days = Math.round((+to - +from) / DAY_MS) + 1;
+    return [{ book, from, to, days, ...(reading && { reading }) }];
   });
 }
 
@@ -25,6 +35,12 @@ export function spanYears(spans: Span[]) {
   return [...years].sort((a, b) => b - a);
 }
 
+// How many days books took, on average; none, none
+const average = (spans: Span[]) =>
+  spans.length
+    ? Math.round(spans.reduce((sum, { days }) => sum + days, 0) / spans.length)
+    : 0;
+
 // Whether a book was being read at some time from `start` up to `end`
 const during = ({ from, to }: Span, start: Date, end: Date) =>
   from < end && to >= start;
@@ -33,7 +49,8 @@ const during = ({ from, to }: Span, start: Date, end: Date) =>
 // ended, as shares of the year, cut to it) and the row it lies in, books
 // read at the same time lying one over another, as low as there's room;
 // how many rows that took (the most read at once), how long a book took
-// on average, and the books being read in each month of it
+// on average (one being read now taking no part, not done yet), and the
+// books being read in each month of it
 export function readingYear(spans: Span[], year: number) {
   const start = new Date(year, 0, 1);
   const end = new Date(year + 1, 0, 1);
@@ -64,8 +81,6 @@ export function readingYear(spans: Span[], year: number) {
       ),
     ),
     rows: rows.length,
-    average: laid.length
-      ? Math.round(laid.reduce((sum, { days }) => sum + days, 0) / laid.length)
-      : 0,
+    average: average(laid.filter((span) => !span.reading)),
   };
 }

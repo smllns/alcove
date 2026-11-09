@@ -1,5 +1,6 @@
 import { booksByWork } from '@/entities/book/booksByWork';
 import { useRef, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { useCatalogueSearch } from '@/entities/book/catalogueQueries';
 import { bookMatches } from '@/entities/book/matches';
 import type { Book, CatalogueWork } from '@/entities/book/types';
@@ -17,12 +18,14 @@ const OWN = 5;
 // Open Library, each part saying so while it looks. Those in the list
 // already aren't found; one from the catalogue the reader has a copy of
 // is handed over as their copy (`onBook`), any other as the catalogue's
-// (`onWork`).
+// (`onWork`). Under them, always, the way to type in one neither has
+// (`onByHand`, with what was looked for).
 export function ListFinder({
   shelf,
   inList,
   onBook,
   onWork,
+  onByHand,
   focus,
   className,
 }: {
@@ -32,6 +35,7 @@ export function ListFinder({
   inList: Book[];
   onBook: (book: Book) => void;
   onWork: (work: CatalogueWork) => void;
+  onByHand?: (title: string) => void;
   // The cursor in it as it opens
   focus?: boolean;
   className?: string;
@@ -112,6 +116,19 @@ export function ListFinder({
             ? 'Open Library didn’t answer. Try again in a moment.'
             : 'Nothing found by that name.'}
         </p>
+      )}
+      {onByHand && (
+        <button
+          type='button'
+          onClick={() => {
+            const title = text.trim();
+            picked(() => onByHand(title));
+          }}
+          className='mt-1 flex w-full cursor-pointer items-center gap-3 rounded-xl border-t border-line px-3 py-3 text-left text-sm text-ink-soft transition-colors duration-500 ease-soft hover:bg-ink/5 hover:text-ink'
+        >
+          <Plus size={15} className='shrink-0' />
+          Can’t find it? Add a book by hand
+        </button>
       )}
     </>
   );

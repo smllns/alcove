@@ -2,6 +2,7 @@ import { useRef, type ReactNode } from 'react';
 import { Button } from './Button';
 import { FormError } from './FormError';
 import { Modal } from './Modal';
+import { dialogClass } from './surfaces';
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -39,7 +40,7 @@ export function ConfirmDialog({
       }}
       // Start on the safe choice, so a stray Enter doesn't destroy anything
       focus={cancel}
-      className='relative m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface shadow-[0_30px_60px_-30px_rgba(40,28,14,0.55)]'
+      className={dialogClass}
     >
       <div className='flex flex-col gap-4 p-6 sm:p-8'>
         <h2 className='font-serif text-2xl leading-tight tracking-[-0.01em]'>

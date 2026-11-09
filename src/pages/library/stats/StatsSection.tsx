@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { isPhysical } from '@/entities/book/nonPhysical';
 import type { Book } from '@/entities/book/types';
 import type { Shelf } from '@/entities/book/useShelf';
@@ -9,19 +9,19 @@ import { DecadePiles } from './DecadePiles';
 import { SpineLedger } from './SpineLedger';
 import { ArrivalWays } from './ArrivalWays';
 import * as kept from './copySayings';
-import { byCondition, publishers } from './copyStats';
+import { byCondition } from './copyStats';
 import { byArrival } from './growth';
 import { AuthorsLedger, LanguagesLedger } from './Ledgers';
-import { authors, byDecade, extremes } from './libraryStats';
-import { tally } from './tallies';
 import { MonthsChapter } from './MonthsChapter';
 import * as words from './readingSayings';
-import { byReading, byStars, byWay } from './readingStats';
+import { byReading, byWay } from './readingStats';
 import { ReadingChapter } from './ReadingChapter';
-import { readSpans } from './readingYears';
 import * as say from './sayings';
 import { StackChapter } from './StackChapter';
 import { LengthPiles } from './LengthPiles';
+import { ScopedChapter } from './ScopedChapter';
+import { scopedFindings, type Findings } from './scopedFindings';
+import type { ShelfShow } from '../views/order';
 
 // What the reader's library says about them, as an almanac: chapter after
 // chapter down the page, each one sentence and one drawing, in the places'
@@ -29,7 +29,8 @@ import { LengthPiles } from './LengthPiles';
 // is left out, and the rest numbered on. Each chapter counts what it's
 // about: the books as things (how tall they'd stack, how they came) only
 // the physical ones; what was read and the reader's taste every book,
-// read on a screen or listened to as much as on paper.
+// read on a screen or listened to as much as on paper, or only the
+// physical ones, as the reader chooses (ScopedChapter).
 export function StatsSection({ shelf }: { shelf: Shelf }) {
   if (!shelf.complete) return <Loading />;
   if (!shelf.all.length)
@@ -46,27 +47,47 @@ function Chapters({ books }: { books: Book[] }) {
   const shelved = useMemo(() => books.filter(isPhysical), [books]);
   const found = useMemo(
     () => ({
-      decades: byDecade(books),
-      genres: tally(books, (book) => book.genres ?? []),
-      authors: authors(books),
-      // The language each was first written in (its own, for one that
-      // isn't a translation)
-      languages: tally(books, (book) => {
-        const first = book.originalLanguage ?? book.language;
-        return first ? [first] : [];
-      }),
-      extremes: extremes(books),
-      read: books.filter((book) => book.copy?.reading === 'read'),
-      spans: readSpans(books),
       reading: byReading(books),
-      stars: byStars(books),
       ways: byWay(books),
       arrival: byArrival(shelved),
       condition: byCondition(shelved),
-      publishers: publishers(shelved),
     }),
     [books, shelved],
   );
+  // Some chapters count either the physical books or all, when they differ
+  const choosing = shelved.length < books.length;
+  // Found once among them all, and again among the physical ones only when
+  // there are others
+  const both = useMemo(() => {
+    const all = scopedFindings(books);
+    return { all, physical: choosing ? scopedFindings(shelved) : all };
+  }, [books, shelved, choosing]);
+  // One of those, starting on `start` (if there's anything to show there),
+  // left out with nothing to go on among all the books
+  const scoped = <K extends keyof Findings>(
+    key: K,
+    title: string,
+    render: (found: NonNullable<Findings[K]>) => {
+      say?: ReactNode;
+      body: ReactNode;
+    },
+    start: ShelfShow = 'all',
+  ): Part | null => {
+    const each = { all: both.all[key], physical: both.physical[key] };
+    if (!each.all) return null;
+    return {
+      key,
+      title,
+      body: (
+        <ScopedChapter
+          found={each as Record<ShelfShow, NonNullable<Findings[K]> | null>}
+          start={each[start] ? start : 'all'}
+          choosing={choosing}
+          render={render}
+        />
+      ),
+    };
+  };
   // Chapters with nothing to go on are left out
   const shown = (parts: (Part | false | null)[]) =>
     parts.filter((part): part is Part => Boolean(part));
@@ -78,12 +99,10 @@ function Chapters({ books }: { books: Book[] }) {
         <StackChapter books={shelved} left={books.length - shelved.length} />
       ),
     },
-    found.extremes && {
-      key: 'extremes',
-      title: 'Longest and shortest',
-      say: say.thickest(found.extremes),
-      body: <LengthPiles found={found.extremes} />,
-    },
+    scoped('extremes', 'Longest and shortest', (each) => ({
+      say: say.thickest(each),
+      body: <LengthPiles found={each} />,
+    })),
     shelved.length > 0 && {
       key: 'arrivals',
       title: 'How the library grew',
@@ -103,32 +122,30 @@ function Chapters({ books }: { books: Book[] }) {
       say: kept.keptIn(found.condition, shelved.length),
       body: <SpineLedger rows={found.condition.rows} noun='shape' />,
     },
-    // Only once some publisher has more than one of them
-    (found.publishers[0]?.books.length ?? 0) > 1 && {
-      key: 'publishers',
-      title: 'Publishers',
-      say: kept.publishedBy(found.publishers),
-      body: <SpineLedger rows={found.publishers} noun='publisher' ranked />,
-    },
+    scoped(
+      'publishers',
+      'Publishers',
+      (rows) => ({
+        say: kept.publishedBy(rows),
+        body: <SpineLedger rows={rows} noun='publisher' ranked />,
+      }),
+      'physical',
+    ),
   ]);
   const reading = shown([
-    {
-      key: 'read',
-      title: 'Your reading year',
-      body: <ReadingChapter books={found.read} spans={found.spans} />,
-    },
+    scoped('read', 'Your reading year', (read) => ({
+      body: <ReadingChapter books={read.books} spans={read.spans} />,
+    })),
     {
       key: 'unread',
       title: 'Still to read',
       say: words.stillToRead(found.reading),
       body: <SpineLedger rows={found.reading.rows} noun='state' />,
     },
-    found.stars && {
-      key: 'stars',
-      title: 'Your stars',
-      say: words.starsGiven(found.stars),
-      body: <SpineLedger rows={found.stars.rows} noun='rating' />,
-    },
+    scoped('stars', 'Your stars', (stars) => ({
+      say: words.starsGiven(stars),
+      body: <SpineLedger rows={stars.rows} noun='rating' />,
+    })),
     // Only once some book was read another way than off the shelves
     found.ways.length > 1 && {
       key: 'ways',
@@ -138,31 +155,22 @@ function Chapters({ books }: { books: Book[] }) {
     },
   ]);
   const inside = shown([
-    found.decades && {
-      key: 'decades',
-      title: 'By decade',
-      say: say.spanned(found.decades),
-      body: <DecadePiles decades={found.decades} />,
-    },
-    found.genres.length > 0 && {
-      key: 'genres',
-      title: 'Genres',
-      say: say.leaning(found.genres),
-      body: <SpineLedger rows={found.genres} noun='genre' ranked />,
-    },
-    // Only once someone's written more than one of them
-    (found.authors[0]?.books.length ?? 0) > 1 && {
-      key: 'authors',
-      title: 'Favourite authors',
-      say: say.favourite(found.authors[0]),
-      body: <AuthorsLedger authors={found.authors} />,
-    },
-    found.languages.length > 0 && {
-      key: 'languages',
-      title: 'Original languages',
-      say: say.spoken(found.languages),
-      body: <LanguagesLedger languages={found.languages} />,
-    },
+    scoped('decades', 'By decade', (decades) => ({
+      say: say.spanned(decades),
+      body: <DecadePiles decades={decades} />,
+    })),
+    scoped('genres', 'Genres', (genres) => ({
+      say: say.leaning(genres),
+      body: <SpineLedger rows={genres} noun='genre' ranked />,
+    })),
+    scoped('authors', 'Favourite authors', (rows) => ({
+      say: say.favourite(rows[0]),
+      body: <AuthorsLedger authors={rows} />,
+    })),
+    scoped('languages', 'Original languages', (languages) => ({
+      say: say.spoken(languages),
+      body: <LanguagesLedger languages={languages} />,
+    })),
   ]);
   return (
     <Almanac

@@ -1,6 +1,6 @@
 import { useRef, useState, type SubmitEvent } from 'react';
 import { useAddBook, useUpdateBook } from '@/entities/book/queries';
-import type { Book, CatalogueEdition } from '@/entities/book/types';
+import type { Book, CatalogueEdition, WantedBook } from '@/entities/book/types';
 import { softSwitch } from '@/shared/lib/softSwitch';
 import { useForm } from '@/shared/lib/useForm';
 import { BookStep } from './BookStep';
@@ -25,7 +25,7 @@ import { FormNotice } from './FormNotice';
 import { StepHeading, type Step } from './StepHeading';
 import { useErrorStep } from './useErrorStep';
 import { useStepScroll } from './useStepScroll';
-import { toBookInput } from './toBookInput';
+import { toBookInput, wantedOf } from './toBookInput';
 
 export type DraftForm = ReturnType<typeof useForm<DraftFields>>;
 
@@ -46,11 +46,22 @@ type BookFormProps = {
   // Already said to be a second copy of a book on the shelves, so adding
   // it doesn't ask again
   secondCopy?: boolean;
+  // A copy of a book typed into lists by hand (typed-…), to take its place
+  typed?: string;
+  // Only the book, no copy, kept in a list (WantedSave)
+  wanted?: WantedSave;
+};
+
+// A book kept without a copy: how it's saved, and what saving is called
+export type WantedSave = {
+  save: (book: WantedBook) => Promise<unknown>;
+  label: string;
 };
 
 // A book in two steps: the book itself, prefilled from the catalogue and
 // editable, then the reader's own copy of it. Adding goes through them in
-// turn; changing a book on the shelves can save from either.
+// turn; changing a book on the shelves can save from either. A book only
+// wanted (`wanted`) is the first step alone.
 export function BookForm({
   fields,
   extras: initialExtras,
@@ -61,6 +72,8 @@ export function BookForm({
   onBack,
   startStep = 'book',
   secondCopy = false,
+  typed,
+  wanted,
 }: BookFormProps) {
   const addBook = useAddBook();
   const updateBook = useUpdateBook();
@@ -80,7 +93,9 @@ export function BookForm({
         savedExtras(editions, extras, values),
         tidied,
       );
-      if (editing) {
+      if (wanted) {
+        await wanted.save(wantedOf(input));
+      } else if (editing) {
         await updateBook.mutateAsync({
           id: editing.id,
           // Free text from before places existed, which the form no
@@ -97,6 +112,7 @@ export function BookForm({
         await addBook.mutateAsync({
           ...input,
           anotherCopy: anotherCopy.current,
+          typed,
         });
       }
       onSaved();
@@ -122,7 +138,7 @@ export function BookForm({
       if (step === 'book') toHeading();
       return;
     }
-    if (step === 'book' && !editing) {
+    if (step === 'book' && !editing && !wanted) {
       switchFromBelow('copy');
       return;
     }
@@ -155,6 +171,7 @@ export function BookForm({
         editing={Boolean(editing)}
         saving={saving}
         onBack={onBack}
+        only={wanted?.label}
       />
     </>
   );
@@ -182,6 +199,7 @@ export function BookForm({
           onStep={
             editing ? (next) => softSwitch(() => setStep(next)) : undefined
           }
+          alone={Boolean(wanted)}
         />
         {/* One step comes in softly in place of the other */}
         <div key={step} className='soft-switch'>
@@ -195,6 +213,7 @@ export function BookForm({
               onGenresChange={(genres) => setExtras((x) => ({ ...x, genres }))}
               workKey={extras.openLibrary?.work}
               footer={footer}
+              wanted={Boolean(wanted)}
             />
           ) : (
             <CopyStep

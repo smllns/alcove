@@ -85,6 +85,16 @@
 :root[data-transition='swap'] .home-title {
   view-transition-name: var(--stays);
 }
+/* The sheet dropped over the page as My books or the stats are chosen
+   (sectionCurtain.ts): over all of the page but the header and the tabs,
+   which stay on top of it */
+.section-curtain {
+  z-index: 25;
+}
+:root[data-curtain] :is(.library-header, .library-nav) {
+  z-index: 26;
+}
+
 /* Over the page turning, just as they are now: the tabs as they are in the
    section chosen, their shading gliding there */
 ::view-transition-group(library-header),

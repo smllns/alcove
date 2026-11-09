@@ -26,6 +26,9 @@ import { ReadNext } from './ReadNext';
 import { AddToList } from './AddToList';
 import { WantToRead } from './WantToRead';
 import { AddWork } from './AddWork';
+import { TypedAbout } from './TypedAbout';
+import { ButtonLink } from '@/shared/ui/ButtonLink';
+import { Pencil } from 'lucide-react';
 import { OwnBookActions } from './OwnBookActions';
 import { YourCopy } from './YourCopy';
 import { inCatalogue } from '@/entities/book/catalogueBook';
@@ -36,7 +39,8 @@ import { paths } from '@/shared/config/paths';
 // title comes with it, under the cover. One on the reader's shelves
 // (`editPath`, its page for changing it) shows all they've made of it, and
 // ways to change it; one that isn't (`work`, from the catalogue) shows only
-// what the catalogue knows, and a way to add it.
+// what the catalogue knows, and a way to add it; one typed into the lists
+// by hand, all the reader said of it, and a way to change that.
 export function BookView({
   book,
   ...on
@@ -113,6 +117,12 @@ export function BookView({
           ) : (
             <>
               <AddWork work={on.work} />
+              {on.work.details && (
+                <ButtonLink to={paths.editWork(on.work.workKey)} variant='pill'>
+                  <Pencil size={14} />
+                  Edit
+                </ButtonLink>
+              )}
               <WantToRead book={book} />
               {catalogued && <AddToList book={book} />}
             </>
@@ -136,6 +146,8 @@ export function BookView({
             <AboutBook book={book} />
           ) : catalogued ? (
             <AboutWork book={book} />
+          ) : on.work.details ? (
+            <TypedAbout book={book} />
           ) : (
             <p className='max-w-xl text-sm leading-relaxed text-muted'>
               Open Library doesn’t know this book, so it’s here as it came, by

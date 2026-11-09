@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { coverHost, importBatch } from '../books/schemas.js';
+import { coverHost, importBatch, wantedBookSchema } from '../books/schemas.js';
 import {
   boundedText,
   list,
@@ -38,9 +38,7 @@ const MAX_CHANGED = 500;
 const TOO_MANY = 'That’s a lot of books at once.';
 
 // A book from the catalogue's work, or one kept as it came from another
-// site (typed-…)
-// The start of the key of a book kept as it came from another site
-export const TYPED = 'typed-';
+// site or typed in (typed-…)
 const LISTED_KEY = /^(OL\d+W|typed-[0-9a-f]{24})$/;
 
 // A book from the catalogue, as a search found it, or one kept as it came
@@ -53,6 +51,8 @@ export const listedWorkSchema = z.object({
   firstPublishYear: maybe(z.number().int().min(-5000).max(3000)),
   editionCount: maybe(z.number().int().min(0)),
   isbn: optionalText(20),
+  // One typed in by hand: all said of it, put back with it
+  details: maybe(wantedBookSchema.omit({ title: true, authors: true })),
 });
 
 // Books from the catalogue put in a list, and taken out of it (by work;

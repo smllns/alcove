@@ -25,11 +25,7 @@ const idOf = (key: string) => `stats-${key}`;
 
 // Chapters short enough to stand side by side on the widest screens, when
 // both are there
-const PAIRS = [
-  ['condition', 'publishers'],
-  ['stars', 'ways'],
-  ['authors', 'languages'],
-];
+const PAIRS = [['stars', 'ways']];
 
 // The stats laid out as an almanac in parts (the library, the reading, what
 // the books are), each under its numeral and name: a short title, how many

@@ -31,7 +31,7 @@ const catalogueKeys = {
   author: ({ work, name, title, read, original }: AuthorAsk) =>
     [
       'catalogue',
-      'author2',
+      'author4',
       work ?? `${name}|${title}`,
       read ?? '',
       original ?? '',
@@ -114,6 +114,15 @@ const nameKey = (name: string) => [
   searchable(name).replace(/[^\p{L}\p{N}]/gu, ''),
 ];
 
+// Who wrote a book, as asked by it (useBookAuthor, and a writer's page,
+// which asks by a few of their books)
+export const authorQuery = (ask: AuthorAsk) => ({
+  queryKey: catalogueKeys.author(ask),
+  queryFn: () => fetchAuthor(ask),
+  enabled: Boolean(ask.work || ask.name),
+  staleTime: Infinity,
+});
+
 // Who wrote the book, asked once per book: it hardly changes. Kept by the
 // writer's name too (theirs as the book has it, and as the catalogue does),
 // so another book of theirs opened next shows them at once, while its own
@@ -122,10 +131,7 @@ export function useBookAuthor(ask: AuthorAsk) {
   const { name } = ask;
   const client = useQueryClient();
   const query = useQuery({
-    queryKey: catalogueKeys.author(ask),
-    queryFn: () => fetchAuthor(ask),
-    enabled: Boolean(ask.work || name),
-    staleTime: Infinity,
+    ...authorQuery(ask),
     placeholderData: () =>
       name ? client.getQueryData<CatalogueAuthor>(nameKey(name)) : undefined,
   });

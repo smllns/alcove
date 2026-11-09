@@ -3,6 +3,7 @@ import { BookCover } from '@/entities/book/ui/BookCover';
 import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/cn';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
+import { Rating } from '@/shared/ui/Rating';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { useGridFold } from './useGridFold';
 import { inCatalogue } from '@/entities/book/catalogueBook';
@@ -31,8 +32,8 @@ export function WorkGridSkeleton() {
 export type MoreWorks = { onMore: () => void; loading: boolean };
 
 // Books from the catalogue as a grid of covers, a few dozen at a time:
-// those on the reader's shelves (`owned`, by work) ringed in gold and
-// opening their own page, the rest their page from the catalogue. With
+// those on the reader's shelves (`owned`, by work) ringed in gold, with
+// the stars they gave them, and opening their own page, the rest their page from the catalogue. With
 // more to come (of those here, then of those still to come), only whole
 // rows show, the last only its top half, fading out, and "Show more" opens
 // the grid down softly over the next.
@@ -60,7 +61,9 @@ export function WorkGrid({
       >
         <ul className={gridClass}>
           {works.slice(0, count).map((work, i) => {
-            const mine = owned.get(work.workKey)?.id;
+            const own = owned.get(work.workKey);
+            const mine = own?.id;
+            const stars = own?.copy?.rating;
             const cover = (
               <>
                 <BookCover
@@ -78,6 +81,9 @@ export function WorkGrid({
                 <span className='mt-0.5 block truncate text-xs text-muted'>
                   {mine ? 'On your shelves' : work.authors[0]}
                 </span>
+                {stars ? (
+                  <Rating value={stars} className='mt-1 flex text-xs' />
+                ) : null}
               </>
             );
             return (

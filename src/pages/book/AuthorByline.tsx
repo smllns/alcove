@@ -1,6 +1,9 @@
+import { Fragment } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { lifespan } from '@/entities/book/authors';
-import { authorAskOf } from '@/entities/book/authorAsk';
+import { authorAskOf, type WriterPageState } from '@/entities/book/authorAsk';
+import { paths } from '@/shared/config/paths';
+import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { useBookAuthor } from '@/entities/book/catalogueQueries';
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
@@ -19,15 +22,16 @@ import { textLinkClass } from '@/shared/ui/buttonStyles';
 const bioText =
   'whitespace-pre-line font-serif text-[15px] leading-relaxed text-ink-soft';
 
-// Who wrote the book, under its title: "by Zora Neale Hurston", a line
-// that never changes. Below it, set in a little, what comes later than the
-// page, each part opening out softly as soon as it's known: the writer's
-// face and years and the first lines about them (a spinner by the name
-// while they're on their way; there at once for a writer seen just
-// before), and how many more of theirs the reader has, which leads down
-// to them.
+// Who wrote the book, under its title: "by Zora Neale Hurston", a line that
+// never changes, each name leading to that writer's page. Below it, set in a
+// little, what comes later than the page, each part opening out softly as soon
+// as it's known: the writer's face and years and the first lines about them (a
+// spinner by the name while they're on their way; there at once for a writer
+// seen just before), and how many more of theirs the reader has, which leads
+// down to them.
 export function AuthorByline({ book }: { book: Book }) {
-  const authorQuery = useBookAuthor(authorAskOf(book));
+  const ask = authorAskOf(book);
+  const authorQuery = useBookAuthor(ask);
   const author = authorQuery.data;
   const { others, known } = useTheirOthers(book);
   const years = lifespan(author);
@@ -44,7 +48,20 @@ export function AuthorByline({ book }: { book: Book }) {
     >
       <p className='mt-3 font-serif text-lg font-medium text-ink sm:mt-4 sm:text-xl'>
         <span className='font-normal text-muted italic'>by</span>{' '}
-        {book.authors.join(', ')}
+        {book.authors.map((name, i) => (
+          <Fragment key={name}>
+            {i > 0 && ', '}
+            {/* Their page, underlined always, a phone having no pointer to
+                show it's a link; the first of them looked up there as here */}
+            <TransitionLink
+              to={paths.author(name)}
+              state={i === 0 ? ({ ask } satisfies WriterPageState) : undefined}
+              className='underline decoration-accent/60 decoration-1 underline-offset-[5px] transition-colors duration-500 ease-soft hover:decoration-ink'
+            >
+              {name}
+            </TransitionLink>
+          </Fragment>
+        ))}
         {/* While what's known of them is still on its way; its place kept
             all along, so the line never moves */}
         <span

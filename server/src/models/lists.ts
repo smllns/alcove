@@ -1,4 +1,5 @@
 import type { ObjectId } from 'mongodb';
+import type { WantedBook } from '../books/schemas.js';
 
 // The reader's own lists of books (to read this summer, the best of the
 // year, …), named however they like; one document per reader, keyed by
@@ -25,6 +26,8 @@ export type ListedWorkNode = {
   editionCount?: number;
   // One kept as it came from another site (typed-…): the ISBN it came with
   isbn?: string;
+  // One typed in by hand (typed-…): everything said of it
+  details?: Omit<WantedBook, 'title' | 'authors'>;
   // Put in by an import from another site, which one (to undo it by)
   importId?: string;
 };

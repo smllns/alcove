@@ -1,13 +1,18 @@
 import { Router, type Request } from 'express';
+import { currentUser } from '../auth/middleware.js';
+import { ownCopies } from '../books/repository.js';
 import { queryText } from '../lib/validation.js';
 import { writerAbout, workAuthor } from './author.js';
+import { authorWorks } from './authorWorks.js';
 import { cached } from './cache.js';
-import { noneIfMissing, workKeyOf } from './params.js';
+import { authorKeyOf, noneIfMissing, workKeyOf } from './params.js';
+import { writerQuotes } from './wikiquote.js';
+import { workTitles } from './workTitles.js';
 import type { Languages } from './wikipedia.js';
 
 // Who wrote a book: name, years, picture and a few lines about them, in a
-// language the reader reads. Mounted inside the lookups (routes.ts),
-// behind their limit.
+// language the reader reads; and for their page, their books and their
+// words. Mounted inside the lookups (routes.ts), behind their limit.
 export const authorRouter = Router();
 
 // A language as Wikipedia writes it ("en", "ru"), or none
@@ -32,28 +37,91 @@ function asked(req: Request) {
   return { languages, titles, key };
 }
 
-// A book in the catalogue
+// What's said of a writer, without the word that they're bare
+const unmarked = <T extends { bare?: boolean }>({ bare: _bare, ...about }: T) =>
+  about;
+
+// A writer of a book the catalogue doesn't have, by their name, kept by
+// it and the book's first title
+const writerNamed = (name: string, req: Request) => {
+  const { languages, titles, key } = asked(req);
+  if (!titles.length) return Promise.resolve(null);
+  return cached(
+    `writer5:${name.toLowerCase()}:${titles[0].toLowerCase()}:${key}`,
+    30,
+    () => writerAbout(name, titles, languages),
+  );
+};
+
+// A book in the catalogue. One it knows only by a bare name is looked for
+// instead by their name as the reader has it, as a book it doesn't have
+// would be (writerNamed), so the answer about the book itself is kept for
+// every reader however they write the name.
 authorRouter.get('/works/:workKey/author', async (req, res) => {
   const workKey = workKeyOf(req);
   const { languages, titles, key } = asked(req);
-  const author = await cached(`author4:${workKey}:${key}`, 30, () =>
+  const found = await cached(`author10:${workKey}:${key}`, 30, () =>
     workAuthor(workKey, titles, languages).catch(noneIfMissing),
   );
-  res.json({ author });
+  const named = queryText(req, 'name', 200);
+  const byName = found?.bare && named ? await writerNamed(named, req) : null;
+  res.json({
+    author: byName
+      ? { ...byName, key: byName.key ?? found?.key }
+      : found && unmarked(found),
+  });
 });
 
 // A book the catalogue doesn't have, by its writer's name
 authorRouter.get('/writer', async (req, res) => {
   const name = queryText(req, 'name', 200);
-  const { languages, titles, key } = asked(req);
-  if (!name || !titles.length) {
-    res.json({ author: null });
+  res.json({ author: name ? await writerNamed(name, req) : null });
+});
+
+// A writer's books, the most read first. The catalogue's answer is kept
+// for all readers; which are on this reader's shelves is looked up afresh,
+// with the stars the reader gave them.
+authorRouter.get('/authors/:authorKey/works', async (req, res) => {
+  const author = authorKeyOf(req);
+  const works = await cached(`authorworks6:${author}`, 7, () =>
+    authorWorks(author),
+  );
+  const owned = await ownCopies(
+    currentUser(req)._id,
+    works.map((work) => work.workKey),
+  );
+  res.json({
+    works: works.map((work) => ({ ...work, ...owned.get(work.workKey) })),
+  });
+});
+
+// Words of the writer's own, from Wikiquote, by the name the catalogue
+// knows them by. Nothing found is an answer too.
+authorRouter.get('/writer/quotes', async (req, res) => {
+  const name = queryText(req, 'name', 200);
+  if (!name) {
+    res.json({ quotes: [], source: null });
     return;
   }
-  const author = await cached(
-    `writer1:${name.toLowerCase()}:${titles[0].toLowerCase()}:${key}`,
-    30,
-    () => writerAbout(name, titles, languages),
+  res.json(
+    await cached(`writerquotes1:${name.toLowerCase()}`, 30, () =>
+      writerQuotes(name),
+    ),
   );
-  res.json({ author });
+});
+
+// A book's titles in every language it's known in (workTitles), by the
+// titles the reader has for it, the one it first came out under first. The
+// same for every reader, and for long: a book's titles hardly change.
+authorRouter.get('/work-titles', async (req, res) => {
+  const { languages, titles } = asked(req);
+  if (!titles.length) {
+    res.json({ titles: [] });
+    return;
+  }
+  const first = [...titles].reverse();
+  res.json({
+    // Wikidata not answering is no answer (workTitles keeps none)
+    titles: await workTitles(first, languages).catch(() => []),
+  });
 });

@@ -52,7 +52,7 @@ const sizeOf = (el: HTMLElement): Size => ({
 
 // Where the sky is looked at from, and every way of moving it. Until the
 // reader moves it themselves, it keeps every book in view as more of them
-// load. Given `focus` (the part of the sky a search found), it glides
+// load (`rest`, where it was last put so). Given `focus` (the part of the sky a search found), it glides
 // there, and back to the whole sky once the search is cleared. `onTap`
 // is told what a press that didn't move the sky was on.
 export function useSkyCamera(
@@ -65,6 +65,9 @@ export function useSkyCamera(
 ) {
   // The start: everything, unless that would make the books too small
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, zoom: 1 });
+  // Where it was last fitted to the books by itself (not by the reader),
+  // for what moves only with the reader's moves to go by
+  const [rest, setRest] = useState<Camera>(camera);
   // Whether the camera has been fitted yet: until then nothing is shown, so
   // the books never flash where an unfitted camera would put them
   const [placed, setPlaced] = useState(false);
@@ -112,8 +115,11 @@ export function useSkyCamera(
     const el = sky.current;
     if (!el) return;
     const refit = () => {
-      if (!touched.current)
-        setCamera(opening(sizeOf(el), insetTop, bounds, typicalWidth));
+      if (!touched.current) {
+        const fit = opening(sizeOf(el), insetTop, bounds, typicalWidth);
+        setCamera(fit);
+        setRest(fit);
+      }
       setPlaced(true);
     };
     refit();
@@ -200,6 +206,7 @@ export function useSkyCamera(
 
   return {
     camera,
+    rest,
     placed,
     dragging: gestures.dragging,
     fit,

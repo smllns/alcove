@@ -3,6 +3,7 @@ import { cn } from '@/shared/lib/cn';
 import { labelClass } from '@/shared/ui/fieldStyles';
 import { HoverBooks } from './HoverBooks';
 import type { Tally } from './tallies';
+import type { GroupPage } from './useBooksDrawer';
 
 // Lines of a ledger (`count` of them) read down columns where there's
 // room: two once it's wide enough (`always`, even when it's narrow, for
@@ -44,17 +45,20 @@ export function LedgerColumns({
 
 // Those with one book each (authors, languages), under a word saying so:
 // only their names (`named`, if not as they're counted), in two columns
-// even where the ledger's narrow, each opening its book
+// even where the ledger's narrow, each opening its book, and its own page
+// (`pageOf`), if it has one
 export function LedgerNames<T extends Tally>({
   items,
   hover,
   onOpen,
   named = (item) => item.name,
+  pageOf,
 }: {
   items: T[];
   hover: boolean;
   onOpen: (item: T) => void;
   named?: (item: T) => string;
+  pageOf?: (item: T) => GroupPage;
 }) {
   return (
     <div className='pt-4'>
@@ -65,9 +69,9 @@ export function LedgerNames<T extends Tally>({
             <HoverBooks
               heading={named(item)}
               books={item.books}
-              side='start'
               hover={hover}
               onOpen={() => onOpen(item)}
+              page={pageOf?.(item)}
             >
               <span className='block truncate py-[3px] text-left font-serif text-sm text-ink-soft transition-colors duration-500 ease-soft group-hover/books:text-ink'>
                 {named(item)}

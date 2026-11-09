@@ -6,6 +6,8 @@ import {
 } from '@tanstack/react-query';
 import {
   changeListWorks,
+  changeTyped,
+  putTyped,
   createList,
   deleteList,
   fetchLists,
@@ -146,6 +148,19 @@ export function useChangeListWorks() {
     },
   });
 }
+
+// A book typed in by hand, put in a list or changed: the lists as the
+// server has them then
+function useListsAfter<V, R extends Lists>(mutationFn: (v: V) => Promise<R>) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: (lists) => client.setQueryData<Lists>(listKeys.all, lists),
+  });
+}
+
+export const usePutTyped = () => useListsAfter(putTyped);
+export const useChangeTyped = () => useListsAfter(changeTyped);
 
 // Other readers' public lists by name, once two letters are typed
 export const useSharedLists = (query: string) =>

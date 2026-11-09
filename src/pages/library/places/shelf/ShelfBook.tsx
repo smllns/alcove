@@ -6,11 +6,12 @@ import { PickMark } from '@/shared/ui/PickMark';
 import { raisedClass } from '@/shared/ui/surfaces';
 import { BookLink } from '../../views/BookLink';
 import { useArrangingHere } from './arranging';
+import { Rating } from '@/shared/ui/Rating';
 
 // One book standing face out on a shelf (CoverShelf). Pointed at, it comes
-// up a little with its title and author under it, and opens its page, its
-// cover flying over to it; found from its page (data-found, useFoundBook),
-// it does so for a moment, ringed. Held on, it starts the room arranging
+// up a little with its title, author and the reader's stars under it, and
+// opens its page, its cover flying over to it; found from its page
+// (data-found, useFoundBook), it does so for a moment, ringed. Held on, it starts the room arranging
 // with it picked; while arranging, a tap picks it or lets it go, rather
 // than opening it, a ring round it and its mark filled once it's picked.
 // Moved, it goes and comes as useBookMoves has it.
@@ -77,6 +78,9 @@ export function ShelfBook({ book }: { book: Book }) {
           {book.title}
         </p>
         <p className='mt-0.5 line-clamp-1 text-xs text-muted'>{author}</p>
+        {book.copy?.rating ? (
+          <Rating value={book.copy.rating} className='mt-1 text-xs' />
+        ) : null}
       </div>
     </li>
   );

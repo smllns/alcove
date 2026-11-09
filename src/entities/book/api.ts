@@ -151,7 +151,9 @@ export async function fetchAuthor(ask: AuthorAsk) {
   add('original_title', ask.originalTitle);
   add('read', ask.read);
   add('original', ask.original);
-  if (!ask.work) add('name', ask.name);
+  // For a book in the catalogue too, should it know the writer by a bare
+  // name alone
+  add('name', ask.name);
   const path = ask.work ? `/lookup/works/${ask.work}/author` : '/lookup/writer';
   return (
     await request<{ author: CatalogueAuthor | null }>(`${path}?${params}`)

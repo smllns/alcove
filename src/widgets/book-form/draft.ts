@@ -67,7 +67,7 @@ export type DraftExtras = {
   // The ids of the reader's lists the book is in
   lists?: string[];
   cover?: BookCover;
-  openLibrary?: { work?: string; edition?: string };
+  openLibrary?: { work?: string; edition?: string; also?: string[] };
 };
 
 // A value as a field holds it: as text, nothing for none (the catalogue

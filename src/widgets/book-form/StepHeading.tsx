@@ -13,18 +13,26 @@ const holds: Record<Step, string> = {
 };
 
 // Above the form: adding goes one step after the other, so it says which
-// step this is; changing a book on the shelves can go to either at will,
-// each saying what's in it
+// step this is (a book only wanted has the one); changing a book on the
+// shelves can go to either at will, each saying what's in it
 export function StepHeading({
   ref,
   step,
   onStep,
+  alone = false,
 }: {
   ref: Ref<HTMLDivElement>;
   step: Step;
   // Given when the steps can be switched between
   onStep?: (step: Step) => void;
+  alone?: boolean;
 }) {
+  if (alone)
+    return (
+      <p ref={ref} className={cn('mb-8 text-ink', labelClass)}>
+        {names.book}
+      </p>
+    );
   if (!onStep)
     return (
       <div

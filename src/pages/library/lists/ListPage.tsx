@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import { useBooks } from '@/entities/book/queries';
+import type { AddBookState } from '@/entities/book/types';
 import { useShelf } from '@/entities/book/useShelf';
 import { tidyListName, WANT_LIST } from '@/entities/list/names';
 import { useChangeList, useLists } from '@/entities/list/queries';
+import { paths } from '@/shared/config/paths';
 import { counted } from '@/shared/lib/plural';
+import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { FormError } from '@/shared/ui/FormError';
 import { Loading } from '@/shared/ui/Loading';
 import { PageTitle } from '@/shared/ui/PageHeading';
@@ -32,6 +35,7 @@ export function ListPage() {
   const shelf = useShelf(useBooks(), '', true);
   const being = useListBeing(id, lists.data?.lists);
   const { list, begun } = being;
+  const navigate = useTransitionNavigate();
   // With those put in it as it's being begun
   const books = [
     ...listedBooks(list, shelf.all),
@@ -131,6 +135,16 @@ export function ListPage() {
             shelf={shelf.all}
             onBook={putIn}
             onWork={putWork}
+            // Typed in, all that's known of it, on the page for adding
+            // books, once the list is made
+            onByHand={
+              begun
+                ? undefined
+                : (byHand) =>
+                    void navigate(paths.addBook, 'forward', {
+                      state: { into: list.id, byHand } satisfies AddBookState,
+                    })
+            }
             focus={begun}
           />
         )

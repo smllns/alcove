@@ -1,6 +1,6 @@
 import type { Book } from '@/entities/book/types';
 import { monthOfYear } from '@/shared/lib/dates';
-import { nativeName } from '@/entities/book/languages';
+import { languageName } from '@/entities/book/languages';
 import { counted } from '@/shared/lib/plural';
 import { Mark } from './Chapter';
 import type { byDecade, extremes } from './libraryStats';
@@ -130,7 +130,7 @@ export function spoken(languages: Tally[]) {
     return (
       <>
         {languages[0].books.length === 1 ? 'It was' : 'All of them were'} first
-        written in <Mark>{nativeName(languages[0].name)}</Mark>.
+        written in <Mark>{languageName(languages[0].name)}</Mark>.
       </>
     );
   return (

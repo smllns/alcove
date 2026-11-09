@@ -18,12 +18,17 @@ export function useBookLists(book: Book) {
     const holding = lists
       .filter((list) => list.works?.some((w) => w.workKey === work.workKey))
       .map((list) => list.id);
+    // As another list keeps it, all said of one typed in by hand with it
+    const listed =
+      lists
+        .flatMap((list) => list.works ?? [])
+        .find((w) => w.workKey === work.workKey) ?? work;
     return {
       value: holding,
       error: changeWorks.error?.message ?? null,
       change: (next: string[]) => {
         for (const id of next.filter((id) => !holding.includes(id)))
-          changeWorks.mutate({ id, add: [work] });
+          changeWorks.mutate({ id, add: [listed] });
         for (const id of holding.filter((id) => !next.includes(id)))
           changeWorks.mutate({ id, remove: [work.workKey] });
       },

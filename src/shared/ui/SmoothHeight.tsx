@@ -11,8 +11,8 @@ const STREAM_MS = 120;
 // thing swapped for another, an entry added): never a jump. What moves
 // smoothly by itself inside it, it simply follows. The height is set on
 // the element directly, frame by frame, without redrawing what's inside.
-// What's inside that sticks out past its edges is cut off, so it's for
-// plain content, not for things with shadows reaching out.
+// What's inside that sticks out past its edges (a shadow, a card shown
+// over the page on hover) is cut off only while it eases.
 export function SmoothHeight({
   children,
   className,
@@ -30,21 +30,32 @@ export function SmoothHeight({
     let last = 0;
     const measure = () => {
       const now = performance.now();
-      box.style.transition =
-        last && now - last > STREAM_MS
-          ? `height ${MS}ms var(--ease-soft)`
-          : 'none';
-      box.style.height = `${el.offsetHeight}px`;
+      const height = `${el.offsetHeight}px`;
+      const easing = last > 0 && now - last > STREAM_MS;
+      box.style.transition = easing
+        ? `height ${MS}ms var(--ease-soft)`
+        : 'none';
+      if (easing && box.style.height !== height) box.style.overflow = 'hidden';
+      else if (!easing) box.style.overflow = '';
+      box.style.height = height;
       last = now;
+    };
+    const eased = (event: TransitionEvent) => {
+      if (event.target === box) box.style.overflow = '';
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
-    return () => observer.disconnect();
+    box.addEventListener('transitionend', eased);
+    return () => {
+      observer.disconnect();
+      box.removeEventListener('transitionend', eased);
+    };
   }, []);
 
   return (
-    <div ref={outer} className={cn('overflow-hidden', className)}>
+    // Its own box, so margins inside stay inside, clipped or not
+    <div ref={outer} className={cn('flow-root', className)}>
       <div ref={inner}>{children}</div>
     </div>
   );

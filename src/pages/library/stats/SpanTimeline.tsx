@@ -3,7 +3,6 @@ import { dayMonth, monthLetters, monthOfYear } from '@/shared/lib/dates';
 import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { BooksDrawer } from './BooksDrawer';
-import { sideAt } from './cardSide';
 import { HoverBooks } from './HoverBooks';
 import type { readingYear, Span } from './readingYears';
 import { ToneSpine } from './ToneSpine';
@@ -13,14 +12,18 @@ import { useBooksDrawer } from './useBooksDrawer';
 const ROW = 11;
 const THICK = 7;
 
-// What's said of a book in a month's card: from when to when, how long
+// What's said of a book in a month's card: from when to when, how long;
+// for one being read now, from when, and how long so far
 const datesOf = (span: Span) =>
-  `${dayMonth(span.from)} – ${dayMonth(span.to)} · ${counted(span.days, 'day')}`;
+  span.reading
+    ? `${dayMonth(span.from)} – now · ${counted(span.days, 'day')} so far`
+    : `${dayMonth(span.from)} – ${dayMonth(span.to)} · ${counted(span.days, 'day')}`;
 
 // A year of reading, book by book (readingYear): each book read lying
 // along the year from the day it was begun to the day it was finished,
 // those read at the same time one over another, on a plank over the
-// months, which the chapter's other drawings share. A month's books
+// months, which the chapter's other drawings share; one being read now
+// runs on to today, fading away at its end, not done yet. A month's books
 // (those being read in it) open as a month's do elsewhere (HoverBooks),
 // each with its days.
 export function SpanTimeline({
@@ -47,7 +50,6 @@ export function SpanTimeline({
               key={m}
               heading={name}
               books={shown}
-              side={sideAt(m, 12)}
               hover={hover}
               onOpen={() => drawer.show(name, shown)}
               detail={detail}
@@ -77,6 +79,9 @@ export function SpanTimeline({
               width: `calc(${(span.right - span.left) * 100}% - 1px)`,
               height: THICK,
               bottom: 4 + span.row * ROW,
+              ...(span.reading && {
+                maskImage: 'linear-gradient(to right, black 55%, transparent)',
+              }),
             }}
           />
         ))}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Book } from '@/entities/book/types';
+import { toDay } from '@/shared/lib/dates';
 import { readingYear, readSpans, spanYears } from './readingYears';
 
 let made = 0;
@@ -20,6 +21,23 @@ describe('reading years', () => {
       read('2026-02-10', '2026-02-01'),
     ]);
     expect(spans.map((span) => span.days)).toEqual([10]);
+  });
+
+  it('runs a book being read now on to today, out of the average', () => {
+    const now = new Date();
+    const begun = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 9,
+    );
+    const reading: Book = {
+      ...read(toDay(begun)),
+      copy: { status: 'shelf', reading: 'reading', started: toDay(begun) },
+    };
+    const spans = readSpans([reading, read('2026-01-01', '2026-01-10')]);
+    expect(spans[0]).toMatchObject({ reading: true, days: 10 });
+    const year = readingYear(spans, now.getFullYear());
+    expect(year.laid.some((span) => span.reading)).toBe(true);
   });
 
   it('lays books read at once one over another, as low as there is room', () => {

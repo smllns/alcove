@@ -18,6 +18,7 @@ import { useSkyShape } from './shape';
 import { SkyStar } from './SkyStar';
 import { SkyVeil } from './SkyVeil';
 import { useSkyCamera } from './useSkyCamera';
+import { useCoversIn } from './useCoversIn';
 import { leaveForBook } from '../views/leaveForBook';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { cn } from '@/shared/lib/cn';
@@ -37,7 +38,7 @@ const FADE_OUT_MS = 450;
 // physical ones alone), the stars fade out and the new ones in, the sky
 // behind them staying. Until every book is in (`ready`), the stars wait
 // unseen under a quiet spinner, to come in all at once rather than a page
-// at a time.
+// at a time, and the covers in view with them (useCoversIn).
 export function Universe({
   books,
   lit = null,
@@ -106,7 +107,7 @@ export function Universe({
     leaveForBook(id, star);
     navigate(paths.book(id));
   };
-  const { camera, placed, dragging, fit, zoomIn, zoomOut, handlers } =
+  const { camera, rest, placed, dragging, fit, zoomIn, zoomOut, handlers } =
     useSkyCamera(
       sky,
       layout,
@@ -114,6 +115,10 @@ export function Universe({
       insetTop,
       open,
     );
+
+  // Come by a transition, already in view: nothing more to wait for
+  const covered = useCoversIn(sky, ready && placed && !eased);
+  const shown = ready && (eased || covered);
 
   // Only that book is told the zoom, as it changes: told to the whole sky,
   // every book in it was restyled at every step of a zoom
@@ -142,7 +147,9 @@ export function Universe({
         sky.current?.removeAttribute('data-pointing');
       }}
     >
-      <SkyDust x={camera.x} y={camera.y} />
+      {/* Moving as the reader moves the sky, not as it refits itself to
+          the books coming in */}
+      <SkyDust x={camera.x - rest.x} y={camera.y - rest.y} />
       <div
         className={cn(
           'absolute left-0 top-0 z-1 origin-top-left will-change-transform',
@@ -151,7 +158,7 @@ export function Universe({
           // chosen, fades softly out and in again with them
           'transition-opacity ease-in-out',
           fading ? 'duration-450' : 'duration-800',
-          (placed || eased) && ready && !fading ? 'opacity-100' : 'opacity-0',
+          (placed || eased) && shown && !fading ? 'opacity-100' : 'opacity-0',
         )}
         style={{
           transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`,
@@ -168,7 +175,7 @@ export function Universe({
           />
         ))}
       </div>
-      <SkyLoading ready={ready} insetTop={insetTop} />
+      <SkyLoading ready={shown} insetTop={insetTop} />
       {notice && (
         <div
           className='pointer-events-none absolute inset-x-0 z-2 flex justify-center px-6'

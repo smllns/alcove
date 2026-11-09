@@ -1,4 +1,4 @@
-import type { BookInput } from '@/entities/book/types';
+import type { BookInput, WantedBook } from '@/entities/book/types';
 import {
   isNonPhysical,
   isTranslation,
@@ -107,4 +107,19 @@ export function toBookInput(
       })),
     },
   };
+}
+
+// A book to keep in a list without a copy (typed in by hand): only what's
+// said of the book itself
+export function wantedOf(input: BookInput): WantedBook {
+  const book: Partial<BookInput> = { ...input };
+  for (const key of [
+    'copy',
+    'lists',
+    'openLibrary',
+    'anotherCopy',
+    'typed',
+  ] as const)
+    delete book[key];
+  return book as WantedBook;
 }

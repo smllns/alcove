@@ -1,3 +1,4 @@
+import type { WantedBook } from '@/entities/book/types';
 import { request } from '@/shared/api/http';
 import type {
   BookList,
@@ -50,6 +51,18 @@ export const changeListWorks = ({ id, add = [], remove = [] }: WorksChange) =>
     method: 'PATCH',
     body: { add, remove },
   });
+
+// A book the catalogue doesn't have, typed in by hand, put in list `id`;
+// every list as it is then, and the book's key there (typed-…)
+export const putTyped = ({ id, book }: { id: string; book: WantedBook }) =>
+  request<Lists & { workKey: string }>(`/lists/${id}/typed`, {
+    method: 'POST',
+    body: book,
+  });
+
+// One typed in, changed, in every list it's in
+export const changeTyped = ({ key, book }: { key: string; book: WantedBook }) =>
+  request<Lists>(`/lists/typed/${key}`, { method: 'PUT', body: book });
 
 // Other readers' public lists with `query` in their names
 export const searchSharedLists = async (query: string) =>

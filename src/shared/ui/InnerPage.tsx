@@ -19,14 +19,18 @@ const widths = {
 // (the shelves, if from nowhere), and a centred column for the content.
 // `fit`: the column as tall as the screen, no taller unless what's in it
 // grows (its last part, stretching, takes up what's left), so a short page
-// doesn't scroll on a phone.
+// doesn't scroll on a phone. `backBeside`: on a wide screen, the way back
+// is the page's own to place (beside the content, staying with it), here
+// only on narrower ones.
 export function InnerPage({
   width = 'md',
   fit = false,
+  backBeside = false,
   children,
 }: {
   width?: keyof typeof widths;
   fit?: boolean;
+  backBeside?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -49,7 +53,7 @@ export function InnerPage({
           to={paths.library}
           returns
           // Its own width, not the column's, in a column laid out as flex
-          className='mb-7 self-start sm:mb-10'
+          className={cn('mb-7 self-start sm:mb-10', backBeside && 'lg:hidden')}
         />
         {children}
       </div>

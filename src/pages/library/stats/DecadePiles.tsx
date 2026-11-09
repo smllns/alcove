@@ -6,7 +6,6 @@ import { yearOf, type byDecade } from './libraryStats';
 import { BookEnds } from './BookEnds';
 import { BooksDrawer } from './BooksDrawer';
 import { HoverBooks } from './HoverBooks';
-import { sideAt } from './cardSide';
 import { Pile, PileCount } from './Pile';
 import { drawnOf, pilesWidth } from './piles';
 import { useBooksDrawer } from './useBooksDrawer';
@@ -83,7 +82,6 @@ export function DecadePiles({
                 key={from}
                 heading={name}
                 books={books}
-                side={sideAt(i, columns.length)}
                 hover={hover}
                 onOpen={() => drawer.show(name, books)}
                 detail={yearWritten}

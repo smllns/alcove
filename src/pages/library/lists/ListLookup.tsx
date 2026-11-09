@@ -15,6 +15,7 @@ export function ListLookup({
   shelf,
   onBook,
   onWork,
+  onByHand,
   focus,
 }: {
   search: ReturnType<typeof useListSearch<Book>>;
@@ -25,6 +26,8 @@ export function ListLookup({
   // A book found to put in: one of the reader's, or one from the catalogue
   onBook: (book: Book) => void;
   onWork: (work: CatalogueWork) => void;
+  // One neither has, to type in, with what was looked for
+  onByHand?: (title: string) => void;
   // The cursor in the field for books to put in as it opens (a list just
   // begun)
   focus?: boolean;
@@ -41,6 +44,7 @@ export function ListLookup({
           inList={books}
           onBook={onBook}
           onWork={onWork}
+          onByHand={onByHand}
           focus={focus}
           className='w-full'
         />

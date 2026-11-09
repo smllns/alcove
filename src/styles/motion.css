@@ -83,3 +83,32 @@
     }
   }
 }
+
+/* Something on its way (Spinner, the sheet over the page as a section is
+   built): a hair-thin ring in the text's colour, its tail fading out,
+   turning unhurried. Sized by its font, and turned by the browser itself
+   (a transform), so it keeps turning while the page behind is busy being
+   built. */
+.soft-ring {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 20%, currentColor 100%);
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 1.6px),
+    #000 calc(100% - 1.5px)
+  );
+  animation: soft-ring 1.1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+}
+@keyframes soft-ring {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .soft-ring {
+    animation-duration: 3s;
+  }
+}

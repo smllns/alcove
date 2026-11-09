@@ -53,7 +53,6 @@ export function SpineLedger({
             <HoverBooks
               heading={line.name}
               books={line.books}
-              side='start'
               hover={hover}
               onOpen={() => open(line)}
               detail={detail}

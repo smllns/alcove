@@ -1,3 +1,4 @@
+import { readableTitle } from '../lib/romanized.js';
 import { HttpError } from '../lib/errors.js';
 import { contact, HEADERS } from './agent.js';
 import { throttle } from './throttle.js';
@@ -75,9 +76,10 @@ export const yearOf = (date: string | undefined) => {
   return match ? Number(match[0]) : undefined;
 };
 
-// Open Library's ids for a work and for one edition of it
+// Open Library's ids for a work, for one edition of it, and for a writer
 export const WORK_KEY = /^OL\d+W$/;
 export const EDITION_KEY = /^OL\d+M$/;
+export const AUTHOR_KEY = /^OL\d+A$/;
 
 // Digits only, keeping a final X (ISBN-10 check digit)
 export const cleanIsbn = (value: string) =>
@@ -107,17 +109,31 @@ export type SearchDoc = {
   first_publish_year?: number | null;
   cover_i?: number;
   edition_count?: number;
+  // The languages its editions are in ("rus", "eng")
+  language?: string[];
 };
 
 export const SEARCH_FIELDS =
-  'key,title,subtitle,author_name,first_publish_year,cover_i,edition_count';
+  'key,title,subtitle,author_name,first_publish_year,cover_i,edition_count,language';
 
+// The search also gives printings Open Library hasn't put under any work
+// ("OL12586306M"): not books to point at, so left out
+export const isWork = (doc: SearchDoc) =>
+  WORK_KEY.test(doc.key.replace('/works/', ''));
+
+// A Russian book the catalogue keeps in Latin letters ("Zolushka
+// beremennai͡a", by "Ėduard Limonov") is given back its Cyrillic title and
+// writers' names (readableTitle)
 export const toWork = (doc: SearchDoc): WorkResult => ({
   workKey: doc.key.replace('/works/', ''),
-  title: doc.title,
+  title: readableTitle(doc.title, doc.language),
   // Open Library sends explicit nulls for missing values
-  subtitle: doc.subtitle ?? undefined,
-  authors: doc.author_name ?? [],
+  subtitle: doc.subtitle
+    ? readableTitle(doc.subtitle, doc.language)
+    : undefined,
+  authors: (doc.author_name ?? []).map((name) =>
+    readableTitle(name, doc.language),
+  ),
   firstPublishYear: doc.first_publish_year ?? undefined,
   coverUrl: coverUrl(doc.cover_i),
   editionCount: doc.edition_count ?? 1,
@@ -129,7 +145,9 @@ export async function searchDocs<T extends SearchDoc = SearchDoc>(
   params: Record<string, string>,
 ) {
   const query = new URLSearchParams(params);
-  return (await fromOpenLibrary<{ docs: T[] }>(`/search.json?${query}`)).docs;
+  return (
+    await fromOpenLibrary<{ docs: T[] }>(`/search.json?${query}`)
+  ).docs.filter(isWork);
 }
 
 const search = async (params: Record<string, string>) =>

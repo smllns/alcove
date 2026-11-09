@@ -1,13 +1,11 @@
-import { useBooksByWriter } from '@/entities/book/queries';
 import type { Book, SimilarBook } from '@/entities/book/types';
-import { settled } from '@/shared/lib/settled';
+import { useWriterBooks } from '@/entities/book/useWriterBooks';
 
-// The reader's other books by this book's writer, newest first, and
+// The reader's other books by this book's writer (useWriterBooks), and
 // whether that's known yet
 export function useTheirOthers(book: Book) {
-  const query = useBooksByWriter(book.authors[0]);
-  const others = (query.data ?? []).filter((other) => other.id !== book.id);
-  return { others, known: settled(query) };
+  const { books, known } = useWriterBooks(book.authors[0]);
+  return { others: books.filter((other) => other.id !== book.id), known };
 }
 
 // One of the reader's own books, to sit in a row of books (BookRow), where
@@ -19,4 +17,5 @@ export const asRowBook = (book: Book): SimilarBook => ({
   coverUrl: book.cover?.url,
   editionCount: 1,
   bookId: book.id,
+  rating: book.copy?.rating,
 });

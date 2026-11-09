@@ -27,6 +27,10 @@ import { flyCoverHome } from './coverFlight';
 //   onward:      another of the library's sections, chosen from the tabs:
 //                it rises over the one left, as forward does, under the
 //                header and the tabs, which stay put
+//   section:     one of the library's heavier sections (the shelves, the
+//                stats), chosen from the tabs: a sheet drops over the page
+//                under the header and the tabs, and lifts off the section
+//                once it's built and loaded (sectionCurtain.ts)
 export type PageTransition =
   | 'forward'
   | 'back'
@@ -39,10 +43,13 @@ export type PageTransition =
   | 'view'
   | 'swap'
   | 'shown'
-  | 'onward';
+  | 'onward'
+  | 'section';
 
-// back is done with a curtain over the page rather than a View Transition
-export const usesCurtain = (kind: PageTransition) => kind === 'back';
+// back and section are done with a curtain over the page rather than a
+// View Transition
+export const usesCurtain = (kind: PageTransition) =>
+  kind === 'back' || kind === 'section';
 
 // View Transitions read the kind off <html data-transition> to pick an
 // animation

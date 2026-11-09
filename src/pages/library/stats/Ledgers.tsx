@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
 import { clothFor } from '@/entities/book/coverImage';
 import type { Book } from '@/entities/book/types';
+import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/cn';
-import { nativeName } from '@/entities/book/languages';
+import { languageName } from '@/entities/book/languages';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { BooksDrawer } from './BooksDrawer';
 import { LedgerRow, LedgerWithMore } from './Ledger';
@@ -18,11 +19,16 @@ const SPINES_PHONE = 8;
 // The authors with the most books, each with their books drawn small
 // after how many, the rest opening out under them (LedgerWithMore); an
 // author's books open as a month's do (HoverBooks), their spines rising a
-// touch as they're pointed at
+// touch as they're pointed at, with the way to the author's own page
 export function AuthorsLedger({ authors }: { authors: Tally[] }) {
   const hover = useMediaQuery(HOVER);
   const drawer = useBooksDrawer();
-  const open = (author: Tally) => drawer.show(author.name, author.books);
+  const pageOf = (author: Tally) => ({
+    to: paths.author(author.name),
+    label: 'Author’s page',
+  });
+  const open = (author: Tally) =>
+    drawer.show(author.name, author.books, pageOf(author));
   return (
     <>
       <LedgerWithMore
@@ -30,6 +36,7 @@ export function AuthorsLedger({ authors }: { authors: Tally[] }) {
         noun='author'
         hover={hover}
         onOpen={open}
+        pageOf={pageOf}
         row={(author, fine) => (
           <LedgerRow
             key={author.name}
@@ -39,6 +46,7 @@ export function AuthorsLedger({ authors }: { authors: Tally[] }) {
             books={author.books}
             hover={hover}
             onOpen={() => open(author)}
+            page={pageOf(author)}
             after={!fine && <Spines books={author.books} />}
           />
         )}
@@ -73,7 +81,7 @@ export function LanguagesLedger({ languages }: { languages: Tally[] }) {
   const hover = useMediaQuery(HOVER);
   const drawer = useBooksDrawer();
   const open = (language: Tally) =>
-    drawer.show(nativeName(language.name), language.books);
+    drawer.show(languageName(language.name), language.books);
   const tone = (code: string) =>
     ({
       backgroundColor: `color-mix(in oklab, ${clothFor(code)} 78%, var(--bg-mid))`,
@@ -95,11 +103,11 @@ export function LanguagesLedger({ languages }: { languages: Tally[] }) {
         noun='language'
         hover={hover}
         onOpen={open}
-        named={(language) => nativeName(language.name)}
+        named={(language) => languageName(language.name)}
         row={(language, fine) => (
           <LedgerRow
             key={language.name}
-            name={nativeName(language.name)}
+            name={languageName(language.name)}
             value={language.books.length}
             fine={fine}
             books={language.books}

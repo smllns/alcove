@@ -5,19 +5,33 @@ import type { Step } from './StepHeading';
 // The buttons under the form. Adding: on to the copy, then add it (or back
 // to the book). Changing a book: save, cancel, or over to the other step
 // from down here too, not just the top (`onStep` takes the page there).
+// A book only wanted (`only`, what saving it is called): save it, or not.
 export function FormButtons({
   step,
   onStep,
   editing,
   saving,
   onBack,
+  only,
 }: {
   step: Step;
   onStep: (step: Step) => void;
   editing: boolean;
   saving: boolean;
   onBack: () => void;
+  only?: string;
 }) {
+  if (only)
+    return (
+      <div className='flex flex-wrap items-center gap-3'>
+        <Button type='submit' arrow loading={saving}>
+          {only}
+        </Button>
+        <Button variant='pill' onClick={onBack}>
+          Cancel
+        </Button>
+      </div>
+    );
   if (editing)
     return (
       <div className='flex flex-wrap items-center gap-3'>

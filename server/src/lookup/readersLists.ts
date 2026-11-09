@@ -106,7 +106,7 @@ async function findLists(query: string) {
 // rest still to be looked into, one by one (checkReadersList), so each
 // shows as soon as it's known
 export async function searchReadersLists(query: string) {
-  const found = await cached(`ollists5:${query.toLowerCase()}`, DAYS, () =>
+  const found = await cached(`ollists9:${query.toLowerCase()}`, DAYS, () =>
     findLists(query),
   );
   const known = await peek<string[] | null>(
@@ -137,7 +137,7 @@ export async function readersList(owner: string, id: string, page: number) {
   const keys = seeds.slice(page * PAGE, (page + 1) * PAGE);
   const [works, about] = await Promise.all([
     keys.length
-      ? cached(`ollist1:${owner}/${id}:${page}`, DAYS, () => worksByKeys(keys))
+      ? cached(`ollist5:${owner}/${id}:${page}`, DAYS, () => worksByKeys(keys))
       : [],
     page === 0 ? aboutKept(owner, id).catch(() => undefined) : undefined,
   ]);

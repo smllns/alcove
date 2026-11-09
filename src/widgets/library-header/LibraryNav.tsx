@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { isPlainClick } from '@/shared/lib/plainClick';
 import { cn } from '@/shared/lib/cn';
 import { scrollToTop } from '@/shared/lib/motion';
 import { sections, type SectionKey } from './sections';
@@ -13,17 +14,26 @@ import { Avatar } from '@/shared/ui/Avatar';
 // The parts of the library: a small capsule floating over the shelves,
 // which stays in view while the books scroll by underneath. Switching
 // sections turns the page under the tabs, the section chosen rising over
-// the one left (the 'onward' transition), the open one's shading gliding
-// over to the tab chosen. Scrolls
+// the one left (the 'onward' transition); to the shelves or the stats,
+// heavier to build, a sheet drops over the page under the tabs instead,
+// lifting off the section once it's built and loaded ('section'). The open
+// one's shading glides over to the tab chosen as the page moves. Scrolls
 // sideways on a phone, where the tabs don't all fit. On a wide screen it
 // sits in the header row, between the logo and the buttons. On a page
 // within the library (a book's), no tab is `current`, and each leads back
 // out to its section the way the reader goes back. Last, set apart by a
 // thin line, the reader's own circle, leading to their profile.
+// The sections that come in under a sheet, being slow to build
+const curtained = (key: SectionKey) => key === 'all' || key === 'stats';
+
 export function LibraryNav({ current }: { current?: SectionKey }) {
   const { user } = useAuth();
   const list = useRef<HTMLUListElement>(null);
-  const pill = useTabPill(list, current);
+  // The tab just chosen, its section still on its way: the shading goes
+  // there at once
+  const [aim, setAim] = useState<SectionKey | null>(null);
+  if (aim && aim === current) setAim(null);
+  const pill = useTabPill(list, aim ?? current);
 
   // Keep the open section in view on a narrow screen
   useEffect(() => {
@@ -82,14 +92,24 @@ export function LibraryNav({ current }: { current?: SectionKey }) {
             >
               <TransitionLink
                 to={section.path}
-                transition={current ? 'onward' : 'return'}
+                transition={
+                  !current
+                    ? 'return'
+                    : curtained(section.key)
+                      ? 'section'
+                      : 'onward'
+                }
                 aria-current={on ? 'page' : undefined}
                 aria-label={me ? section.label : undefined}
                 data-section={section.key}
                 data-moves-along
                 // The section already open: back to its top instead
                 onClick={(e) => {
-                  if (!on) return;
+                  if (!on) {
+                    if (current && curtained(section.key) && isPlainClick(e))
+                      setAim(section.key);
+                    return;
+                  }
                   e.preventDefault();
                   scrollToTop();
                 }}

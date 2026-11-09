@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { HttpError } from '../lib/errors.js';
-import { WORK_KEY } from './openLibrary.js';
+import { AUTHOR_KEY, WORK_KEY } from './openLibrary.js';
 
 // The work a lookup is about, from its address
 export const workKeyOf = (req: Request) => {
@@ -8,6 +8,14 @@ export const workKeyOf = (req: Request) => {
   if (typeof workKey !== 'string' || !WORK_KEY.test(workKey))
     throw new HttpError(400, 'bad_work', 'That isn’t a book we know.');
   return workKey;
+};
+
+// The writer a lookup is about, from its address
+export const authorKeyOf = (req: Request) => {
+  const { authorKey } = req.params;
+  if (typeof authorKey !== 'string' || !AUTHOR_KEY.test(authorKey))
+    throw new HttpError(400, 'bad_author', 'That isn’t a writer we know.');
+  return authorKey;
 };
 
 // A book the catalogue doesn't have says nothing, rather than failing

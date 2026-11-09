@@ -3,7 +3,7 @@ import { rateLimit } from 'express-rate-limit';
 import { HttpError } from '../lib/errors.js';
 import { queryText } from '../lib/validation.js';
 import { currentUser } from '../auth/middleware.js';
-import { shelvedWorks } from '../books/repository.js';
+import { ownCopies } from '../books/repository.js';
 import { cached } from './cache.js';
 import { listRouter } from './listRoutes.js';
 import { noneIfMissing, workKeyOf } from './params.js';
@@ -59,7 +59,7 @@ lookupRouter.get('/search', async (req, res) => {
   }
   const key = query.toLowerCase();
 
-  const results = await cached(`search4:${key}`, 3, () => searchWorks(query));
+  const results = await cached(`search8:${key}`, 3, () => searchWorks(query));
 
   // An ISBN points at one exact edition; fetch it so the form can use it as
   // is, and keep it in alcove's own catalogue
@@ -110,7 +110,7 @@ lookupRouter.get('/works/:workKey/editions', async (req, res) => {
 lookupRouter.get('/works/:workKey/summary', async (req, res) => {
   const workKey = workKeyOf(req);
   res.json({
-    work: await cached(`worksummary1:${workKey}`, 7, () =>
+    work: await cached(`worksummary5:${workKey}`, 7, () =>
       workSummary(workKey),
     ),
   });
@@ -148,16 +148,17 @@ lookupRouter.get('/works/:workKey/lists', async (req, res) => {
 
 // Books to read next: on the same themes, and by the same author. The
 // catalogue's answer is kept for all readers; which of the books are on
-// this reader's shelves already is looked up afresh, with their ids.
+// this reader's shelves already is looked up afresh, with their ids and
+// the stars the reader gave them.
 lookupRouter.get('/works/:workKey/similar', async (req, res) => {
   const workKey = workKeyOf(req);
-  const similar = (await cached(`similar4:${workKey}`, 7, () =>
+  const similar = (await cached(`similar8:${workKey}`, 7, () =>
     similarWorks(workKey).catch(noneIfMissing),
   )) ?? { alike: [], byAuthor: [] };
   const keys = [...similar.alike, ...similar.byAuthor].map((w) => w.workKey);
-  const owned = await shelvedWorks(currentUser(req)._id, keys);
+  const owned = await ownCopies(currentUser(req)._id, keys);
   const withShelf = (list: typeof similar.alike) =>
-    list.map((work) => ({ ...work, bookId: owned.get(work.workKey) }));
+    list.map((work) => ({ ...work, ...owned.get(work.workKey) }));
   res.json({
     alike: withShelf(similar.alike),
     byAuthor: withShelf(similar.byAuthor),

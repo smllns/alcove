@@ -40,12 +40,12 @@ const plain = (s: string) =>
     .trim();
 
 // Books by more than a few people are anthologies, not the author's own
-const ownBook = (doc: SearchDoc) => (doc.author_name?.length ?? 0) <= 3;
+export const ownBook = (doc: SearchDoc) => (doc.author_name?.length ?? 0) <= 3;
 // Readable here: with an English edition. A translation the catalogue
 // keeps as a work of its own ("Un lloc per a en Mungo") has none.
 const inEnglish = (doc: Found) => !doc.language || doc.language.includes('eng');
 // What's asked of each book found
-const FIELDS = `${SEARCH_FIELDS},author_key,language`;
+const FIELDS = `${SEARCH_FIELDS},author_key`;
 
 // The books most read first
 const search = (params: Record<string, string>) =>

@@ -82,4 +82,62 @@ describe('Want to read', () => {
     expect(body.lists[0].works).toEqual([]);
     expect(body.counts['want-to-read']).toBe(1);
   });
+
+  it('keeps a book typed in by hand, changed, until a copy takes its place', async () => {
+    const { cookie } = await signUp();
+    const typed = {
+      title: 'Колыбель для кошки',
+      authors: ['Курт Воннегут'],
+      pages: 320,
+      genres: ['Satire'],
+      description: 'Ice-nine.',
+    };
+    const put = await api('/lists/want-to-read/typed', {
+      method: 'POST',
+      cookie,
+      body: typed,
+    });
+    expect(put.status).toBe(201);
+    const key: string = put.body.workKey;
+    expect(key).toMatch(/^typed-[0-9a-f]{24}$/);
+    expect(put.body.lists[0].works[0]).toMatchObject({
+      workKey: key,
+      title: typed.title,
+      details: { pages: 320, genres: ['Satire'], description: 'Ice-nine.' },
+    });
+    expect(
+      (
+        await api('/lists/want-to-read/typed', {
+          method: 'POST',
+          cookie,
+          body: { authors: ['Nobody'] },
+        })
+      ).status,
+    ).toBe(400);
+
+    const changed = await api(`/lists/typed/${key}`, {
+      method: 'PUT',
+      cookie,
+      body: { ...typed, pages: 330 },
+    });
+    expect(changed.body.lists[0].works[0].details.pages).toBe(330);
+
+    await api('/books', {
+      method: 'POST',
+      cookie,
+      body: { ...typed, typed: key, copy: { status: 'shelf' } },
+    });
+    const { body } = await api('/lists', { cookie });
+    expect(body.lists[0].works).toEqual([]);
+    expect(body.counts['want-to-read']).toBe(1);
+    expect(
+      (
+        await api(`/lists/typed/${key}`, {
+          method: 'PUT',
+          cookie,
+          body: typed,
+        })
+      ).status,
+    ).toBe(404);
+  });
 });

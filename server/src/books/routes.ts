@@ -5,6 +5,7 @@ import { HttpError } from '../lib/errors.js';
 import { parseBody, queryText } from '../lib/validation.js';
 import { getLists, ownLists, WANT_LIST } from '../lists/repository.js';
 import { takeWanted } from '../lists/wanted.js';
+import { takeTyped } from '../lists/typed.js';
 import { warmListsOfWork } from '../lookup/workLists.js';
 import { getPlaces, resolvePlace } from '../places/repository.js';
 import { storedCoverSources, type BookDoc } from '../db.js';
@@ -17,7 +18,7 @@ import {
   findBook,
   findSameBook,
   listBooks,
-  shelvedWorks,
+  ownCopies,
   toPublicBook,
   updateBook,
 } from './repository.js';
@@ -91,13 +92,29 @@ const unwanted = <T extends BookInput>(input: T) =>
 
 // A copy added of a book wanted from the catalogue: it stays wanted, now
 // as the reader's own, until it's read
-async function claimWanted<T extends BookInput>(req: Request, input: T) {
+async function claimWanted<T extends BookInput>(
+  req: Request,
+  input: T,
+  typed?: string,
+) {
+  if (typed) return claimTyped(req, input, typed);
   const work = input.openLibrary?.work;
   if (!work || !(await takeWanted(me(req), work))) return input;
   return unwanted({
     ...input,
     lists: [...new Set([...input.lists, WANT_LIST])],
   });
+}
+
+// A copy added of a book typed into lists by hand: in those lists in its
+// place
+async function claimTyped<T extends BookInput>(
+  req: Request,
+  input: T,
+  typed: string,
+) {
+  const ids = await takeTyped(me(req), typed);
+  return unwanted({ ...input, lists: [...new Set([...input.lists, ...ids])] });
 }
 
 // Open Library is slow with a book's lists: asked for as soon as the book
@@ -109,11 +126,11 @@ function warmLists(book: BookDoc, before?: BookDoc) {
 }
 
 booksRouter.post('/', async (req, res) => {
-  const { anotherCopy, ...asked } = await ownRefsOnly(
+  const { anotherCopy, typed, ...asked } = await ownRefsOnly(
     req,
     parseBody(addBookSchema, req.body),
   );
-  const input = await claimWanted(req, asked);
+  const input = await claimWanted(req, asked, typed);
   if (!anotherCopy) {
     const same = await findSameBook(me(req), input);
     if (same) throw alreadyShelved(same);
@@ -134,8 +151,8 @@ booksRouter.get('/by-writer', async (req, res) => {
 // The reader's own copy of a work from the catalogue, if they have it
 booksRouter.get('/by-work/:workKey', async (req, res) => {
   const workKey = String(req.params.workKey);
-  const owned = await shelvedWorks(me(req), [workKey]);
-  res.json({ bookId: owned.get(workKey) ?? null });
+  const owned = await ownCopies(me(req), [workKey]);
+  res.json({ bookId: owned.get(workKey)?.bookId ?? null });
 });
 
 booksRouter.get('/:id', async (req, res) => {

@@ -58,3 +58,19 @@
     var(--page);
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 28%, transparent);
 }
+
+/* A group's card of books (HoverBooks) is made as the group's pointed at:
+   from nothing, it fades in and rises into place (settles, under it) as
+   if it had been there all along */
+@starting-style {
+  .group\/books:hover .books-card {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .group\/books:hover .books-card > * {
+    translate: 0 0.5rem;
+  }
+  .group\/books:hover .books-card[data-under] > * {
+    translate: 0 -0.5rem;
+  }
+}

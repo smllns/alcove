@@ -92,17 +92,31 @@ export function findSameBook(userId: ObjectId, input: BookInput) {
   );
 }
 
-// Which of the catalogue's `works` are on the reader's shelves: the id of
-// the book for each work key that is
-export async function shelvedWorks(userId: ObjectId, works: string[]) {
+// The reader's copies of the catalogue's `works`, by work key, for those
+// they have, the book's own work or one they said is the same book: each
+// one's id, and the stars they gave it
+export async function ownCopies(userId: ObjectId, works: string[]) {
   const found = await books()
     .find(
-      { userId, 'openLibrary.work': { $in: works } },
-      { projection: { _id: 1, 'openLibrary.work': 1 } },
+      {
+        userId,
+        $or: [
+          { 'openLibrary.work': { $in: works } },
+          { 'openLibrary.also': { $in: works } },
+        ],
+      },
+      { projection: { _id: 1, openLibrary: 1, 'copy.rating': 1 } },
     )
     .toArray();
   return new Map(
-    found.map((book) => [book.openLibrary?.work, book._id.toHexString()]),
+    found.flatMap((book) => {
+      const copy = {
+        bookId: book._id.toHexString(),
+        rating: book.copy?.rating,
+      };
+      const keys = [book.openLibrary?.work, ...(book.openLibrary?.also ?? [])];
+      return keys.flatMap((key) => (key ? [[key, copy] as const] : []));
+    }),
   );
 }
 

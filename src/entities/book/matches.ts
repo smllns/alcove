@@ -38,3 +38,9 @@ export function bookMatches(book: Book, query: string) {
   const text = haystack(book);
   return words.every((word) => text.includes(word));
 }
+
+// A title compared without case, accents, punctuation or what follows a
+// colon or a bracket, in any alphabet: "Mules and Men (P.S.)" is "Mules
+// and Men", "Книга мёртвых" is "Книга мертвых"
+export const titleKey = (title: string) =>
+  searchable(title.split(/[:(]/)[0]).replace(/[^\p{L}\p{N}]/gu, '');

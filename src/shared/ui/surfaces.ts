@@ -49,3 +49,8 @@ export const noticeClass =
 // up to a width past which it stops spreading and sits in the middle
 export const pageWidthClass =
   'mx-auto w-full max-w-[88rem] px-6 sm:px-10 lg:px-16';
+
+// A dialog's panel, in the middle of the screen (Modal): a card of the
+// page's surface, lifted off it
+export const dialogClass =
+  'relative m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface shadow-[0_30px_60px_-30px_rgba(40,28,14,0.55)]';

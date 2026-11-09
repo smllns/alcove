@@ -2,7 +2,6 @@ import { formatLabel } from '@/entities/book/formats';
 import type { Book } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
 import { cn } from '@/shared/lib/cn';
-import { Rating } from '@/shared/ui/Rating';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { publishedIn } from './order';
 import { BookLink } from './BookLink';
@@ -22,12 +21,7 @@ export function BookRow({
   opens?: string;
 }) {
   const author = book.authors.join(', ');
-  const rating = book.copy?.rating;
-  const details = [
-    publishedIn(book),
-    book.format && formatLabel(book.format),
-    rating ? <Rating value={rating} /> : null,
-  ];
+  const details = [publishedIn(book), book.format && formatLabel(book.format)];
   const line = (
     <BookLine
       size={size}
@@ -36,6 +30,7 @@ export function BookRow({
       coverUrl={book.cover?.url}
       bookId={book.id}
       details={details}
+      rating={book.copy?.rating}
     />
   );
 

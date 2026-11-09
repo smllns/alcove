@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
+import { Rating } from '@/shared/ui/Rating';
 import { BookCover } from './BookCover';
 
 const sizes = {
@@ -42,9 +43,10 @@ type BookLineProps = {
   coverUrl?: string;
   // The book's id, for its cover to fly to the book's page
   bookId?: string;
-  // Small facts after the byline (a year, a format, a rating), set apart
-  // by dots; empty ones are left out
+  // Small facts after the byline (a year, a format), set apart by dots;
+  // empty ones are left out. Last of them, the stars the reader gave it.
   details?: ReactNode[];
+  rating?: number;
   size?: keyof typeof sizes;
 };
 
@@ -56,10 +58,14 @@ export function BookLine({
   coverUrl,
   bookId,
   details = [],
+  rating,
   size = 'md',
 }: BookLineProps) {
   const look = sizes[size];
-  const shown = details.filter(Boolean);
+  const shown = [
+    ...details,
+    rating ? <Rating key='rating' value={rating} /> : null,
+  ].filter(Boolean);
   return (
     <span className={cn('flex min-w-0 flex-1 items-center', look.gap)}>
       <BookCover

@@ -1,7 +1,6 @@
 import type { Book } from '@/entities/book/types';
 import { counted } from '@/shared/lib/plural';
 import type { HomeBooks } from '../places/arrange';
-import { tally } from './tallies';
 
 // What the stats tab says of the reader's books, worked out from the
 // books themselves: nothing is asked of the server or the catalogue
@@ -142,19 +141,6 @@ export function extremes(books: Book[]) {
     average: Math.round(pages / paged.length),
     piles,
   };
-}
-
-// The authors, the most kept first; between two with as many, the one
-// whose books were rated higher
-export function authors(books: Book[]) {
-  const rated = (held: Book[]) => {
-    const stars = held.flatMap((book) => book.copy?.rating ?? []);
-    return stars.length ? stars.reduce((a, b) => a + b) / stars.length : 0;
-  };
-  return tally(books, (book) => book.authors).sort(
-    (a, b) =>
-      b.books.length - a.books.length || rated(b.books) - rated(a.books),
-  );
 }
 
 // Every book kept in a home, wherever in it

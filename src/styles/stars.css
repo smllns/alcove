@@ -103,6 +103,14 @@
   transition-duration: 0.5s;
   transition-timing-function: var(--ease-soft);
 }
+
+/* A cover there at once as it comes, not faded in on its own: the sky
+   comes in whole once the covers in view are in, and Chrome, a cover
+   fading in on a star's layer, could leave it half faded until the star
+   was redrawn (pointed at) */
+.sky .star-cover img {
+  transition: none;
+}
 /* Under the cover, clear of it even when it's grown, and the same size
    on screen however far the sky is zoomed. Without the frosting of a
    raised card: it's nearly solid anyway, and the blur behind every hidden

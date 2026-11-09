@@ -98,8 +98,10 @@ export type BookDoc = {
   // for a book the catalogue has no ratings for (those are asked afresh)
   averageRating?: number;
   cover?: { url: string; source: CoverSource };
-  // Where the details came from, for refreshing them later
-  openLibrary?: { work?: string; edition?: string };
+  // Where the details came from, for refreshing them later; and other
+  // works the catalogue keeps apart that the reader said are this same
+  // book (a translation kept as a book of its own)
+  openLibrary?: { work?: string; edition?: string; also?: string[] };
   copy?: CopyDetails;
   // Brought over from another site, in which import (to undo it by)
   importId?: string;

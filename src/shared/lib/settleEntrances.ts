@@ -37,6 +37,21 @@ const settleStarted = (e: Event) => {
 };
 const STARTS = ['animationstart', 'transitionrun'];
 
+// Whatever's rising or fading into place on the page settled now, and
+// whatever starts to till `done`: for a page come in behind a curtain,
+// there whole as it lifts (sectionCurtain.ts)
+export function settleUntil(done: Promise<unknown>) {
+  settle(document.getAnimations());
+  for (const type of STARTS)
+    document.addEventListener(type, settleStarted, true);
+  void done
+    .catch(() => {})
+    .finally(() => {
+      for (const type of STARTS)
+        document.removeEventListener(type, settleStarted, true);
+    });
+}
+
 // Longer than any transition of ours takes (the longest, about a second
 // and a half). One still going by then is stuck: Safari can leave one
 // hanging half done (the app sent to the background mid-way, say), its
@@ -84,18 +99,8 @@ export function settleEntrances() {
     if (!['forward', 'return', 'onward', 'swap', 'shown'].includes(kind ?? ''))
       return transition;
     transition.updateCallbackDone
-      .then(() => {
-        settle(document.getAnimations());
-        for (const type of STARTS)
-          document.addEventListener(type, settleStarted, true);
-      })
+      .then(() => settleUntil(transition.finished))
       .catch(() => {});
-    transition.finished
-      .catch(() => {})
-      .finally(() => {
-        for (const type of STARTS)
-          document.removeEventListener(type, settleStarted, true);
-      });
     return transition;
   }) as typeof document.startViewTransition;
 }

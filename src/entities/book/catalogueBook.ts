@@ -7,7 +7,8 @@ const PREFIX = 'work-';
 export const inCatalogue = (workKey: string) => /^OL\d+W$/.test(workKey);
 
 // A work from the catalogue as a book, for its page: what the catalogue
-// says of it, and none of a reader's own (no copy, no lists of theirs)
+// says of it (or, one typed in by hand, all the reader said of it), and
+// none of a reader's own (no copy, no lists of theirs)
 export const catalogueBook = (work: CatalogueWork): Book => ({
   id: PREFIX + work.workKey,
   title: work.title,
@@ -15,9 +16,10 @@ export const catalogueBook = (work: CatalogueWork): Book => ({
   authors: work.authors,
   isbn: work.isbn,
   firstPublishedYear: work.firstPublishYear,
-  cover: work.coverUrl
-    ? { url: work.coverUrl, source: 'openlibrary' }
-    : undefined,
+  ...work.details,
+  cover:
+    work.details?.cover ??
+    (work.coverUrl ? { url: work.coverUrl, source: 'openlibrary' } : undefined),
   // Only one the catalogue knows points to it
   openLibrary: inCatalogue(work.workKey) ? { work: work.workKey } : undefined,
   createdAt: '',
@@ -39,3 +41,7 @@ export const workOfBook = (book: Book): CatalogueWork | undefined =>
         isbn: book.isbn,
       }
     : undefined;
+
+// Whether a work is one kept in lists as it came from another site or
+// typed in by hand (typed-…), not the catalogue's
+export const isTyped = (workKey: string) => workKey.startsWith('typed-');
