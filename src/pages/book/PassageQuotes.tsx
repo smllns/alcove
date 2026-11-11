@@ -8,14 +8,14 @@ import { RemoveAction } from '@/shared/ui/HoverAction';
 import { FormError } from '@/shared/ui/FormError';
 import { SmoothHeight } from '@/shared/ui/SmoothHeight';
 import { AddButton } from '@/shared/ui/ListControls';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { takeOffConfirm } from './takeOffConfirm';
 import { EditingHint } from '@/shared/ui/EditingHint';
 import { editedList } from '@/shared/lib/editList';
 import { InlineEditor } from '@/shared/ui/InlineEditor';
 
 const quoteText =
-  'whitespace-pre-line font-serif text-base leading-relaxed text-ink italic sm:text-[17px]';
+  'whitespace-pre-line font-serif text-base leading-relaxed text-ink italic sm:text-[1.0625rem]';
 
 // The gold quotation mark each quote opens with, out in its margin
 function QuoteMark() {
@@ -74,7 +74,7 @@ export function PassageQuotes({ book }: { book: Book }) {
   );
 
   return (
-    <BookSection title={plural(quotes.length, 'Quote')}>
+    <TitledSection title={plural(quotes.length, 'Quote')}>
       {/* A quote written in, kept or taken off: the list grows and shrinks
           to fit, softly */}
       <SmoothHeight>
@@ -113,6 +113,6 @@ export function PassageQuotes({ book }: { book: Book }) {
         <AddButton onClick={() => setAdding(true)}>Another quote</AddButton>
       )}
       <FormError message={error} small />
-    </BookSection>
+    </TitledSection>
   );
 }

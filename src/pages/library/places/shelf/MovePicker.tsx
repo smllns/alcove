@@ -79,7 +79,7 @@ export function MovePicker({
         {groups.map((group) => (
           <section key={group.id} className='mt-3 first:mt-2'>
             {/* Each home on a band of its own, over all that's in it */}
-            <p className='flex items-center gap-2.5 rounded-lg bg-ink/7 px-2 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-ink'>
+            <p className='flex items-center gap-2.5 rounded-lg bg-ink/7 px-2 py-2 text-xs font-medium uppercase tracking-[0.16em] text-ink'>
               <House size={14} className='shrink-0' />
               {group.home}
             </p>
@@ -102,10 +102,10 @@ export function MovePicker({
                         row(
                           unit.target,
                           LibraryBig,
-                          'pl-2 text-[13px] text-ink-soft',
+                          'pl-2 text-[0.8125rem] text-ink-soft',
                         )
                       ) : (
-                        <p className='flex items-center gap-2.5 px-2 pb-0.5 pt-2 text-[13px] text-muted'>
+                        <p className='flex items-center gap-2.5 px-2 pb-0.5 pt-2 text-[0.8125rem] text-muted'>
                           <LibraryBig size={14} className='shrink-0' />
                           {unit.name}
                         </p>

@@ -2,10 +2,10 @@ import { lifespan } from '@/entities/book/authors';
 import type { CatalogueAuthor } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { Spinner } from '@/shared/ui/Spinner';
-import { AuthorPortrait } from './AuthorPortrait';
+import { Portrait } from '@/shared/ui/Portrait';
 
 // Who a writer was, beside their page as a book's cover is beside its: their
-// photo (AuthorPortrait), their name, as the reader's books have it, their
+// photo (Portrait), their name, as the reader's books have it, their
 // years and how many of their books the reader has. A spinner after the years
 // while they're on their way; every line keeps its place all along, so nothing
 // moves.
@@ -24,7 +24,7 @@ export function AuthorHeading({
   const years = lifespan(author);
   return (
     <div className='flex animate-rise flex-col items-center text-center lg:items-stretch lg:text-left'>
-      <AuthorPortrait
+      <Portrait
         // Its fade begun afresh for another picture
         key={author?.photoUrl}
         name={name}

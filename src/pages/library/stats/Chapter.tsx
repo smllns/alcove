@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
-import { SectionTag } from '../places/drawing/SectionTag';
+import { SectionTag } from '@/shared/ui/drawing/SectionTag';
 
 // The sentence a chapter opens with
 export const sayClass =
   'max-w-xl font-serif text-lg leading-relaxed text-ink-soft';
 // A note under a chapter's drawing: what it went by, and how to show more
-export const noteClass = 'mt-5 max-w-xl text-[13px] leading-relaxed text-muted';
+export const noteClass =
+  'mt-5 max-w-xl text-[0.8125rem] leading-relaxed text-muted';
 
 // One chapter of the stats: its number in a ring and its title, a sentence
 // saying what it found, and one drawing showing it, set in under the title (on

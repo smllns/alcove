@@ -1,7 +1,7 @@
 import { sources, ways } from '@/entities/book/acquired';
 import type { Book } from '@/entities/book/types';
 import { counted } from '@/shared/lib/plural';
-import type { Tally } from './tallies';
+import type { Tally } from '@/entities/book/tallies';
 import { ScaleHeading } from './ScaleHeading';
 import { SpineLedger } from './SpineLedger';
 

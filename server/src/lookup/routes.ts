@@ -5,6 +5,8 @@ import { queryText } from '../lib/validation.js';
 import { currentUser } from '../auth/middleware.js';
 import { ownCopies } from '../books/repository.js';
 import { cached } from './cache.js';
+import { titleKey } from '../lib/text.js';
+import { sharedBooksMatching } from '../users/sharedBooks.js';
 import { listRouter } from './listRoutes.js';
 import { noneIfMissing, workKeyOf } from './params.js';
 import { listsOfWork } from './workLists.js';
@@ -58,13 +60,25 @@ lookupRouter.get('/search', async (req, res) => {
     return;
   }
   const key = query.toLowerCase();
-
-  const results = await cached(`search8:${key}`, 3, () => searchWorks(query));
-
-  // An ISBN points at one exact edition; fetch it so the form can use it as
-  // is, and keep it in alcove's own catalogue
-  let isbnEdition = null;
+  const works = () => cached(`search9:${key}`, 3, () => searchWorks(query));
   const isIsbn = looksLikeIsbn(query);
+
+  // Open Library's works, and for words alcove's own, asked for at once:
+  // printings readers added that Open Library doesn't know, and books other
+  // readers keep that the catalogue doesn't know (after its own, each with
+  // all that's said of it)
+  const [found, printings, shared] = await Promise.all([
+    works(),
+    isIsbn ? [] : searchOurs(query),
+    isIsbn
+      ? []
+      : sharedBooksMatching(query, currentUser(req)._id).catch(() => []),
+  ]);
+  let ours: OurEdition[] = printings;
+  // An ISBN points at one exact edition; fetch it so the form can use it as
+  // is, and keep it in alcove's own catalogue; and for one it doesn't know,
+  // the printing a reader added
+  let isbnEdition = null;
   if (isIsbn) {
     isbnEdition = await cached(`isbn3:${cleanIsbn(query)}`, 30, () =>
       editionByIsbn(query),
@@ -73,15 +87,14 @@ lookupRouter.get('/search', async (req, res) => {
       await rememberFound([
         { ...isbnEdition, isbn: isbnEdition.isbn ?? query },
       ]);
+    const edition = found.length ? null : await ourEdition(query);
+    ours = edition ? [edition] : [];
   }
-  // alcove's own: for words, printings readers added that Open Library
-  // doesn't know; for an ISBN it doesn't know, the printing a reader added
-  let ours: OurEdition[] = [];
-  if (!isIsbn) ours = await searchOurs(query);
-  else if (!results.length) {
-    const edition = await ourEdition(query);
-    if (edition) ours = [edition];
-  }
+  const known = new Set(found.map((work) => titleKey(work.title)));
+  const results = [
+    ...found,
+    ...shared.filter((work) => !known.has(titleKey(work.title))),
+  ];
   res.json({ results, isbnEdition, ours });
 });
 

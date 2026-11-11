@@ -11,7 +11,7 @@ import { Collapse } from '@/shared/ui/Collapse';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { readersListOpening } from '@/entities/list/opening';
 import { Arriving } from './Arriving';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { Labelled } from './Labelled';
 
 // Columns as wide as the room, not as a long name, which is cut short
@@ -43,7 +43,7 @@ export function BookLists({ book }: { book: Book }) {
 
   return (
     <Arriving ready={ours.length > 0 || elsewhere}>
-      <BookSection title='Lists'>
+      <TitledSection title='Lists'>
         <div>
           {ours.length > 0 && (
             <Labelled label='Yours'>
@@ -109,7 +109,7 @@ export function BookLists({ book }: { book: Book }) {
             </Labelled>
           </Collapse>
         </div>
-      </BookSection>
+      </TitledSection>
     </Arriving>
   );
 }

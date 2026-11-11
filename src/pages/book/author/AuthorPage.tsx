@@ -20,6 +20,7 @@ import { AuthorQuote } from './AuthorQuote';
 import { LifeAndWorks } from './LifeAndWorks';
 import { useWriter } from './useWriter';
 import { useMatchedWorks } from '@/entities/book/useMatchedWorks';
+import { withShared } from '@/entities/book/sharedWorks';
 import { lifePins } from './writerBooks';
 import { readerFigures } from './readerFigures';
 import { AuthorNext } from './AuthorNext';
@@ -44,6 +45,8 @@ export function AuthorPage() {
   // on a wide screen): gone up out of sight, there's a way back up
   const [top, setTop] = useState<HTMLSpanElement | null>(null);
   const works = useAuthorWorks(writer.authorKey);
+  // And those only alcove's other readers have
+  const { shared } = writer;
   // Wikiquote has them by the name the catalogue does, in Latin letters
   const known = writer.author?.name;
   const quotes = useWriterQuotes(
@@ -60,8 +63,14 @@ export function AuthorPage() {
     unread,
   } = useMatchedWorks(
     writer.theirs,
-    works.data ?? [],
-    writer.known && !writer.keying && settled(works),
+    withShared(
+      works.data ?? [],
+      shared.data ?? [],
+      [name, writer.author?.name].filter((each): each is string =>
+        Boolean(each),
+      ),
+    ),
+    writer.known && !writer.keying && settled(works) && settled(shared),
     writer.author?.born,
     writer.author?.died,
   );

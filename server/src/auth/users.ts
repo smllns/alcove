@@ -1,6 +1,7 @@
 import { MongoServerError, ObjectId } from 'mongodb';
 import { users, type UserDoc } from '../db.js';
 import { HttpError } from '../lib/errors.js';
+import { privacyOf, type Privacy } from '../users/privacy.js';
 
 // What the client is allowed to see about a user
 export type PublicUser = {
@@ -10,6 +11,11 @@ export type PublicUser = {
   username: string | null;
   email: string;
   createdAt: string;
+  // A line or two about themselves, and who sees what of their page
+  about: string | null;
+  privacy: Privacy;
+  // Their photo, if they've uploaded one
+  avatarUrl: string | null;
 };
 
 export const toPublicUser = (user: UserDoc): PublicUser => ({
@@ -19,6 +25,9 @@ export const toPublicUser = (user: UserDoc): PublicUser => ({
   username: user.username ?? null,
   email: user.email,
   createdAt: user.createdAt.toISOString(),
+  about: user.about || null,
+  privacy: privacyOf(user),
+  avatarUrl: user.avatarUrl || null,
 });
 
 export const findUserByEmail = (email: string) => users().findOne({ email });
@@ -58,7 +67,16 @@ export async function createUser(input: {
 export async function updateUser(
   id: ObjectId,
   changes: Partial<
-    Pick<UserDoc, 'name' | 'username' | 'email' | 'passwordHash'>
+    Pick<
+      UserDoc,
+      | 'name'
+      | 'username'
+      | 'email'
+      | 'passwordHash'
+      | 'about'
+      | 'privacy'
+      | 'avatarUrl'
+    >
   >,
 ) {
   try {

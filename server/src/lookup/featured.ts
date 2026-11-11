@@ -34,7 +34,7 @@ async function popular() {
 
 // What's read most this week, as last asked for: fresh for a day, and
 // past that given at once while a fresh one's asked for behind it
-const thisWeek = () => cachedStale('popular1', 1, popular);
+const thisWeek = () => cachedStale('popular2', 1, popular);
 
 // One featured list with its books and what's said of it: this week's fresh for a day, a classic
 // one for a month, and past that the one kept still given at once while a
@@ -45,7 +45,7 @@ export async function featuredList(id: string) {
   const works =
     id === 'popular'
       ? await thisWeek()
-      : await cachedStale(`classic1:${id}`, 30, () =>
+      : await cachedStale(`classic2:${id}`, 30, () =>
           worksByKeys(classics.find((each) => each.id === id)!.works),
         );
   return { ...list, description: about[id], works };

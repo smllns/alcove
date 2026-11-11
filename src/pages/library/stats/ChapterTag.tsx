@@ -1,11 +1,7 @@
-import { SectionTag } from '../places/drawing/SectionTag';
+import { SectionTag } from '@/shared/ui/drawing/SectionTag';
 
 // A chapter's number as the contents and the pill give it: in a ring, as
-// the chapter's own heading does (Chapter), smaller
+// the chapter's own heading does (Chapter)
 export function ChapterTag({ number }: { number: number }) {
-  return (
-    <SectionTag className='size-[18px]! self-center font-sans text-[9px]!'>
-      {number}
-    </SectionTag>
-  );
+  return <SectionTag className='self-center font-sans'>{number}</SectionTag>;
 }

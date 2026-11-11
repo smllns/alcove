@@ -4,10 +4,10 @@ import { cn } from '@/shared/lib/cn';
 import { labelClass } from '@/shared/ui/fieldStyles';
 import { ArrangeBar } from './ArrangeBar';
 import { ArrangeButton } from './ArrangeButton';
-import { ArrangingContext, useArranging } from './arranging';
+import { ArrangingContext, useArranging } from '@/features/move-books';
 import { CoverShelf } from './CoverShelf';
 import { ShelfSheet } from './ShelfSheet';
-import { useBookMoves } from './useBookMoves';
+import { useBookMoves } from '@/features/move-books';
 import { useFoundBook } from '../room/useFoundBook';
 
 // The books in no place yet, face out on a sheet of their own as a shelf's

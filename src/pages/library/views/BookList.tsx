@@ -1,8 +1,8 @@
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { BookRow } from './BookRow';
-import { MoreBooks, type Paging } from './MoreBooks';
-import { shelfItem } from './shelfItem';
+import { MoreBooks, type Paging } from '@/widgets/book-grid';
+import { shelfItem } from '@/widgets/book-grid';
 
 // Books as rows, in one column or in as many as fit
 export function BookList({

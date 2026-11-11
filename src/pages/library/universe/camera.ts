@@ -16,18 +16,32 @@ const MAX_FIT_ZOOM = 1.6;
 const FIT_SIDE = 40;
 const FIT_ENDS = 48;
 
-const clampZoom = (zoom: number) =>
-  Math.min(Math.max(zoom, MIN_ZOOM), MAX_ZOOM);
+// On a touch screen, how small a typical cover may be zoomed out to, in
+// pixels: there, with the whole of a big library in view at once, the
+// phone runs out of memory for the covers, the page goes blank and lags
+const FARTHEST_TOUCH_WIDTH = 36;
+
+const clampZoom = (zoom: number, least = MIN_ZOOM) =>
+  Math.min(Math.max(zoom, least), MAX_ZOOM);
+
+// The furthest out the sky may be zoomed, for covers `typicalWidth` across
+// in the sky: anywhere on a screen with a pointer, not too far on a touch
+// screen
+export const farthestZoom = (typicalWidth: number) =>
+  typicalWidth && matchMedia('(hover: none)').matches
+    ? Math.max(FARTHEST_TOUCH_WIDTH / typicalWidth, MIN_ZOOM)
+    : MIN_ZOOM;
 
 // `camera` zoomed by `factor`, keeping the point of the sky under (px, py)
-// on the screen where it is
+// on the screen where it is, never further out than `least`
 export function zoomedAt(
   camera: Camera,
   px: number,
   py: number,
   factor: number,
+  least = MIN_ZOOM,
 ): Camera {
-  const zoom = clampZoom(camera.zoom * factor);
+  const zoom = clampZoom(camera.zoom * factor, least);
   const k = zoom / camera.zoom;
   return { zoom, x: px - (px - camera.x) * k, y: py - (py - camera.y) * k };
 }
@@ -48,7 +62,7 @@ export function fitted(
   const top = Math.min(insetTop, box.height / 2);
   const room = box.height - top - FIT_ENDS * 2;
   const whole = Math.min(box.width / width, room / height, MAX_FIT_ZOOM);
-  const zoom = clampZoom(Math.max(whole, readable));
+  const zoom = clampZoom(whole, readable);
   return {
     zoom,
     x: box.width / 2 - ((bounds.minX + bounds.maxX) / 2) * zoom,

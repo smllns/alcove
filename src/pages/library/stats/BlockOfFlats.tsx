@@ -1,6 +1,6 @@
 import type { Book } from '@/entities/book/types';
 import { seedOf } from '@/shared/lib/seed';
-import { furnish } from '../places/drawing/decor';
+import { furnish } from '@/shared/ui/drawing/decor';
 import { BlockCut, Stair } from './BlockCut';
 import {
   FLAT,
@@ -85,7 +85,7 @@ export function BlockOfFlats({ books }: { books: Book[] }) {
               x={X - 16}
               y={ceiling + (STOREY * M) / 2 + 3}
               textAnchor='end'
-              className={`text-[8.5px] tracking-[0.15em] uppercase ${f === lit ? 'fill-ink' : 'fill-muted'}`}
+              className={`text-[9px] tracking-[0.15em] uppercase ${f === lit ? 'fill-ink' : 'fill-muted'}`}
             >
               {ordinal(f)}
             </text>

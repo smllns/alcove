@@ -10,7 +10,7 @@ const sizes = {
     cover:
       'w-9 shadow-[0_6px_10px_-6px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]',
     image: 'S',
-    title: 'text-[15px] leading-snug',
+    title: 'text-[0.9375rem] leading-snug',
     byline: 'mt-0.5 text-xs',
     details: 'mt-1 text-xs',
   },
@@ -20,7 +20,7 @@ const sizes = {
     cover:
       'w-12 shadow-[0_8px_14px_-8px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]',
     image: 'M',
-    title: 'text-[17px] leading-tight',
+    title: 'text-[1.0625rem] leading-tight',
     byline: 'mt-1 text-sm',
     details: 'mt-1 text-xs',
   },
@@ -30,7 +30,7 @@ const sizes = {
     cover:
       'w-12 shadow-[0_8px_14px_-8px_rgb(var(--shade)/calc(0.5*var(--shade-k)))] sm:w-20 sm:shadow-[0_14px_24px_-12px_rgb(var(--shade)/calc(0.5*var(--shade-k)))]',
     image: 'L',
-    title: 'text-[17px] leading-tight sm:text-2xl',
+    title: 'text-[1.0625rem] leading-tight sm:text-2xl',
     byline: 'mt-1 text-sm sm:mt-1.5 sm:text-base',
     details: 'mt-1 text-xs sm:mt-2 sm:text-sm',
   },

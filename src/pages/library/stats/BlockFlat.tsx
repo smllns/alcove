@@ -1,6 +1,6 @@
 import type { Book } from '@/entities/book/types';
 import { seedOf } from '@/shared/lib/seed';
-import type { Decor } from '../places/drawing/decor';
+import type { Decor } from '@/shared/ui/drawing/decor';
 import { FLAT, M, SHELF } from './blockMeasures';
 import { Bookcase } from './BookShapes';
 import { hangingLamp, type Ids } from './drawingKit';

@@ -4,11 +4,11 @@ import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { yearOf, type byDecade } from './libraryStats';
 import { BookEnds } from './BookEnds';
-import { BooksDrawer } from './BooksDrawer';
-import { HoverBooks } from './HoverBooks';
+import { BooksDrawer } from '@/widgets/book-cards';
+import { HoverBooks } from '@/widgets/book-cards';
 import { Pile, PileCount } from './Pile';
 import { drawnOf, pilesWidth } from './piles';
-import { useBooksDrawer } from './useBooksDrawer';
+import { useBooksDrawer } from '@/widgets/book-cards';
 
 // How wide a fold of empty decades is, against a decade's width
 const FOLD = 0.6;
@@ -131,7 +131,7 @@ export function DecadePiles({
                 />
                 <em
                   className={cn(
-                    'absolute top-2.5 -translate-x-1/2 text-[11px] whitespace-nowrap text-muted not-italic',
+                    'absolute top-2.5 -translate-x-1/2 text-xs whitespace-nowrap text-muted not-italic',
                     !written[i] && !last && 'max-sm:hidden',
                   )}
                   // Kept within the ruler at its ends

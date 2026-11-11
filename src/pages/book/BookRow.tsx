@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { risingCover } from '@/entities/book/coverImage';
 import type { AddBookState, SimilarBook } from '@/entities/book/types';
 import { BookCover } from '@/entities/book/ui/BookCover';
 import { paths } from '@/shared/config/paths';
@@ -89,9 +90,9 @@ function NextBook({
         title={book.title}
         author={author}
         url={book.coverUrl}
-        className='shadow-[0_10px_18px_-10px_rgb(var(--shade)/calc(0.5*var(--shade-k)))] will-change-transform transition-transform duration-500 ease-soft group-hover:-translate-y-1'
+        className={cn(risingCover, 'will-change-transform')}
       />
-      <span className='mt-2.5 line-clamp-2 font-serif text-[15px] leading-snug text-ink'>
+      <span className='mt-2.5 line-clamp-2 font-serif text-[0.9375rem] leading-snug text-ink'>
         {book.title}
       </span>
       {byline && author && (

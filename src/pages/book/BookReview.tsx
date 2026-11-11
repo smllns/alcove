@@ -8,7 +8,7 @@ import { Fold } from '@/shared/ui/Fold';
 import { paperClass } from '@/shared/ui/surfaces';
 import { SmoothHeight } from '@/shared/ui/SmoothHeight';
 import { FormError } from '@/shared/ui/FormError';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { HoverAction } from '@/shared/ui/HoverAction';
 import { EditableText } from '@/shared/ui/EditableText';
 import { EditingHint } from '@/shared/ui/EditingHint';
@@ -22,7 +22,7 @@ const TOP = 14;
 
 // Line height as LINE, written out for Tailwind to find
 const reviewText =
-  'whitespace-pre-line font-serif text-[17px] leading-[30px] text-ink';
+  'whitespace-pre-line font-serif text-[1.0625rem] leading-[30px] text-ink';
 
 // A notebook's lines: ruled across, with the margin's line down the left,
 // over its old paper
@@ -85,7 +85,7 @@ export function BookReview({
     <div ref={section} className='-mb-10 scroll-mt-28'>
       <Collapse open={open} appear={first}>
         <div className='pb-10'>
-          <BookSection title='Your review'>
+          <TitledSection title='Your review'>
             <div
               style={{ paddingTop: TOP, paddingBottom: LINE }}
               className={cn(
@@ -136,7 +136,7 @@ export function BookReview({
             </div>
             <EditingHint show={writing} />
             <FormError message={error} small className='mt-2' />
-          </BookSection>
+          </TitledSection>
         </div>
       </Collapse>
     </div>

@@ -4,7 +4,7 @@ import {
   useWorkRatings,
 } from '@/entities/book/catalogueQueries';
 import type { CatalogueEdition, CatalogueWork } from '@/entities/book/types';
-import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
+import { useGoBack } from '@/shared/lib/useGoBack';
 import { useOwnedWork } from '@/entities/book/queries';
 import { Spinner } from '@/shared/ui/Spinner';
 import { BookForm, draftFromCatalogue } from '@/widgets/book-form';
@@ -25,7 +25,8 @@ type PickedBookProps = {
 // they have this book already (and the form adds a second without asking
 // again); otherwise what they have by the same writer.
 export function PickedBook({ work, isbnEdition, onBack }: PickedBookProps) {
-  const navigate = useTransitionNavigate();
+  // Saved, back to where the reader was before they came to add it
+  const goBack = useGoBack(paths.library);
   const editions = useEditions(work.workKey);
   const about = useWorkDetails(work.workKey);
   const owned = useOwnedWork(work.workKey);
@@ -62,7 +63,7 @@ export function PickedBook({ work, isbnEdition, onBack }: PickedBookProps) {
         fields={draft.fields}
         extras={draft.extras}
         editions={withIsbnEdition}
-        onSaved={() => navigate(paths.library, 'forward')}
+        onSaved={() => void goBack()}
         onBack={onBack}
       />
     </>

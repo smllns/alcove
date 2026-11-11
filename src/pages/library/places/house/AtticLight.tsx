@@ -1,4 +1,4 @@
-import { EAVES, RIDGE, WALL } from '../drawing/section';
+import { EAVES, RIDGE, WALL } from '@/shared/ui/drawing/section';
 
 // The light of a home's attic lamp (HouseAttic), filling the attic up to
 // the roof's slopes, under the roof as it's drawn (HouseSketch), so its

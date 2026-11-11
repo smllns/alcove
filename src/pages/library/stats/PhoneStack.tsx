@@ -1,6 +1,6 @@
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
-import { ListPile } from '../lists/ListPile';
+import { ListPile } from '@/widgets/list-pile';
 import { figures, stampOf } from './libraryStats';
 import { tallness } from './words';
 
@@ -19,10 +19,10 @@ export function PhoneStack({ books }: { books: Book[] }) {
             key={name}
             className={cn('px-2.5 py-1', i > 0 && 'border-t border-(--fine)')}
           >
-            <dt className='text-[9px] uppercase tracking-[0.18em] text-muted'>
+            <dt className='text-xs uppercase tracking-[0.18em] text-muted'>
               {name}
             </dt>
-            <dd className='font-serif text-[17px] leading-snug'>
+            <dd className='font-serif text-[1.0625rem] leading-snug'>
               {value.toLocaleString('en')}
             </dd>
           </div>

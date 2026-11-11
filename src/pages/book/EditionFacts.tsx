@@ -5,7 +5,7 @@ import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { paperClass } from '@/shared/ui/surfaces';
 import { captionClass } from '@/shared/ui/fieldStyles';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 
 type Entry = [label: string, value: ReactNode];
 
@@ -86,7 +86,7 @@ export function EditionFacts({ book }: { book: Book }) {
   if (!known.length) return null;
 
   return (
-    <BookSection title='The book'>
+    <TitledSection title='The book'>
       {
         // A catalogue card: one rule in red under its top edge, the rest
         // ruled lightly between its lines
@@ -103,11 +103,11 @@ export function EditionFacts({ book }: { book: Book }) {
               className='grid grid-cols-[7.5rem_1fr] items-baseline gap-4 border-b border-(--rule) px-5 py-3 last:border-b-0 sm:grid-cols-[9rem_1fr]'
             >
               <dt className={captionClass}>{label}</dt>
-              <dd className='font-serif text-[16px] text-ink'>{value}</dd>
+              <dd className='font-serif text-base text-ink'>{value}</dd>
             </div>
           ))}
         </dl>
       }
-    </BookSection>
+    </TitledSection>
   );
 }

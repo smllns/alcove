@@ -10,7 +10,7 @@ import { FormError } from '@/shared/ui/FormError';
 import { AddButton } from '@/shared/ui/ListControls';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
 import { Arriving } from './Arriving';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { SourceCredit } from './SourceCredit';
 
 // Shown at first; the rest on asking
@@ -46,7 +46,7 @@ export function QuoteSuggestions({ book }: { book: Book }) {
 
   return (
     <Arriving ready={offered.length > 0}>
-      <BookSection title='Lines from the book'>
+      <TitledSection title='Lines from the book'>
         {/* Those past the first few open out when asked for */}
         <ul ref={list}>
           {offered.map((quote, i) => (
@@ -95,7 +95,7 @@ export function QuoteSuggestions({ book }: { book: Book }) {
           href={found.data?.source ?? 'https://en.wikiquote.org'}
           className='mt-4'
         />
-      </BookSection>
+      </TitledSection>
     </Arriving>
   );
 }

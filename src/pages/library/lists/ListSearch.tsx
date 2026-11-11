@@ -3,9 +3,9 @@ import type { AddBookState, Book } from '@/entities/book/types';
 import { paths } from '@/shared/config/paths';
 import { useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
-import { BookSearch } from '../views/BookSearch';
-import { ShelfFinder } from '../views/ShelfFinder';
-import type { useListSearch } from './useListSearch';
+import { BookSearch } from '@/widgets/book-search';
+import { ShelfFinder } from '@/widgets/book-search';
+import type { useListSearch } from '@/widgets/book-search';
 
 const PLACEHOLDER = 'Find in this list';
 
@@ -57,7 +57,7 @@ export function ListSearch({
 // Nothing in the list goes by what's typed
 export function NoneFound() {
   return (
-    <p className='animate-arrive text-[15px] text-muted'>
+    <p className='animate-arrive text-[0.9375rem] text-muted'>
       Nothing in this list by that name.
     </p>
   );

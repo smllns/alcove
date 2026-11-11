@@ -1,12 +1,12 @@
 import type { Ref } from 'react';
 import type { Shelf } from '@/entities/book/useShelf';
 import { ChoiceCapsule } from '@/shared/ui/ChoiceCapsule';
-import { BookSearch } from './views/BookSearch';
-import { shows } from './views/order';
+import { BookSearch } from '@/widgets/book-search';
+import { shows } from '@/widgets/book-order';
 import { SearchResults } from './views/SearchResults';
-import { ShelfOrderMenu } from './views/ShelfOrderMenu';
-import type { useShelfOrder } from './views/useShelfOrder';
-import type { useShelfSearch } from './views/useShelfSearch';
+import { ShelfOrderMenu } from '@/widgets/book-order';
+import type { useShelfOrder } from '@/widgets/book-order';
+import type { useShelfSearch } from '@/features/open-book';
 import type { BookView, ViewKind } from './views/views';
 import { ViewSwitcher } from './views/ViewSwitcher';
 

@@ -1,4 +1,4 @@
-import { LOOSE, type HomeBooks } from '../arrange';
+import { LOOSE, type HomeBooks } from '@/entities/place/arrange';
 import { RoomCard } from './RoomCard';
 
 // A home as plain cards rather than drawn: a card for each of its rooms,

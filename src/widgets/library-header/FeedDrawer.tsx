@@ -15,7 +15,7 @@ export function FeedDrawer({
   return (
     <Drawer open={open} onClose={onClose} title='Feed'>
       <article className='flex gap-3.5 border-b border-line/70 bg-accent/7 px-6 py-5'>
-        <span className='grid size-9 shrink-0 place-items-center rounded-full bg-button font-serif text-[15px] tracking-[-0.04em] text-button-text'>
+        <span className='grid size-9 shrink-0 place-items-center rounded-full bg-button font-serif text-[0.9375rem] tracking-[-0.04em] text-button-text'>
           <span>
             a<span className='text-accent'>.</span>
           </span>

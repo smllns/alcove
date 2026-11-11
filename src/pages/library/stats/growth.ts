@@ -1,6 +1,6 @@
 import { ways } from '@/entities/book/acquired';
 import type { Book } from '@/entities/book/types';
-import { byOption } from './tallies';
+import { byOption } from '@/entities/book/tallies';
 
 // The months of the stats: when books came to the reader, and when they
 // were finished, going only by the days the reader gave for them (a book

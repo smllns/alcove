@@ -55,7 +55,7 @@
   border-right: 0.8px solid var(--fine);
   writing-mode: vertical-rl;
   rotate: 180deg;
-  font-size: 11px;
+  font-size: 0.75rem;
   line-height: 1;
   letter-spacing: 0.08em;
   color: var(--muted);

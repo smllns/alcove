@@ -69,7 +69,7 @@ export function BookCover({
             {title}
           </span>
           {author && (
-            <span className='line-clamp-2 text-[clamp(0.5rem,4.5cqw,0.75rem)] uppercase tracking-[0.12em] opacity-75'>
+            <span className='line-clamp-2 text-[clamp(0.5rem,4.5cqw,0.75rem)] uppercase tracking-[0.12em]'>
               {author}
             </span>
           )}

@@ -3,7 +3,7 @@ import { seedOf } from '@/shared/lib/seed';
 import { SectionNotes } from './SectionNotes';
 import { SectionWall } from './SectionWall';
 import { AtticLight } from './AtticLight';
-import { EAVES, RIDGE, SLAB, UNDER, WALL } from '../drawing/section';
+import { EAVES, RIDGE, SLAB, UNDER, WALL } from '@/shared/ui/drawing/section';
 import { useMeasured } from '@/shared/lib/useMeasured';
 
 // The house drawn as an architect's section through it, over its rooms

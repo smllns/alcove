@@ -28,6 +28,11 @@ export type ListedWorkNode = {
   isbn?: string;
   // One typed in by hand (typed-…): everything said of it
   details?: Omit<WantedBook, 'title' | 'authors'>;
+  // How the catalogue's readers rate it, out of five, if they have
+  averageRating?: number;
+  // When it was put in the list (not said by those put in before that was
+  // kept)
+  addedAt?: string;
   // Put in by an import from another site, which one (to undo it by)
   importId?: string;
 };

@@ -48,11 +48,16 @@ export function CopyStep({
     <div className='flex flex-col gap-8'>
       <ReadingFields form={form} />
 
+      {/* Rated, it's been read */}
       <StarRating
         label='Your rating'
         value={Number(form.values['copy.rating']) || 0}
         onChange={(rating) =>
-          form.setValue('copy.rating', rating ? String(rating) : '')
+          form.setValues((v) => ({
+            ...v,
+            'copy.rating': rating ? String(rating) : '',
+            ...(rating && { 'copy.reading': 'read' as const }),
+          }))
         }
       />
 

@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { showOwnChanges } from '@/entities/reader/queries';
 import * as userApi from '@/entities/user/api';
 import type { User } from '@/entities/user/types';
 import { keepFor } from '@/shared/lib/storage';
@@ -60,7 +61,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState(guest);
   }, [queryClient]);
 
-  const replaceUser = useCallback((user: User) => setState(signedIn(user)), []);
+  // The reader changed (their name, what they say of themselves, their
+  // photo, who sees what): their own page shows it at once
+  const replaceUser = useCallback(
+    (user: User) => {
+      setState(signedIn(user));
+      if (user.username)
+        showOwnChanges(queryClient, { ...user, username: user.username });
+    },
+    [queryClient],
+  );
   const forgetUser = useCallback(() => {
     queryClient.clear();
     keepFor('');

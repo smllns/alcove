@@ -32,7 +32,7 @@ export function CalendarDays({
           <span
             key={name}
             role='columnheader'
-            className='py-1 text-center text-[11px] uppercase tracking-[0.12em] text-faint'
+            className='py-1 text-center text-xs uppercase tracking-[0.12em] text-faint'
           >
             {name}
           </span>

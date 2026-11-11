@@ -106,7 +106,7 @@ export function Preloader({ covers, onReveal, onDone }: PreloaderProps) {
     };
   }, [covers, onReveal, onDone]);
 
-  const label = 'text-[10px] uppercase tracking-[0.24em] text-faint';
+  const label = 'text-xs uppercase tracking-[0.24em] text-faint';
 
   return (
     <div

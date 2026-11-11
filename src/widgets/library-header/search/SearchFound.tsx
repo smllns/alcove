@@ -20,6 +20,7 @@ export function SearchFound({
   onWork,
   onAuthor,
   onList,
+  onReader,
 }: {
   found: Found;
   query: string;
@@ -30,6 +31,8 @@ export function SearchFound({
   onWork: (work: CatalogueWork) => void;
   onAuthor: (name: string) => void;
   onList: (to: string, state?: ListOpenState) => void;
+  // Another reader (or the reader themself): their page
+  onReader: (username: string, you: boolean) => void;
 }) {
   const some = kind === 'all' && !found.readersOnly;
   // The first few, with a way to the rest when there are more
@@ -123,7 +126,12 @@ export function SearchFound({
         onMore={readers.more}
       >
         {readers.items.map((reader, i) => (
-          <ReaderRow key={reader.username} reader={reader} order={i} />
+          <ReaderRow
+            key={reader.username}
+            reader={reader}
+            order={i}
+            onOpen={() => onReader(reader.username, reader.you)}
+          />
         ))}
       </SearchSection>
       {nothing && (

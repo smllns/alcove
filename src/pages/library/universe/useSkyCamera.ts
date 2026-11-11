@@ -6,10 +6,17 @@ import {
   useRef,
   useState,
 } from 'react';
-import { fitted, MIN_ZOOM, zoomedAt, type Camera, type Size } from './camera';
+import {
+  farthestZoom,
+  fitted,
+  MIN_ZOOM,
+  zoomedAt,
+  type Camera,
+  type Size,
+} from './camera';
 import { between, easeOut, GLIDE_MS } from './glide';
 import type { Bounds } from './layout';
-import { useSkyGestures } from './useSkyGestures';
+import { usePanZoom } from '@/shared/lib/usePanZoom';
 
 // How wide a typical cover should look at the start, at the least: big
 // enough to know the book by, on a phone, and a little bigger again where
@@ -72,6 +79,7 @@ export function useSkyCamera(
   // the books never flash where an unfitted camera would put them
   const [placed, setPlaced] = useState(false);
   const touched = useRef(false);
+  const least = farthestZoom(typicalWidth);
 
   // Gliding to a camera, for the buttons and keys: the frame in flight, and
   // where it's headed (so a second click carries on from there)
@@ -133,9 +141,9 @@ export function useSkyCamera(
     (px: number, py: number, factor: number) => {
       touched.current = true;
       stopGliding();
-      setCamera((c) => zoomedAt(c, px, py, factor));
+      setCamera((c) => zoomedAt(c, px, py, factor, least));
     },
-    [stopGliding],
+    [stopGliding, least],
   );
   const pan = useCallback(
     (dx: number, dy: number) => {
@@ -145,7 +153,7 @@ export function useSkyCamera(
     },
     [stopGliding],
   );
-  const gestures = useSkyGestures(sky, {
+  const gestures = usePanZoom(sky, {
     pan,
     zoomAt,
     onGrab: stopGliding,
@@ -158,7 +166,7 @@ export function useSkyCamera(
     if (!box) return;
     touched.current = true;
     const from = goal.current ?? latest.current;
-    glideTo(zoomedAt(from, box.width / 2, box.height / 2, factor));
+    glideTo(zoomedAt(from, box.width / 2, box.height / 2, factor, least));
   };
 
   // A search's finds in view; once it's cleared, the whole sky again
@@ -171,7 +179,7 @@ export function useSkyCamera(
     if (!box) return;
     if (focus) {
       touched.current = true;
-      glideTo(fitted(box, insetTop, focus));
+      glideTo(fitted(box, insetTop, focus, least));
     } else if (wasFocused.current) {
       touched.current = false;
       glideTo(opening(box, insetTop, bounds, typicalWidth), UNFOCUS_GLIDE_MS);

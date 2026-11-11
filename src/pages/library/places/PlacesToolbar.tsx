@@ -5,7 +5,7 @@ import type { Home } from '@/entities/place/types';
 import { ChoiceCapsule } from '@/shared/ui/ChoiceCapsule';
 import { ChoiceToggle } from '@/shared/ui/ChoiceToggle';
 import type { PlacesLook } from './placesLook';
-import { HomeTitle } from './HomeTitle';
+import { HomeTitle } from '@/entities/place/ui/HomeTitle';
 import { PlacesSearch } from './PlacesSearch';
 
 const looks: { value: PlacesLook; label: string; icon: ReactNode }[] = [

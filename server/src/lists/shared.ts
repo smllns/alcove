@@ -1,4 +1,5 @@
 import type { ObjectId } from 'mongodb';
+import { asShelved, shelvedProjection } from '../books/shelvedWork.js';
 import {
   books,
   lists,
@@ -65,8 +66,31 @@ export async function searchSharedLists(query: string, me: ObjectId) {
 
 // A book in a public list as any reader may see it: what the catalogue
 // would say of it, nothing of the owner's copy. One not from the
-// catalogue is told apart by a key of its own (`book-`), opening nothing.
+// catalogue is told apart by a key of its own (`book-`), opening what's
+// known of it here.
 const asWork = (work: ListedWorkNode) => ({ ...work, editionCount: 0 });
+
+// A list's books: those on its owner's shelves in it, newest first (the
+// first `most` of them, if that's given), then those from the catalogue in
+// it that aren't among them
+async function listWorks(userId: ObjectId, list: BookListNode, most?: number) {
+  const copies = await books()
+    .find(
+      { userId, lists: list.id },
+      {
+        projection: shelvedProjection,
+        sort: { createdAt: -1 },
+        ...(most && { limit: most }),
+      },
+    )
+    .toArray();
+  const shelved = copies.map(asShelved);
+  const keys = new Set(shelved.map((work) => work.workKey));
+  const works = (list.works ?? [])
+    .filter((work) => !keys.has(work.workKey))
+    .map(asWork);
+  return [...shelved, ...works];
+}
 
 // One public list, with its books: those on its owner's shelves in it,
 // newest first, then those from the catalogue in it; or null when there's
@@ -78,42 +102,38 @@ export async function sharedList(id: string) {
   );
   const list = doc?.lists[0];
   if (!doc || !list) return null;
-  const [owner, copies] = await Promise.all([
+  const [owner, works] = await Promise.all([
     users().findOne({ _id: doc._id }, ownerProjection),
-    books()
-      .find(
-        { userId: doc._id, lists: id },
-        {
-          projection: {
-            title: 1,
-            authors: 1,
-            firstPublishedYear: 1,
-            cover: 1,
-            openLibrary: 1,
-          },
-          sort: { createdAt: -1 },
-        },
-      )
-      .toArray(),
+    listWorks(doc._id, list),
   ]);
-  const shelved = copies.map((book) =>
-    asWork({
-      workKey: book.openLibrary?.work ?? `book-${book._id.toHexString()}`,
-      title: book.title,
-      authors: book.authors,
-      coverUrl: book.cover?.url,
-      firstPublishYear: book.firstPublishedYear,
-    }),
-  );
-  const keys = new Set(shelved.map((work) => work.workKey));
-  const works = (list.works ?? [])
-    .filter((work) => !keys.has(work.workKey))
-    .map(asWork);
   return {
     id: list.id,
     name: list.name,
     description: list.description,
     owner: calledBy(owner),
-    works: [...shelved, ...works],
+    works,
   };
+}
+
+// The most books of a list drawn in its pile
+const PILE = 16;
+
+// A reader's public lists, for their page: each with how many books it
+// holds and the first of them for its pile (the newest on the shelves
+// first, then those from the catalogue), as a list kept from another
+// reader is (SavedListNode)
+export async function publicListsOf(userId: ObjectId) {
+  const doc = await lists().findOne({ _id: userId });
+  const open = (doc?.lists ?? []).filter((list) => list.public);
+  if (!open.length) return [];
+  const counts = await countByList(userId, open);
+  return Promise.all(
+    open.map(async (list) => ({
+      kind: 'shared' as const,
+      ref: list.id,
+      name: list.name,
+      books: counts[list.id] ?? 0,
+      works: (await listWorks(userId, list, PILE)).slice(0, PILE),
+    })),
+  );
 }

@@ -6,7 +6,7 @@ import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { usePageTurned } from '@/shared/lib/usePageTurned';
 import { LampMeasure, MEASURE_TOP } from './LampMeasure';
-import { leanClass, leanOf } from './pileLean';
+import { leanClass, leanOf } from '@/widgets/list-pile';
 
 // A book of the list's still to come, drawn plain till it's here
 const TO_COME = 'to-come-';
@@ -160,7 +160,7 @@ export function ListLamp({
           a word on what the line is, whatever its length */}
       <div
         className={cn(
-          'absolute inset-x-0 bottom-0 flex h-5 items-center justify-between gap-3 whitespace-nowrap text-[11px] font-medium transition-opacity duration-700 ease-soft',
+          'absolute inset-x-0 bottom-0 flex h-5 items-center justify-between gap-3 whitespace-nowrap text-xs font-medium transition-opacity duration-700 ease-soft',
           waiting && 'opacity-0',
         )}
       >

@@ -14,7 +14,7 @@ export function PageContents({
   shown,
   onGo,
   number = (i) => (
-    <span className='font-sans text-[11px] tracking-[0.1em] text-faint'>
+    <span className='font-sans text-xs tracking-[0.1em] text-faint'>
       {numeral(i)}
     </span>
   ),
@@ -40,9 +40,9 @@ export function PageContents({
               onGo(id);
             }}
             className={cn(
-              'group flex items-baseline gap-2 py-2 font-serif text-[17px] transition-colors duration-500 ease-soft',
+              'group flex items-baseline gap-2 py-2 font-serif text-[1.0625rem] transition-colors duration-500 ease-soft',
               danger
-                ? 'text-danger/80 hover:text-danger'
+                ? 'text-danger'
                 : on
                   ? 'text-ink'
                   : 'text-muted hover:text-ink',

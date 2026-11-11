@@ -1,11 +1,11 @@
 import { scrollPageToElement } from '@/shared/lib/pageScroll';
-import type { RoomBooks } from '../arrange';
-import type { Decor } from '../drawing/decor';
+import type { RoomBooks } from '@/entities/place/arrange';
+import type { Decor } from '@/shared/ui/drawing/decor';
 import { detailOf, tagOf } from './bookcaseTags';
-import { RoomFloor } from '../drawing/RoomFloor';
+import { RoomFloor } from '@/shared/ui/drawing/RoomFloor';
 import { MiniBookcase, MiniPiles } from '../drawing/RoomMiniature';
-import { SectionTag } from '../drawing/SectionTag';
-import { WallDecor } from '../drawing/WallDecor';
+import { SectionTag } from '@/shared/ui/drawing/SectionTag';
+import { WallDecor } from '@/shared/ui/drawing/WallDecor';
 
 // A room opened, drawn from the front as in its home's drawing, its
 // bookcases tagged with letters, each tag leading down to its bookcase's

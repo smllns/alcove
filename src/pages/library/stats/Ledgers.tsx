@@ -5,12 +5,12 @@ import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/cn';
 import { languageName } from '@/entities/book/languages';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { BooksDrawer } from './BooksDrawer';
+import { BooksDrawer } from '@/widgets/book-cards';
 import { LedgerRow, LedgerWithMore } from './Ledger';
 import { AVERAGE_PAGES } from './libraryStats';
-import type { Tally } from './tallies';
-import { RisingSpine } from './ToneSpine';
-import { useBooksDrawer } from './useBooksDrawer';
+import type { Tally } from '@/entities/book/tallies';
+import { RisingSpine } from '@/widgets/book-cards';
+import { useBooksDrawer } from '@/widgets/book-cards';
 
 // The most of an author's books drawn after their number, fewer on a phone
 const SPINES = 14;

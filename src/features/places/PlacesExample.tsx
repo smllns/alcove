@@ -22,7 +22,7 @@ const example = [
 ];
 
 const Tag = ({ children }: { children: string }) => (
-  <span className='mr-2 text-[10px] uppercase tracking-[0.2em] text-muted'>
+  <span className='mr-2 text-xs uppercase tracking-[0.2em] text-muted'>
     {children}
   </span>
 );
@@ -42,7 +42,7 @@ export function PlacesExample({
     <div
       style={style}
       className={cn(
-        'rounded-2xl border border-line bg-surface/50 px-5 py-4 text-[15px] leading-7',
+        'rounded-2xl border border-line bg-surface/50 px-5 py-4 text-[0.9375rem] leading-7',
         className,
       )}
     >

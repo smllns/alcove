@@ -31,7 +31,7 @@ import { ButtonLink } from '@/shared/ui/ButtonLink';
 import { Pencil } from 'lucide-react';
 import { OwnBookActions } from './OwnBookActions';
 import { YourCopy } from './YourCopy';
-import { inCatalogue } from '@/entities/book/catalogueBook';
+import { inCatalogue, isTyped } from '@/entities/book/catalogueBook';
 import { paths } from '@/shared/config/paths';
 
 // One book laid out: on a wide screen the cover stays beside everything
@@ -117,7 +117,7 @@ export function BookView({
           ) : (
             <>
               <AddWork work={on.work} />
-              {on.work.details && (
+              {on.work.details && isTyped(on.work.workKey) && (
                 <ButtonLink to={paths.editWork(on.work.workKey)} variant='pill'>
                   <Pencil size={14} />
                   Edit

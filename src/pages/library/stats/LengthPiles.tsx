@@ -2,13 +2,14 @@ import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { pagesIn, pagesOf, type extremes } from './libraryStats';
+import { type extremes } from './libraryStats';
+import { pagesIn, pagesOf } from '@/entities/book/pages';
 import { BookEnds } from './BookEnds';
-import { BooksDrawer } from './BooksDrawer';
-import { HoverBooks } from './HoverBooks';
+import { BooksDrawer } from '@/widgets/book-cards';
+import { HoverBooks } from '@/widgets/book-cards';
 import { Pile, PileCount } from './Pile';
 import { drawnOf, pilesWidth } from './piles';
-import { useBooksDrawer } from './useBooksDrawer';
+import { useBooksDrawer } from '@/widgets/book-cards';
 
 // How high the highest pile stands, and how thin a book may lie in one
 const HIGHEST = 150;
@@ -102,7 +103,7 @@ export function LengthPiles({
                 />
                 <em
                   className={cn(
-                    'absolute top-2.5 text-[11px] whitespace-nowrap text-muted not-italic',
+                    'absolute top-2.5 text-xs whitespace-nowrap text-muted not-italic',
                     // The ends kept within the ruler
                     i === 0
                       ? ''
@@ -124,7 +125,7 @@ export function LengthPiles({
             style={{ left: `${at}%` }}
           />
           <em
-            className='absolute top-8 -translate-x-1/2 font-serif text-[13px] whitespace-nowrap text-ink-soft not-italic'
+            className='absolute top-8 -translate-x-1/2 font-serif text-[0.8125rem] whitespace-nowrap text-ink-soft not-italic'
             style={{
               left: `clamp(4.5rem, ${at}%, calc(100% - 4.5rem))`,
             }}

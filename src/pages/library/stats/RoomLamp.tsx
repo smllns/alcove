@@ -1,4 +1,4 @@
-import type { Decor } from '../places/drawing/decor';
+import type { Decor } from '@/shared/ui/drawing/decor';
 import { hangingLamp, roomOutline } from './drawingKit';
 
 // A room's lamp as the places furnish it (decor.ts), drawn with their

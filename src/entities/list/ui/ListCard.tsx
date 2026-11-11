@@ -45,7 +45,7 @@ export function ListCard({
         ))}
       </span>
       <span className='min-w-0 flex-1'>
-        <span className='block truncate font-serif text-[17px] leading-snug tracking-[-0.01em] text-ink'>
+        <span className='block truncate font-serif text-[1.0625rem] leading-snug tracking-[-0.01em] text-ink'>
           {name}
         </span>
         <span className='mt-0.5 block truncate text-xs text-muted'>

@@ -6,7 +6,7 @@ import { FloatingBar } from '@/shared/ui/FloatingBar';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
 import { Arriving } from '../Arriving';
 import { BookRow } from '../BookRow';
-import { BookSection } from '../BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { asRowBook } from '../useTheirOthers';
 import { SameBookDialog } from './SameBookDialog';
 import { useSameBook } from './useSameBook';
@@ -45,7 +45,7 @@ export function AuthorBooks({
             setAsked(work);
             setAsking(true);
           }}
-          className='cursor-pointer rounded-full bg-surface/90 px-2.5 py-1 text-[11px] text-ink shadow-[0_4px_10px_-4px_rgb(var(--shade)/0.5)] backdrop-blur-sm transition-colors duration-300 ease-soft hover:bg-surface'
+          className='cursor-pointer rounded-full bg-surface/90 px-2.5 py-1 text-xs text-ink shadow-[0_4px_10px_-4px_rgb(var(--shade)/0.5)] backdrop-blur-sm transition-colors duration-300 ease-soft hover:bg-surface'
         >
           I have this
         </button>
@@ -56,13 +56,13 @@ export function AuthorBooks({
   return (
     <>
       <Arriving ready={known && theirs.length > 0}>
-        <BookSection title='On your shelves'>
+        <TitledSection title='On your shelves'>
           <BookRow books={theirs.map(asRowBook)} ours byline={false} grid />
-        </BookSection>
+        </TitledSection>
       </Arriving>
       {children}
       <Arriving ready={more.length > 0}>
-        <BookSection title='Not on your shelves yet'>
+        <TitledSection title='Not on your shelves yet'>
           <BookRow
             books={folds ? more.slice(0, FIRST) : more}
             byline={false}
@@ -89,7 +89,7 @@ export function AuthorBooks({
               </MoreToggle>
             </>
           )}
-        </BookSection>
+        </TitledSection>
       </Arriving>
       <SameBookDialog
         work={asked}

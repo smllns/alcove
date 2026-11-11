@@ -145,6 +145,9 @@ export function SearchDialog({
             onWork={(work) => go(paths.work(work.workKey), { work })}
             onAuthor={booksBy}
             onList={go}
+            onReader={(username, you) =>
+              go(you ? paths.profile : paths.reader(username))
+            }
           />
         </SmoothHeight>
       </div>

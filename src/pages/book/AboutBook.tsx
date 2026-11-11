@@ -10,7 +10,7 @@ import { FormError } from '@/shared/ui/FormError';
 import { AddButton } from '@/shared/ui/ListControls';
 import { SmoothHeight } from '@/shared/ui/SmoothHeight';
 import { aboutTextClass } from './aboutText';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { EditingHint } from '@/shared/ui/EditingHint';
 import { InlineEditor } from '@/shared/ui/InlineEditor';
 import { useWriteInPlace } from '@/shared/lib/useWriteInPlace';
@@ -33,7 +33,7 @@ export function AboutBook({ book }: { book: Book }) {
   };
 
   return (
-    <BookSection title='What it’s about'>
+    <TitledSection title='What it’s about'>
       {/* Text, the box to write it in, or the ways to start: one gives
           way to the next softly */}
       <SmoothHeight>
@@ -53,7 +53,7 @@ export function AboutBook({ book }: { book: Book }) {
             <Fold className={aboutTextClass}>{description}</Fold>
           ) : (
             <div>
-              <p className='text-[15px] text-muted'>
+              <p className='text-[0.9375rem] text-muted'>
                 Nothing about the story yet.
               </p>
               <div className='mt-2 flex flex-wrap gap-x-6'>
@@ -88,6 +88,6 @@ export function AboutBook({ book }: { book: Book }) {
       </SmoothHeight>
       <EditingHint show={writing !== null} />
       <FormError message={error} small className='mt-2' />
-    </BookSection>
+    </TitledSection>
   );
 }

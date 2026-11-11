@@ -14,6 +14,8 @@ import { FeaturedListPage } from '@/pages/library/lists/FeaturedListPage';
 import { ListPage } from '@/pages/library/lists/ListPage';
 import { ReadersListPage } from '@/pages/library/lists/ReadersListPage';
 import { SharedListPage } from '@/pages/library/lists/SharedListPage';
+import { ReaderBooksPage } from '@/pages/library/reader/ReaderBooksPage';
+import { ReaderPage } from '@/pages/library/reader/ReaderPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { SettingsPage } from '@/pages/settings/SettingsPage';
 import { WelcomePage } from '@/pages/welcome/WelcomePage';
@@ -60,6 +62,11 @@ export const router = createBrowserRouter([
           {
             path: paths.readersList(':owner', ':id'),
             element: <ReadersListPage />,
+          },
+          { path: paths.reader(':username'), element: <ReaderPage /> },
+          {
+            path: paths.readerBooks(':username'),
+            element: <ReaderBooksPage />,
           },
           { path: paths.settings, element: <SettingsPage /> },
           { path: paths.welcome, element: <WelcomePage /> },

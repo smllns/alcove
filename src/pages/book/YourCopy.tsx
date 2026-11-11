@@ -11,7 +11,7 @@ import { labelClass } from '@/shared/ui/fieldStyles';
 import { FormError } from '@/shared/ui/FormError';
 import { StepSlider } from '@/shared/ui/StepSlider';
 import { outlineCardClass } from '@/shared/ui/surfaces';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { CopyStory } from './CopyStory';
 import { copyStory } from './copyMoments';
 import { PlaceTrail } from './PlaceTrail';
@@ -29,7 +29,7 @@ export function YourCopy({ book }: { book: Book }) {
   const away = copy?.nonPhysical;
 
   return (
-    <BookSection title={away ? 'Your reading' : 'Your copy'}>
+    <TitledSection title={away ? 'Your reading' : 'Your copy'}>
       <div className='flex flex-col gap-8'>
         {/* Where it is and what shape it's in, on one card, a rule
             between them */}
@@ -42,7 +42,7 @@ export function YourCopy({ book }: { book: Book }) {
           {away && (
             <p className='flex flex-col gap-1.5'>
               <span className={labelClass}>How you read it</span>
-              <span className='font-serif text-[17px] text-ink'>
+              <span className='font-serif text-[1.0625rem] text-ink'>
                 {nonPhysicalLabel(away)}
               </span>
             </p>
@@ -66,7 +66,7 @@ export function YourCopy({ book }: { book: Book }) {
                   )}
                 </>
               ) : (
-                <p className='font-serif text-[17px] text-ink'>
+                <p className='font-serif text-[1.0625rem] text-ink'>
                   {copy?.location}
                 </p>
               )}
@@ -90,6 +90,6 @@ export function YourCopy({ book }: { book: Book }) {
         </div>
         {moments.length > 0 && <CopyStory moments={moments} />}
       </div>
-    </BookSection>
+    </TitledSection>
   );
 }

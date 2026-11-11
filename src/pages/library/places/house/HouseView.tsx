@@ -1,10 +1,10 @@
 import { useRef } from 'react';
-import { LOOSE, type HomeBooks } from '../arrange';
-import { atticOf, furnish } from '../drawing/decor';
+import { LOOSE, type HomeBooks } from '@/entities/place/arrange';
+import { atticOf, furnish } from '@/shared/ui/drawing/decor';
 import { HouseRoom } from './HouseRoom';
 import { useCurrentRoom } from './useCurrentRoom';
 import { HouseSketch } from './HouseSketch';
-import { SLAB, UNDER } from '../drawing/section';
+import { SLAB, UNDER } from '@/shared/ui/drawing/section';
 import { HouseAttic } from './HouseAttic';
 import { PHONE, useMediaQuery } from '@/shared/lib/useMediaQuery';
 

@@ -15,7 +15,12 @@ import { FirstList } from './FirstList';
 import { SavedLists, SavedStacks } from './SavedLists';
 import { isOwn, listedBooks } from './listedBooks';
 import { ListsFinder } from './ListsFinder';
-import { floorClass, ListStack, stackClass, stacksClass } from './ListStack';
+import {
+  floorClass,
+  ListStack,
+  stackClass,
+  stacksClass,
+} from '@/widgets/list-pile';
 import { WANT_LIST } from '@/entities/list/names';
 
 // Every list of the reader's, each a pile of its books standing on the

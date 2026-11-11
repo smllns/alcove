@@ -1,6 +1,8 @@
 // What's written under a drawing, as under an architect's: a scale bar of
 // three metres (`metre` units each) on the left, and on the right the
-// title block, a ruled box of what's drawn in figures
+// title block, a ruled box of what's drawn in figures. Its words in 9
+// units: the drawings it's under are shown a third larger or more, so
+// they come to 12px at the least on the screen.
 export function TitleBlock({
   y,
   width,
@@ -34,7 +36,7 @@ export function TitleBlock({
             key={label}
             x={m * metre - (m ? 3 : 0)}
             y='14'
-            className='text-[8px]'
+            className='text-[9px]'
             fontFamily='ui-monospace, Menlo, monospace'
           >
             {label}
@@ -58,7 +60,7 @@ export function TitleBlock({
           <text
             x={left + i * cell + 10}
             y={y + 14}
-            className='fill-muted text-[7.5px] tracking-[0.18em] uppercase'
+            className='fill-muted text-[9px] tracking-[0.14em] uppercase'
           >
             {name}
           </text>

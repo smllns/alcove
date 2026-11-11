@@ -1,6 +1,6 @@
 import { request } from '@/shared/api/http';
 import type { AuthorAsk } from './authorAsk';
-import type { SimilarBook } from './types';
+import type { CatalogueWork, SimilarBook } from './types';
 
 // What's asked about a writer for their page: their books in the
 // catalogue, the most read first, with the ids of those on the reader's
@@ -34,3 +34,12 @@ export const fetchWorkTitles = async (ask: AuthorAsk) => {
   return (await request<{ titles: string[] }>(`/lookup/work-titles?${params}`))
     .titles;
 };
+
+// A writer's books as alcove's other readers have them (users/sharedBooks.ts
+// on the server)
+export const fetchSharedBooksBy = async (name: string) =>
+  (
+    await request<{ works: CatalogueWork[] }>(
+      `/users/books-by?${new URLSearchParams({ name })}`,
+    )
+  ).works;

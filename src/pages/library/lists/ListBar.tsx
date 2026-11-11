@@ -8,7 +8,7 @@ import {
   FloatingBar,
   PickedTally,
 } from '@/shared/ui/FloatingBar';
-import type { Arranging } from '../places/shelf/arranging';
+import type { Arranging } from '@/features/move-books';
 
 // How long the word that books were taken out stays, with its undo
 const TOLD = 6000;

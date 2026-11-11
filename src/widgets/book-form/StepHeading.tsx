@@ -70,7 +70,7 @@ export function StepHeading({
                   : 'text-ink-soft hover:bg-ink/5 hover:text-ink',
               )}
             >
-              <span className='block font-serif text-[17px] tracking-[-0.01em]'>
+              <span className='block font-serif text-[1.0625rem] tracking-[-0.01em]'>
                 {names[each]}
               </span>
               <span

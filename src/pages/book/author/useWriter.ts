@@ -9,6 +9,8 @@ import { authorQuery, useAuthorSearch } from '@/entities/book/catalogueQueries';
 import type { CatalogueAuthor } from '@/entities/book/types';
 import { useWriterBooks } from '@/entities/book/useWriterBooks';
 import { sameWriter } from '@/entities/book/writers';
+import { catalogueBook } from '@/entities/book/catalogueBook';
+import { useSharedBooksBy } from '@/entities/book/sharedWorks';
 import { settled } from '@/shared/lib/settled';
 
 // How many of the reader's books by them they're asked about by
@@ -29,14 +31,18 @@ const told = (author: CatalogueAuthor | null | undefined) =>
 // known of them. One book can know them poorly (the catalogue may keep a
 // writer for an edition as a bare name, nothing else), so they're asked
 // about by a few: the book the page was opened from, if it was, then those
-// the reader has that they wrote first, the catalogue's first; the answer
+// the reader has that they wrote first (none, those alcove's other readers
+// have), the catalogue's first; the answer
 // that tells most is theirs. Their key in the catalogue, for their books
 // there: as that says, or else found by their name.
 export function useWriter(name: string) {
   const { books: theirs, known } = useWriterBooks(name);
   const handed = (useLocation().state as WriterPageState | null)?.ask;
+  // None of the reader's own: those alcove's other readers have
+  const shared = useSharedBooksBy(name);
+  const others = (shared.data ?? []).map(catalogueBook);
 
-  const firsts = theirs.filter((book) =>
+  const firsts = (theirs.length ? theirs : others).filter((book) =>
     sameWriter(book.authors[0] ?? '', name),
   );
   const leads = [
@@ -45,7 +51,7 @@ export function useWriter(name: string) {
   ].map(authorAskOf);
   const asks: AuthorAsk[] = [
     ...(handed ? [handed] : []),
-    ...(!known
+    ...(!known || (!theirs.length && !settled(shared))
       ? []
       : leads.length
         ? leads
@@ -79,6 +85,8 @@ export function useWriter(name: string) {
 
   return {
     theirs,
+    // Their books as alcove's other readers have them
+    shared,
     known,
     author,
     waiting: !heard,

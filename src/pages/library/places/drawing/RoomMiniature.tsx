@@ -1,7 +1,7 @@
 import { cn } from '@/shared/lib/cn';
 import type { Book } from '@/entities/book/types';
 import { MiniSpine } from '@/entities/book/ui/MiniSpine';
-import type { UnitBooks } from '../arrange';
+import type { UnitBooks } from '@/entities/place/arrange';
 
 // The most books a shelf shows in the plan
 const SHOWN = 28;

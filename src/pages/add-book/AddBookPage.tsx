@@ -7,7 +7,11 @@ import type {
 } from '@/entities/book/types';
 import { InnerPage } from '@/shared/ui/InnerPage';
 import { Eyebrow, Lead, PageTitle } from '@/shared/ui/PageHeading';
-import { catalogueBook, isTyped } from '@/entities/book/catalogueBook';
+import {
+  catalogueBook,
+  isReadersOwn,
+  isTyped,
+} from '@/entities/book/catalogueBook';
 import {
   BookForm,
   draftFromBook,
@@ -25,8 +29,9 @@ type Step =
   | {
       kind: 'manual';
       isbn?: string;
-      // Begun from a printing alcove knows, or from a book typed into
-      // lists by hand (`typed`, its key there), now on the shelves
+      // Begun from a printing alcove knows, from a book typed into lists
+      // by hand (`typed`, its key there), now on the shelves, or from
+      // another reader's own, all that's known of it filled in
       draft?: ReturnType<typeof draftFromOurs>;
       typed?: string;
     };
@@ -39,11 +44,11 @@ function startOf({ work, isbnEdition, byHand }: AddBookState): Step {
       draft: { fields: { ...emptyFields, title: byHand }, extras: {} },
     };
   if (!work) return { kind: 'search' };
-  if (isTyped(work.workKey))
+  if (isTyped(work.workKey) || isReadersOwn(work.workKey))
     return {
       kind: 'manual',
       draft: draftFromBook(catalogueBook(work)),
-      typed: work.workKey,
+      typed: isTyped(work.workKey) ? work.workKey : undefined,
     };
   return { kind: 'picked', work, isbnEdition };
 }
@@ -56,10 +61,14 @@ export function AddBookPage() {
   const [step, setStep] = useState<Step>(() => startOf(found ?? {}));
   const back = () => setStep({ kind: 'search' });
   const into = useAddInto(found?.into);
+  // Another reader's own (found among theirs): its form, all that's known
+  // of it filled in, for the library or a list alike
   const pick = (work: CatalogueWork, isbnEdition?: CatalogueEdition) =>
-    into.only
-      ? into.keepWork(work)
-      : setStep({ kind: 'picked', work, isbnEdition });
+    isReadersOwn(work.workKey)
+      ? setStep(startOf({ work }))
+      : into.only
+        ? into.keepWork(work)
+        : setStep({ kind: 'picked', work, isbnEdition });
 
   return (
     <InnerPage width='lg' fit={step.kind === 'search'}>

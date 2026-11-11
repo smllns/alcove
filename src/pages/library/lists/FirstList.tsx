@@ -1,5 +1,5 @@
 import { cn } from '@/shared/lib/cn';
-import { stackNameClass, stacksClass } from './ListStack';
+import { stackNameClass, stacksClass } from '@/widgets/list-pile';
 
 // Where the reader's lists stand while there are none: in the first of
 // their places, the place of a pile on a floor drawn faint, "01 Your

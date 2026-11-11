@@ -1,10 +1,10 @@
 import { counted } from '@/shared/lib/plural';
 import { cn } from '@/shared/lib/cn';
-import type { RoomBooks } from '../arrange';
-import type { Decor } from '../drawing/decor';
+import type { RoomBooks } from '@/entities/place/arrange';
+import type { Decor } from '@/shared/ui/drawing/decor';
 import { MiniBookcase, MiniPile } from '../drawing/RoomMiniature';
-import { RoomFloor } from '../drawing/RoomFloor';
-import { RoomLight, WallDecor } from '../drawing/WallDecor';
+import { RoomFloor } from '@/shared/ui/drawing/RoomFloor';
+import { RoomLight, WallDecor } from '@/shared/ui/drawing/WallDecor';
 
 // One room in the section through its home: labelled with its number,
 // name and how many books it holds, its bookcases standing on its floor,
@@ -41,7 +41,7 @@ export function HouseRoom({
           how many books it holds, faintly if none (clear of a lamp
           hanging there) */}
       <WallDecor decor={decor}>
-        <span className='relative z-3 flex min-w-0 shrink flex-col gap-1 pt-3 text-[10px]'>
+        <span className='relative z-3 flex min-w-0 shrink flex-col gap-1 pt-3 text-xs'>
           <span className='flex min-w-0 items-baseline gap-2 uppercase tracking-[0.16em]'>
             <span className='text-muted'>
               {String(number).padStart(2, '0')}

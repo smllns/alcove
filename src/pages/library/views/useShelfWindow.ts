@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router';
 import type { Book } from '@/entities/book/types';
-import type { Paging } from './MoreBooks';
+import type { Paging } from '@/widgets/book-grid';
 
 // How many books the shelves show at first, and how many more each time
 // the last of them comes into view

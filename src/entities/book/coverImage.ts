@@ -14,16 +14,17 @@ export const coverSeen = (src: string) => seen.has(src);
 export const markCoverSeen = (src: string) => void seen.add(src);
 
 // Warm, muted cloth colours for books without a picture, picked by title so a
-// book always gets the same one
+// book always gets the same one; each dark enough for the light title and
+// author on it to read (4.5:1)
 const cloths = [
   '#7b4837',
   '#5a6870',
   '#6f5947',
-  '#8d7762',
+  '#79644f',
   '#4f5b4a',
   '#7a5a6b',
   '#3f4a5c',
-  '#8a6a3f',
+  '#826237',
 ];
 
 export function clothFor(title: string) {
@@ -35,3 +36,8 @@ export function clothFor(title: string) {
 // The shadow under a cover shown large, as if held up off the page
 export const liftedCover =
   'shadow-[0_30px_50px_-24px_rgb(var(--shade)/calc(0.55*var(--shade-k))),0_3px_8px_rgb(var(--shade)/calc(0.15*var(--shade-k)))]';
+
+// The shadow under a cover in a row or grid of them, and its rise as the
+// book it opens is pointed at (inside a `group`)
+export const risingCover =
+  'shadow-[0_10px_18px_-10px_rgb(var(--shade)/calc(0.5*var(--shade-k)))] transition-transform duration-500 ease-soft group-hover:-translate-y-1';

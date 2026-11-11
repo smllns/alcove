@@ -1,16 +1,18 @@
 import { counted } from '@/shared/lib/plural';
-import { WALL } from '../drawing/section';
+import { WALL } from '@/shared/ui/drawing/section';
 
 // What's drawn under a section through a home, as under an architect's
 // drawing: the ground it stands on, hatched, a line under that ticked at
 // every wall (`walls`, along it) downstairs, a scale bar in one corner and
 // the title block in the other: the home's name, its rooms and books.
-// `width`: the house's; `ground`: how far down the ground is.
+// `width`: the house's; `ground`: how far down the ground is. Drawn at
+// the screen's own scale, so its words are 12px, as small as any text in
+// alcove gets.
 
 const label = {
   fill: 'var(--muted)',
-  fontSize: 8.5,
-  letterSpacing: '0.16em',
+  fontSize: 12,
+  letterSpacing: '0.14em',
 } as const;
 const figures = 'ui-monospace, Menlo, monospace';
 
@@ -30,6 +32,12 @@ export function SectionNotes({
   books: number;
 }) {
   const under = ground + 46;
+  // The title block as wide as it can be beside the scale bar, the name
+  // taking the larger part, cut to the letters that fit (12px capitals,
+  // spaced, take about 9.5 each)
+  const box = Math.min(300, w - 110);
+  const split = Math.round(box * 0.58);
+  const letters = Math.floor((split - 24) / 9.5);
   return (
     <>
       {/* The ground */}
@@ -72,7 +80,7 @@ export function SectionNotes({
       <g
         transform={`translate(0 ${under + 30})`}
         fill='var(--fine)'
-        fontSize='8'
+        fontSize='12'
         fontFamily={figures}
       >
         <rect width='25' height='3' />
@@ -85,36 +93,36 @@ export function SectionNotes({
           strokeWidth='0.6'
         />
         <rect x='50' width='25' height='3' />
-        <text y='14'>0</text>
-        <text x='47' y='14'>
+        <text y='17'>0</text>
+        <text x='50' y='17' textAnchor='middle'>
           1
         </text>
-        <text x='72' y='14'>
+        <text x='71' y='17'>
           2 m
         </text>
       </g>
-      <g transform={`translate(${w - 232} ${under + 18})`}>
+      <g transform={`translate(${w - box} ${under + 18})`}>
         <rect
-          width='232'
-          height='36'
+          width={box}
+          height='48'
           fill='none'
           stroke='var(--fine)'
           strokeWidth='0.6'
         />
         <line
-          x1='132'
-          x2='132'
-          y2='36'
+          x1={split}
+          x2={split}
+          y2='48'
           stroke='var(--fine)'
           strokeWidth='0.6'
         />
-        <text x='10' y='21.5' {...label} fill='var(--ink)' fontSize='9'>
-          {name.toUpperCase().slice(0, 22)}
+        <text x='12' y='28.5' {...label} fill='var(--ink)'>
+          {name.toUpperCase().slice(0, letters)}
         </text>
-        <text x='142' y='15' {...label}>
+        <text x={split + 12} y='20' {...label}>
           {counted(rooms, 'ROOM', 'ROOMS')}
         </text>
-        <text x='142' y='28' {...label}>
+        <text x={split + 12} y='37' {...label}>
           {counted(books, 'BOOK', 'BOOKS')}
         </text>
       </g>

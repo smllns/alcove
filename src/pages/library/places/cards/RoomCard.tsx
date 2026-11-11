@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { captionClass } from '@/shared/ui/fieldStyles';
 import { sheetClass } from '@/shared/ui/surfaces';
-import type { RoomBooks } from '../arrange';
+import type { RoomBooks } from '@/entities/place/arrange';
 
 // The most covers a card shows
 const SHOWN = 7;

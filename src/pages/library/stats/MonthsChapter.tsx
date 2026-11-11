@@ -3,7 +3,7 @@ import type { Book } from '@/entities/book/types';
 import { counted } from '@/shared/lib/plural';
 import { noteClass, sayClass } from './Chapter';
 import { byMonth, cameOn, monthsSoFar, yearsOf } from './growth';
-import { MonthShelf } from './MonthShelf';
+import { MonthShelf } from '@/widgets/book-cards';
 import { monthly } from './sayings';
 import { YearSwitch } from './YearSwitch';
 

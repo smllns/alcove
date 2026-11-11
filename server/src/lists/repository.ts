@@ -125,6 +125,9 @@ export async function changeListWorks(
   if (!list) return 'missing';
   if ((list.works?.length ?? 0) + add.length > MAX_WORKS) return 'full';
   const where = { _id: userId, 'lists.id': id };
+  // Each saying when it was put in, unless it says so already
+  const now = new Date().toISOString();
+  const dated = add.map((work) => ({ addedAt: now, ...work }));
   const out = [...remove, ...add.map((work) => work.workKey)];
   // Each a change of its own, so two made at once both hold
   if (out.length)
@@ -132,7 +135,7 @@ export async function changeListWorks(
       $pull: { 'lists.$.works': { workKey: { $in: out } } },
     });
   await lists().updateOne(where, {
-    ...(add.length && { $push: { 'lists.$.works': { $each: add } } }),
+    ...(add.length && { $push: { 'lists.$.works': { $each: dated } } }),
     $set: { updatedAt: new Date() },
   });
   return 'changed';

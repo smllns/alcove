@@ -1,6 +1,6 @@
 import { seedOf } from '@/shared/lib/seed';
-import type { Decor } from '../places/drawing/decor';
-import { pendants } from '../places/drawing/pieces/lamps';
+import type { Decor } from '@/shared/ui/drawing/decor';
+import { pendants } from '@/shared/ui/drawing/pieces/lamps';
 import { useId } from 'react';
 
 // The pattern and the lights a drawing fills with, named its own way so

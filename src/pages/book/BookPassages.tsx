@@ -1,7 +1,7 @@
 import type { Book } from '@/entities/book/types';
 import { plural } from '@/shared/lib/plural';
 import { BookReview } from './BookReview';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { StickyNotes } from './StickyNotes';
 
 // What the reader has written about the book: their review (once there is
@@ -24,9 +24,9 @@ export function BookPassages({
         starting={reviewing}
         onStarted={onReviewStarted}
       />
-      <BookSection title={plural(notes.length, 'Note')}>
+      <TitledSection title={plural(notes.length, 'Note')}>
         <StickyNotes book={book} />
-      </BookSection>
+      </TitledSection>
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useSimilarBooks } from '@/entities/book/catalogueQueries';
 import type { Book } from '@/entities/book/types';
 import { Arriving } from './Arriving';
 import { BookRow } from './BookRow';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 
 // Books on the same themes to read after this one, from the catalogue
 // (Open Library); more by the same author are with theirs (SameAuthor).
@@ -12,9 +12,9 @@ export function ReadNext({ book }: { book: Book }) {
   const alike = useSimilarBooks(book.openLibrary?.work).data?.alike ?? [];
   return (
     <Arriving ready={alike.length > 0}>
-      <BookSection title='Read next'>
+      <TitledSection title='Read next'>
         <BookRow label='On the same themes' books={alike} />
-      </BookSection>
+      </TitledSection>
     </Arriving>
   );
 }

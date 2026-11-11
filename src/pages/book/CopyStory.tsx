@@ -28,13 +28,13 @@ export function CopyStory({ moments }: { moments: Moment[] }) {
             <p className={captionClass}>
               {day ? dayName(day) : 'Some time ago'}
             </p>
-            <p className='mt-1 font-serif text-[16px] leading-snug text-ink'>
+            <p className='mt-1 font-serif text-base leading-snug text-ink'>
               {what}
             </p>
             {more && (
               <p
                 className={cn(
-                  'mt-0.5 text-[13px] font-medium',
+                  'mt-0.5 text-[0.8125rem] font-medium',
                   urgencies[more.urgency],
                 )}
               >

@@ -1,6 +1,6 @@
 import { copyConditions } from '@/entities/book/conditions';
 import type { Book } from '@/entities/book/types';
-import { byOption } from './tallies';
+import { byOption } from '@/entities/book/tallies';
 
 // What the stats say of the copies themselves: the shape they're in (who
 // published them: publishers.ts)

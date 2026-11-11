@@ -89,9 +89,13 @@ describe('copy stats', () => {
       book({ publisher: 'Поляндрия' }),
       book({ publisher: 'Polyandria NoAge' }),
       book({ publisher: 'Новое литературное обозрение' }),
+      book({ publisher: 'HarperCollins' }),
+      book({ publisher: 'Harper Perennial' }),
+      book({ publisher: 'HarperVia' }),
     ]);
     expect(found.map((row) => [row.name, row.books.length])).toEqual([
       ['Альпина', 3],
+      ['HarperCollins', 3],
       ['Поляндрия', 2],
       ['Новое литературное обозрение', 1],
     ]);

@@ -7,7 +7,7 @@ import { BackToTop } from '@/shared/ui/BackToTop';
 import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { pageWidthClass, sheetClass } from '@/shared/ui/surfaces';
 import { LibraryHeader, LibraryNav } from '@/widgets/library-header';
-import { lightOf } from '../places/drawing/decor';
+import { lightOf } from '@/shared/ui/drawing/decor';
 
 // Around any one list opened, the reader's or one every reader sees: the
 // library's header and tabs, the way back, the pile by its measure on the
@@ -15,7 +15,8 @@ import { lightOf } from '../places/drawing/decor';
 // book's are under its cover, and a way to look for a book in it
 // (`search`) under them, all staying in sight as the books go by; on the
 // right what it's called, what's said about it (`about`), a line of how
-// many and its books (`children`). On
+// many with the way its books are ordered beside it (`order`), and its
+// books (`children`). On
 // a phone, the search comes under the line, the pile under it, and the
 // ways to change it under the pile. While it's `loading`, all of it is
 // drawn bare (the lamp unlit, the title and line as soft bars, its books
@@ -31,6 +32,7 @@ export function ListFrame({
   waiting,
   loading = false,
   search,
+  order,
   lightKey,
   children,
 }: {
@@ -45,6 +47,8 @@ export function ListFrame({
   loading?: boolean;
   // A way to look for a book in it
   search?: ReactNode;
+  // How its books are ordered, to change
+  order?: ReactNode;
   // The list's lamplight, its own colour (ListLamp)
   lightKey: string;
   children: ReactNode;
@@ -120,17 +124,19 @@ export function ListFrame({
                     {about}
                   </div>
                 )}
-                <p
-                  ref={setTop}
-                  className='mt-4 animate-rise text-[15px] text-muted'
+                <div
+                  className='mt-4 flex animate-rise flex-wrap items-center justify-between gap-x-4 gap-y-2'
                   style={{ animationDelay: '120ms' }}
                 >
-                  {loading ? (
-                    <span className='inline-block h-[1em] w-48 rounded-md bg-ink/6 align-middle' />
-                  ) : (
-                    line
-                  )}
-                </p>
+                  <p ref={setTop} className='text-[0.9375rem] text-muted'>
+                    {loading ? (
+                      <span className='inline-block h-[1em] w-48 rounded-md bg-ink/6 align-middle' />
+                    ) : (
+                      line
+                    )}
+                  </p>
+                  {!loading && order}
+                </div>
                 {/* The search before the pile, up where a phone's keyboard
                     leaves it in sight, so the page needn't move for it */}
                 {search && !loading && (

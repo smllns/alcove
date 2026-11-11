@@ -1,6 +1,7 @@
 import { Router, type Request } from 'express';
 import { HttpError } from '../lib/errors.js';
 import { queryText } from '../lib/validation.js';
+import { averageRatings, MOST_AVERAGES } from './averages.js';
 import { featured, featuredList } from './featured.js';
 import {
   checkReadersList,
@@ -22,6 +23,17 @@ listRouter.get('/featured', (_req, res) => {
 });
 listRouter.get('/featured/:id', async (req, res) => {
   res.json({ list: await featuredList(String(req.params.id)) });
+});
+
+// How the catalogue's readers rate a list's books, for ordering it by
+// that: ?works=OL1W,OL2W
+listRouter.get('/averages', async (req, res) => {
+  const works = queryText(req, 'works', MOST_AVERAGES * 16)
+    .split(',')
+    .filter(Boolean);
+  if (works.length > MOST_AVERAGES)
+    throw new HttpError(400, 'too_many', 'That’s a lot of books at once.');
+  res.json({ averages: await averageRatings(works) });
 });
 
 // Lists readers have made on Open Library, by name (readersLists.ts)

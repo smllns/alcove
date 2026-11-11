@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { seedOf } from '@/shared/lib/seed';
-import { ToneSpine } from './ToneSpine';
+import { ToneSpine } from '@/widgets/book-cards';
 
 // Books lying one on another, the top one first, as a list's pile is: each
 // in its cover's colour, its own width, set a little off true, as thick as
@@ -49,7 +49,7 @@ export function Pile({
 // then too; none written over an empty one
 export function PileCount({ count }: { count: number }) {
   return (
-    <span className='mb-4 text-center font-serif text-[13px] text-faint transition-colors duration-500 ease-soft group-hover/books:text-ink'>
+    <span className='mb-4 text-center font-serif text-[0.8125rem] text-faint transition-colors duration-500 ease-soft group-hover/books:text-ink'>
       {count || ''}
     </span>
   );

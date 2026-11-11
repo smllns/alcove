@@ -109,6 +109,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .soft-ring {
-    animation-duration: 3s;
+    animation-duration: 3s !important;
+    animation-iteration-count: infinite !important;
   }
 }

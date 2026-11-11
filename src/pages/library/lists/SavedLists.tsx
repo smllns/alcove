@@ -3,7 +3,7 @@ import { savedOpening } from '@/entities/list/opening';
 import type { SavedList } from '@/entities/list/types';
 import { cn } from '@/shared/lib/cn';
 import { labelClass } from '@/shared/ui/fieldStyles';
-import { ListStack, stackClass, stacksClass } from './ListStack';
+import { ListStack, stackClass, stacksClass } from '@/widgets/list-pile';
 
 // Other readers' lists the reader's kept (SaveListButton), each a pile of
 // the books it had when kept, numbered on from the reader's own

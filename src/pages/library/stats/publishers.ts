@@ -1,8 +1,13 @@
 import { searchable } from '@/entities/book/matches';
 import type { Book } from '@/entities/book/types';
 import { inLatin, misspelt } from '@/shared/lib/spelling';
-import { gather, joined, nameOf, type Gathered } from './sameNames';
-import { byMost, type Tally } from './tallies';
+import {
+  gather,
+  joined,
+  nameOf,
+  type Gathered,
+} from '@/entities/book/sameNames';
+import { byMost, type Tally } from '@/entities/book/tallies';
 
 // Who published the reader's books, each publisher once however its name
 // is written
@@ -49,19 +54,33 @@ function ownWords(name: string) {
 const wordsOf = (name: string) => ownWords(name).map(told);
 const sameWord = (a: string, b: string) => a === b || misspelt(a, b);
 
+// The house a publisher writing its name as one word in two capitals is
+// named by: its first part ("HarperCollins", "HarperVia": Harper)
+function houseOf(name: string) {
+  const joined = /^(\p{Lu}\p{Ll}+)\p{Lu}/u.exec(ownWords(name)[0] ?? '');
+  return joined ? told(joined[1]) : undefined;
+}
+
 // The publishers with their imprints: one whose name is another's with
 // more words after it ("Альпина. Проза", "Penguin Classics") counted with
-// that one ("Альпина", "Penguin Books"), when the reader has that one too
+// that one ("Альпина", "Penguin Books"), and one beginning with the house
+// a publisher's joined name is named by ("Harper Perennial", "HarperVia")
+// with that one ("HarperCollins"), when the reader has that one too
 function withImprints(found: Gathered[]) {
   const told = found
-    .map((each) => ({ each, words: wordsOf(each.first) }))
+    .map((each) => ({
+      each,
+      words: wordsOf(each.first),
+      house: houseOf(each.first),
+    }))
     .sort((a, b) => a.words.length - b.words.length);
   const kept: typeof told = [];
   for (const one of told) {
     const publisher = kept.find(
-      ({ words }) =>
-        words.length < one.words.length &&
-        words.every((word, i) => sameWord(word, one.words[i])),
+      ({ words, house }) =>
+        (words.length < one.words.length &&
+          words.every((word, i) => sameWord(word, one.words[i]))) ||
+        (house !== undefined && house === (one.house ?? one.words[0])),
     );
     if (publisher) joined(publisher.each, one.each);
     else kept.push(one);

@@ -4,8 +4,8 @@ import { cn } from '@/shared/lib/cn';
 import { useLongPress } from '@/shared/lib/useLongPress';
 import { PickMark } from '@/shared/ui/PickMark';
 import { raisedClass } from '@/shared/ui/surfaces';
-import { BookLink } from '../../views/BookLink';
-import { useArrangingHere } from './arranging';
+import { BookLink } from '@/features/open-book';
+import { useArrangingHere } from '@/features/move-books';
 import { Rating } from '@/shared/ui/Rating';
 
 // One book standing face out on a shelf (CoverShelf). Pointed at, it comes

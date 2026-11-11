@@ -121,7 +121,7 @@ function Camera({ onFound }: { onFound: Found }) {
               </span>
             )}
           </span>
-          <p className='relative mt-8 max-w-xs px-6 text-center text-[15px] leading-relaxed text-white text-shadow-[0_1px_8px_rgb(0_0_0/0.8)]'>
+          <p className='relative mt-8 max-w-xs px-6 text-center text-[0.9375rem] leading-relaxed text-white text-shadow-[0_1px_8px_rgb(0_0_0/0.8)]'>
             Hold the barcode on the back of the book inside the frame.
           </p>
           {torch.can && (

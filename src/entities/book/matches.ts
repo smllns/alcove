@@ -1,3 +1,4 @@
+import { writerKey } from './writers';
 import type { Book } from './types';
 
 // Text as search compares it: lower case and without accents, so "exupery"
@@ -44,3 +45,8 @@ export function bookMatches(book: Book, query: string) {
 // and Men", "Книга мёртвых" is "Книга мертвых"
 export const titleKey = (title: string) =>
   searchable(title.split(/[:(]/)[0]).replace(/[^\p{L}\p{N}]/gu, '');
+
+// A book as two readers' copies of it are told to be the same when the
+// catalogue doesn't say: its title and its first writer, however written
+export const sameBookKey = (title: string, authors: string[]) =>
+  `${titleKey(title)}|${writerKey(authors[0] ?? '')}`;

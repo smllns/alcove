@@ -10,7 +10,7 @@ const variants: Record<ButtonVariant, string> = {
   // For things that can't be undone
   danger:
     'min-h-11 [--gap:--spacing(2.5)] border border-danger/60 px-6 py-2.5 text-danger text-shadow-none sm:min-h-12 sm:px-7 sm:py-3 hover:border-danger hover:bg-danger hover:text-button-text',
-  pill: '[--gap:--spacing(2)] border border-line bg-surface/85 px-4 py-2 text-[13px] backdrop-blur-sm sm:px-5 sm:py-2.5 sm:text-sm hover:border-ink',
+  pill: '[--gap:--spacing(2)] border border-line bg-surface/85 px-4 py-2 text-[0.8125rem] backdrop-blur-sm sm:px-5 sm:py-2.5 sm:text-sm hover:border-ink',
 };
 
 // Shared by <Button> and <ButtonLink>, so a link and a button can look alike.

@@ -7,7 +7,7 @@ import type { Book, FeaturedList } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { paths } from '@/shared/config/paths';
 import { labelClass } from '@/shared/ui/fieldStyles';
-import { ListStack, stackClass, stacksClass } from './ListStack';
+import { ListStack, stackClass, stacksClass } from '@/widgets/list-pile';
 
 // Under the reader's own lists, those every reader sees, from Open
 // Library: what's read most this week, and the classics. Each pile comes

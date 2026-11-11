@@ -137,7 +137,7 @@ export async function readersList(owner: string, id: string, page: number) {
   const keys = seeds.slice(page * PAGE, (page + 1) * PAGE);
   const [works, about] = await Promise.all([
     keys.length
-      ? cached(`ollist5:${owner}/${id}:${page}`, DAYS, () => worksByKeys(keys))
+      ? cached(`ollist6:${owner}/${id}:${page}`, DAYS, () => worksByKeys(keys))
       : [],
     page === 0 ? aboutKept(owner, id).catch(() => undefined) : undefined,
   ]);

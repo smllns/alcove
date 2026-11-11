@@ -1,6 +1,6 @@
 import { counted } from '@/shared/lib/plural';
 import { Mark } from './Chapter';
-import type { Tally } from './tallies';
+import type { Tally } from '@/entities/book/tallies';
 import type { byCondition } from './copyStats';
 import { inWords } from './words';
 

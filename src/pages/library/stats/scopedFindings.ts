@@ -1,10 +1,10 @@
 import type { Book } from '@/entities/book/types';
-import { authors } from './favouriteAuthors';
+import { authors } from '@/entities/book/favouriteAuthors';
 import { byDecade, extremes } from './libraryStats';
 import { publishers } from './publishers';
 import { byStars } from './readingStats';
 import { readSpans } from './readingYears';
-import { tally, type Tally } from './tallies';
+import { tally, type Tally } from '@/entities/book/tallies';
 
 // What the chapters that count either the physical books or every one
 // (ScopedChapter) find among `books`; none where there's too little to go on

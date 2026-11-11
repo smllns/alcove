@@ -50,6 +50,9 @@ export const listedWorkSchema = z.object({
   coverUrl: maybe(z.url().refine(coverHost, 'That cover can’t be used.')),
   firstPublishYear: maybe(z.number().int().min(-5000).max(3000)),
   editionCount: maybe(z.number().int().min(0)),
+  averageRating: maybe(z.number().min(0).max(5)),
+  // When it was put in first, for one put back after being taken out
+  addedAt: maybe(z.iso.datetime()),
   isbn: optionalText(20),
   // One typed in by hand: all said of it, put back with it
   details: maybe(wantedBookSchema.omit({ title: true, authors: true })),

@@ -20,7 +20,7 @@ import { useTheirOthers } from './useTheirOthers';
 import { textLinkClass } from '@/shared/ui/buttonStyles';
 
 const bioText =
-  'whitespace-pre-line font-serif text-[15px] leading-relaxed text-ink-soft';
+  'whitespace-pre-line font-serif text-[0.9375rem] leading-relaxed text-ink-soft';
 
 // Who wrote the book, under its title: "by Zora Neale Hurston", a line that
 // never changes, each name leading to that writer's page. Below it, set in a

@@ -11,7 +11,8 @@ import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { FormError } from '@/shared/ui/FormError';
 import { Loading } from '@/shared/ui/Loading';
 import { PageTitle } from '@/shared/ui/PageHeading';
-import { useArranging } from '../places/shelf/arranging';
+import { useArranging } from '@/features/move-books';
+import { ShelfOrderMenu } from '@/widgets/book-order';
 import { ListAbout } from './ListAbout';
 import { ListActions } from './ListActions';
 import { ListBooks } from './ListBooks';
@@ -21,7 +22,8 @@ import { ListLookup } from './ListLookup';
 import { ListName } from './ListName';
 import { isOwn, listedBooks } from './listedBooks';
 import { useListChanges } from './useListChanges';
-import { useListSearch } from './useListSearch';
+import { useListOrder } from '@/widgets/book-order';
+import { useListSearch } from '@/widgets/book-search';
 import { useBegunBooks, useListBeing } from './useListBeing';
 
 // One of the reader's lists opened: its pile by a measure (how many, how
@@ -36,10 +38,10 @@ export function ListPage() {
   const being = useListBeing(id, lists.data?.lists);
   const { list, begun } = being;
   const navigate = useTransitionNavigate();
-  // With those put in it as it's being begun
+  // With those put in it as it's being begun, the newest first
   const books = [
+    ...being.early.map((each) => each.book).toReversed(),
     ...listedBooks(list, shelf.all),
-    ...being.early.map((each) => each.book),
   ];
   const own = books.filter(isOwn).length;
   // Changing it, its name and what's in it: its books picked, to take
@@ -50,7 +52,9 @@ export function ListPage() {
   // A book in it looked for; changing it shows it whole
   const search = useListSearch(books, (book) => book);
   if (editing.on && search.query) search.setQuery('');
-  const changes = useListChanges(list, search.found);
+  const order = useListOrder(books);
+  const shown = order.sort(search.found);
+  const changes = useListChanges(list, shown);
   const { frame, takeOut } = changes;
   const { putIn, putWork } = useBegunBooks(being, changes);
   const change = useChangeList();
@@ -118,6 +122,7 @@ export function ListPage() {
             } in your library`
           : 'No books in it yet'
       }
+      order={books.length > 1 && <ShelfOrderMenu {...order.menu} />}
       ruler={
         <ListLamp
           books={books}
@@ -164,7 +169,7 @@ export function ListPage() {
       {list && (
         <ListBooks
           books={books}
-          shown={search.found}
+          shown={shown}
           asked={search.asked}
           editing={editing}
           frame={frame}

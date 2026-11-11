@@ -16,7 +16,12 @@ describe('finding readers', () => {
       await api(`/users/search?q=@${tag}`, { cookie: me.cookie })
     ).body.readers;
     expect(byHandle).toEqual([
-      { username: anna.username, name: 'Anna Petrova', you: false },
+      {
+        username: anna.username,
+        name: 'Anna Petrova',
+        avatarUrl: null,
+        you: false,
+      },
     ]);
 
     const byName = (await api('/users/search?q=petrova', { cookie: me.cookie }))
@@ -31,7 +36,12 @@ describe('finding readers', () => {
     const [found] = (
       await api(`/users/search?q=${me.username}`, { cookie: me.cookie })
     ).body.readers;
-    expect(found).toEqual({ username: me.username, name: null, you: true });
+    expect(found).toEqual({
+      username: me.username,
+      name: null,
+      avatarUrl: null,
+      you: true,
+    });
   });
 
   it('is only for those signed in', async () => {

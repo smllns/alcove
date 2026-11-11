@@ -21,7 +21,7 @@ import { StackChapter } from './StackChapter';
 import { LengthPiles } from './LengthPiles';
 import { ScopedChapter } from './ScopedChapter';
 import { scopedFindings, type Findings } from './scopedFindings';
-import type { ShelfShow } from '../views/order';
+import type { ShelfShow } from '@/widgets/book-order';
 
 // What the reader's library says about them, as an almanac: chapter after
 // chapter down the page, each one sentence and one drawing, in the places'

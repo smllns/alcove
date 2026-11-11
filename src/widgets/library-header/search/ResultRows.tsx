@@ -2,10 +2,10 @@ import type { ReactNode } from 'react';
 import type { AuthorFound, Book, CatalogueWork } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
 import { ownBookLine } from '@/entities/book/ui/ownBookLine';
-import { handle, type Reader } from '@/entities/user/types';
+import type { Reader } from '@/entities/user/types';
+import { ReaderLine } from '@/entities/user/ui/ReaderLine';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
-import { Avatar } from '@/shared/ui/Avatar';
 import { RoundPhoto } from '@/shared/ui/RoundPhoto';
 
 const rowClass =
@@ -112,27 +112,24 @@ export function WorkRow({
   );
 }
 
-// Another reader. Their page is still to come, so for now they're only
-// found, not opened.
+// Another reader (or the reader themself), opening their page
 export function ReaderRow({
   reader,
   order,
+  onOpen,
 }: {
   reader: Reader;
   order: number;
+  onOpen: () => void;
 }) {
-  const shownAs = handle(reader.username);
   return (
-    <Row hint={reader.you ? 'You' : undefined} noted order={order}>
-      <Avatar name={reader.name ?? shownAs} />
-      <span className='min-w-0'>
-        <span className='block truncate text-sm text-ink'>
-          {reader.name ?? shownAs}
-        </span>
-        {reader.name && (
-          <span className='block truncate text-xs text-muted'>{shownAs}</span>
-        )}
-      </span>
+    <Row
+      onClick={onOpen}
+      hint={reader.you ? 'You' : 'Their page'}
+      noted={reader.you}
+      order={order}
+    >
+      <ReaderLine reader={reader} />
     </Row>
   );
 }

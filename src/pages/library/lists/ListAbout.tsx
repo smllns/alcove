@@ -7,7 +7,7 @@ import { editBoxClass } from './ListName';
 
 // What's said about a list as it's set under its name, folded if it's long
 const aboutClass =
-  'whitespace-pre-line font-serif text-[17px] leading-relaxed text-ink/85';
+  'whitespace-pre-line font-serif text-[1.0625rem] leading-relaxed text-ink/85';
 
 // What's said about a list, under its name: nothing at all when nothing
 // is. The reader's own, while it's being changed (`editing`), a soft box

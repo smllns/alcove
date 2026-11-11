@@ -1,7 +1,7 @@
 import { useState, type RefObject } from 'react';
 import type { Book } from '@/entities/book/types';
-import type { Arranging } from '../places/shelf/arranging';
-import { BookGrid } from '../views/BookGrid';
+import type { Arranging } from '@/features/move-books';
+import { BookGrid } from '@/widgets/book-grid';
 import { ListBar } from './ListBar';
 import { NoneFound } from './ListSearch';
 
@@ -42,11 +42,12 @@ export function ListBooks({
           rise={(book) => first.has(book.id)}
           removable={false}
           picking={editing}
+          average
         />
       ) : asked ? (
         <NoneFound />
       ) : (
-        <p className='text-[15px] text-muted'>
+        <p className='text-[0.9375rem] text-muted'>
           {editing.on
             ? 'Nothing in it yet. Find books to put in it.'
             : 'Nothing in it yet. Choose Edit list to put books in it.'}

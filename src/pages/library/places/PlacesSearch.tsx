@@ -1,7 +1,7 @@
 import type { Book } from '@/entities/book/types';
 import { placePath } from '@/entities/place/names';
 import type { Home } from '@/entities/place/types';
-import { ShelfFinder } from '../views/ShelfFinder';
+import { ShelfFinder } from '@/widgets/book-search';
 
 // A book looked for by its title or writer among all the reader's books,
 // each found shown by its cover with where it is, one picked found there

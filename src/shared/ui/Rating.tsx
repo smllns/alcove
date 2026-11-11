@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Star } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { halves } from '@/shared/lib/halves';
 import { GoldStar } from './Stars';
@@ -29,6 +30,31 @@ export function Rating({
       <span>
         {halves(value)}
         {outOfFive}
+      </span>
+    </span>
+  );
+}
+
+// How readers at large rate a book, beside it where the reader's own stars
+// would be, quieter than those: a hollow star, the average to a tenth and
+// "avg", "☆ 4.1 avg"
+export function AverageRating({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) {
+  const shown = value.toFixed(1);
+  return (
+    <span
+      role='img'
+      aria-label={`On average ${shown} out of 5 stars`}
+      className={cn('inline-flex items-center gap-0.5 text-muted', className)}
+    >
+      <Star size={14} strokeWidth={1.5} className='size-[0.95em] text-faint' />
+      <span>
+        {shown} <span className='text-faint'>avg</span>
       </span>
     </span>
   );

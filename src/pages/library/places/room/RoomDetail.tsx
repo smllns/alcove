@@ -2,7 +2,7 @@ import { cn } from '@/shared/lib/cn';
 import { captionClass } from '@/shared/ui/fieldStyles';
 import type { Book } from '@/entities/book/types';
 import { CoverShelf } from '../shelf/CoverShelf';
-import { SectionTag } from '../drawing/SectionTag';
+import { SectionTag } from '@/shared/ui/drawing/SectionTag';
 import { ShelfSheet } from '../shelf/ShelfSheet';
 
 // One bookcase of a room drawn again on its own, large, as a detail on an

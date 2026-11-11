@@ -2,8 +2,8 @@ import type { Book } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
 import { ownBookLine } from '@/entities/book/ui/ownBookLine';
 import { Spinner } from '@/shared/ui/Spinner';
-import { BookLink } from './BookLink';
-import { FoundPanel, foundRowClass } from './FoundPanel';
+import { BookLink } from '@/features/open-book';
+import { FoundPanel, foundRowClass } from '@/widgets/book-search';
 
 // What a search found, as a list dropping down under the search field. On
 // a phone, where the keyboard leaves too little of the page in view to

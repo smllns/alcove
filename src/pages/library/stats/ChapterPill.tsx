@@ -39,7 +39,7 @@ export function ChapterPill({
         )}
       >
         <ChapterTag number={at + 1} />
-        <span className='truncate font-serif text-[15px] text-ink'>
+        <span className='truncate font-serif text-[0.9375rem] text-ink'>
           {parts[at]?.label}
         </span>
         <ChevronUp

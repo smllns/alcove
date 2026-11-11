@@ -12,24 +12,29 @@ import { BackToTop } from '@/shared/ui/BackToTop';
 import {
   LibraryHeader,
   LibraryNav,
+  sections,
   type SectionKey,
 } from '@/widgets/library-header';
-import { ComingSoon } from './ComingSoon';
 import { EmptyShelf } from './EmptyShelf';
 import { LibraryBooks } from './LibraryBooks';
 import { ListsSection } from './lists/ListsSection';
+import { ProfileSection } from './reader/ProfileSection';
 import { PlacesSection } from './places/PlacesSection';
 import { StatsSection } from './stats/StatsSection';
 import { useShelf } from '@/entities/book/useShelf';
 import { useBookView } from './views/views';
-import { keptBy, needsEveryBook } from './views/order';
-import { useShelfOrder } from './views/useShelfOrder';
+import { keptBy, needsEveryBook } from '@/widgets/book-order';
+import { useShelfOrder } from '@/widgets/book-order';
 import { ShelfToolbar } from './ShelfToolbar';
 import { ViewStage } from './ViewStage';
-import { useShelfSearch } from './views/useShelfSearch';
+import { useShelfSearch } from '@/features/open-book';
 import { FormError } from '@/shared/ui/FormError';
 import { Loading } from '@/shared/ui/Loading';
 import { pageWidthClass } from '@/shared/ui/surfaces';
+
+// The sections with a heading of their own (the rest are given one, unseen,
+// named as their tab is)
+const titled = new Set<SectionKey>(['stats', 'profile']);
 
 // One page for every section, so the header and tabs stay put while the
 // section underneath changes
@@ -150,6 +155,13 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
             ) : (
               <div className='mt-8 sm:mt-12 xl:mt-16'>
                 <span ref={setSectionTop} aria-hidden className='block' />
+                {/* Named for those who hear the page, as its tab names it;
+                    the stats and the profile have headings of their own */}
+                {!titled.has(section) && (
+                  <h1 className='sr-only'>
+                    {sections.find((each) => each.key === section)?.label}
+                  </h1>
+                )}
                 {section === 'places' ? (
                   <PlacesSection shelf={shelf} />
                 ) : section === 'lists' ? (
@@ -157,7 +169,7 @@ export function LibraryPage({ section = 'all' }: { section?: SectionKey }) {
                 ) : section === 'stats' ? (
                   <StatsSection shelf={shelf} />
                 ) : (
-                  <ComingSoon section={section} />
+                  <ProfileSection />
                 )}
               </div>
             )}

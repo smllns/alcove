@@ -2,10 +2,10 @@ import type { CSSProperties } from 'react';
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
-import type { Thing } from '../drawing/decor';
-import { Piece } from '../drawing/Piece';
+import type { Thing } from '@/shared/ui/drawing/decor';
+import { Piece } from '@/shared/ui/drawing/Piece';
 import { MiniPiles } from '../drawing/RoomMiniature';
-import { SLAB } from '../drawing/section';
+import { SLAB } from '@/shared/ui/drawing/section';
 
 // A home's attic, under its roof. With books in it (kept in the home but
 // in no room): a pile of them, labelled as the rooms are, under a lamp
@@ -37,7 +37,7 @@ export function HouseAttic({
       <Piece thing={lamp} />
     </span>
   );
-  const label = 'text-[10px] uppercase tracking-[0.16em]';
+  const label = 'text-xs uppercase tracking-[0.16em]';
   if (!books.length)
     return (
       <div
@@ -63,7 +63,7 @@ export function HouseAttic({
         {hanging}
         <span className='relative flex min-w-0 max-w-full items-end gap-3 px-8'>
           {/* As the rooms are labelled: its name, its books under it */}
-          <span className='flex flex-col items-start gap-1 pb-3 text-[10px]'>
+          <span className='flex flex-col items-start gap-1 pb-3 text-xs'>
             <span className='uppercase tracking-[0.16em] text-ink'>
               Not sorted
             </span>

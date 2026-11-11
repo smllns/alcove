@@ -58,7 +58,7 @@ export function Almanac({
   return (
     <div className='grid w-full lg:grid-cols-[15rem_1fr] lg:gap-16 xl:gap-24'>
       <div className='lg:sticky lg:top-24 lg:self-start xl:top-10'>
-        <Eyebrow rise={0} className='whitespace-nowrap lg:text-[10px]'>
+        <Eyebrow rise={0} className='whitespace-nowrap lg:text-xs'>
           Your library · {counted(total, 'book')}
         </Eyebrow>
         <PageTitle size='xs' rise={60} className='mt-2'>

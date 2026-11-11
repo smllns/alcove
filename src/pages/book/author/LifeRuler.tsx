@@ -60,7 +60,7 @@ function Mark({
       <span className={cn('w-px bg-ink-soft/70', strong ? 'h-2.5' : 'h-1.5')} />
       <span
         className={cn(
-          'mt-1 whitespace-nowrap text-[11px] tabular-nums',
+          'mt-1 whitespace-nowrap text-xs tabular-nums',
           strong ? 'text-ink-soft' : 'text-faint',
         )}
       >

@@ -15,12 +15,21 @@ import { passwordAttempts } from '../lib/rateLimit.js';
 import { parseBody } from '../lib/validation.js';
 import { deleteLists } from '../lists/repository.js';
 import { deletePlaces } from '../places/repository.js';
-import { deleteAllCovers } from '../uploads/storage.js';
+import { deleteFollows, letAllIn } from '../users/follows.js';
+import { privacyOf } from '../users/privacy.js';
 import {
+  deleteAllCovers,
+  discardCover,
+  isOwnCover,
+} from '../uploads/storage.js';
+import {
+  aboutSchema,
+  avatarSchema,
   deleteSchema,
   emailSchema,
   nameSchema,
   passwordSchema,
+  privacySchema,
   usernameSchema,
 } from './schemas.js';
 
@@ -45,6 +54,34 @@ const emailTaken = () =>
 accountRouter.patch('/name', async (req, res) => {
   const { name } = parseBody(nameSchema, req.body);
   const user = await updateUser(currentUser(req)._id, { name });
+  res.json({ user: toPublicUser(user!) });
+});
+
+accountRouter.patch('/about', async (req, res) => {
+  const { about } = parseBody(aboutSchema, req.body);
+  const user = await updateUser(currentUser(req)._id, { about });
+  res.json({ user: toPublicUser(user!) });
+});
+
+// Their photo changed, or taken away; the one before thrown away
+accountRouter.patch('/avatar', async (req, res) => {
+  const { url } = parseBody(avatarSchema, req.body);
+  const me = currentUser(req);
+  if (url && !isOwnCover(me._id, url))
+    throw new HttpError(400, 'not_yours', 'Upload the photo here first.');
+  const user = await updateUser(me._id, { avatarUrl: url ?? '' });
+  if (me.avatarUrl && me.avatarUrl !== url)
+    await discardCover(me._id, me.avatarUrl).catch(() => {});
+  res.json({ user: toPublicUser(user!) });
+});
+
+// Who sees what; a page opened to everyone lets in all who were asking
+accountRouter.patch('/privacy', async (req, res) => {
+  const change = parseBody(privacySchema, req.body);
+  const me = currentUser(req);
+  const privacy = { ...privacyOf(me), ...change };
+  const user = await updateUser(me._id, { privacy });
+  if (change.page === 'open') await letAllIn(me._id);
   res.json({ user: toPublicUser(user!) });
 });
 
@@ -78,13 +115,15 @@ accountRouter.delete('/', passwordAttempts, async (req, res) => {
   const me = currentUser(req);
   await confirmPassword(me, password, 'password');
   await endAllSessions(res, me._id);
-  // Their books and photos go with them
+  // Their books and photos go with them: the photos last, once nothing of
+  // theirs uses them (those another reader added with a book stay)
   await Promise.all([
     deleteAllBooks(me._id),
     deletePlaces(me._id),
     deleteLists(me._id),
-    deleteAllCovers(me._id).catch(() => {}),
+    deleteFollows(me._id),
   ]);
   await deleteUser(me._id);
+  await deleteAllCovers(me._id).catch(() => {});
   res.status(204).end();
 });

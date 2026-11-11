@@ -4,16 +4,16 @@ import { counted } from '@/shared/lib/plural';
 import { usePageTurned } from '@/shared/lib/usePageTurned';
 import { BackArrowIcon } from '@/shared/ui/ArrowIcon';
 import { Button } from '@/shared/ui/Button';
-import type { RoomBooks } from '../arrange';
+import type { RoomBooks } from '@/entities/place/arrange';
 import { ArrangeBar } from '../shelf/ArrangeBar';
 import { ArrangeButton } from '../shelf/ArrangeButton';
-import { ArrangingContext, useArranging } from '../shelf/arranging';
-import type { Decor } from '../drawing/decor';
+import { ArrangingContext, useArranging } from '@/features/move-books';
+import type { Decor } from '@/shared/ui/drawing/decor';
 import { LampLight } from './LampLight';
 import { RoomDetails } from './RoomDetails';
 import { RoomDrawing } from './RoomDrawing';
 import { useFoundBook } from './useFoundBook';
-import { useBookMoves } from '../shelf/useBookMoves';
+import { useBookMoves } from '@/features/move-books';
 
 // One room, opened. `drawn` (the places drawn as houses), as an
 // architect's sheet: lit by its lamp, the light over the whole screen;

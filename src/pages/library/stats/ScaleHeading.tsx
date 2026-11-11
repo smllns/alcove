@@ -16,7 +16,9 @@ export function ScaleHeading({
   return (
     <div className={cn('flex items-baseline justify-between gap-3', className)}>
       <span className={labelClass}>{name}</span>
-      <span className='font-serif text-[13px] text-ink-soft'>{children}</span>
+      <span className='font-serif text-[0.8125rem] text-ink-soft'>
+        {children}
+      </span>
     </div>
   );
 }

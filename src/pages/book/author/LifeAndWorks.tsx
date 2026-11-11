@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { BookSection } from '../BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { LifeBook } from './LifeBook';
 import { LifeBookDrawer } from './LifeBookDrawer';
 import { LifeRuler } from './LifeRuler';
@@ -72,7 +72,7 @@ export function LifeAndWorks({
   const have = pins.filter((pin) => pin.bookId);
 
   return (
-    <BookSection title='Life and works'>
+    <TitledSection title='Life and works'>
       <p className='font-serif text-lg text-ink-soft'>
         You have <span className='text-ink'>{have.length}</span> of these{' '}
         {pins.length}
@@ -139,6 +139,6 @@ export function LifeAndWorks({
           onClose={() => setOpen(false)}
         />
       )}
-    </BookSection>
+    </TitledSection>
   );
 }

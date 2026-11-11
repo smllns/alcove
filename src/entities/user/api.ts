@@ -1,5 +1,5 @@
 import { ApiError, request } from '@/shared/api/http';
-import type { Reader, User } from './types';
+import type { Privacy, Reader, User } from './types';
 
 type UserResponse = { user: User };
 
@@ -37,6 +37,31 @@ export const updateName = async (name: string) =>
     await request<UserResponse>('/account/name', {
       method: 'PATCH',
       body: { name },
+    })
+  ).user;
+
+export const updateAbout = async (about: string) =>
+  (
+    await request<UserResponse>('/account/about', {
+      method: 'PATCH',
+      body: { about },
+    })
+  ).user;
+
+// Their photo, uploaded first, or none
+export const updateAvatar = async (url: string | null) =>
+  (
+    await request<UserResponse>('/account/avatar', {
+      method: 'PATCH',
+      body: { url },
+    })
+  ).user;
+
+export const updatePrivacy = async (change: Partial<Privacy>) =>
+  (
+    await request<UserResponse>('/account/privacy', {
+      method: 'PATCH',
+      body: change,
     })
   ).user;
 

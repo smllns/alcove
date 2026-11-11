@@ -9,7 +9,7 @@ export function AddBookButton() {
     <TransitionLink
       to={paths.addBook}
       aria-label='Add a book'
-      className='group ml-1 inline-flex h-9 animate-rise items-center justify-center gap-2 rounded-full bg-button px-4 text-sm text-button-text shadow-[0_12px_24px_-12px_rgba(40,28,14,0.6)] transition-colors duration-500 ease-soft hover:bg-button-hover max-[359px]:w-9 max-[359px]:px-0 sm:ml-2 sm:h-12 sm:gap-2.5 sm:px-7 sm:text-[15px]'
+      className='group ml-1 inline-flex h-9 animate-rise items-center justify-center gap-2 rounded-full bg-button px-4 text-sm text-button-text shadow-[0_12px_24px_-12px_rgba(40,28,14,0.6)] transition-colors duration-500 ease-soft hover:bg-button-hover max-[359px]:w-9 max-[359px]:px-0 sm:ml-2 sm:h-12 sm:gap-2.5 sm:px-7 sm:text-[0.9375rem]'
     >
       <Plus
         size={17}

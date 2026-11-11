@@ -31,20 +31,30 @@ export async function putTyped(userId: ObjectId, id: string, book: WantedBook) {
   return result === 'changed' ? { workKey } : result;
 }
 
-// One typed in, changed where it is, in every list it's in: whether it
-// was there
+// One typed in, changed where it is, in every list it's in, still saying
+// when it was put in each: whether it was there
 export async function changeTyped(
   userId: ObjectId,
   workKey: string,
   book: WantedBook,
 ) {
+  // Field by field, those no longer said taken away
+  const fields = Object.entries(listed(workKey, book)).map(
+    ([field, value]) => [`lists.$[].works.$[it].${field}`, value] as const,
+  );
+  const gone = fields
+    .filter(([, value]) => value === undefined)
+    .map(([at]) => [at, '']);
   const { modifiedCount } = await lists().updateOne(
     { _id: userId, 'lists.works.workKey': workKey },
     {
       $set: {
-        'lists.$[].works.$[it]': listed(workKey, book),
+        ...Object.fromEntries(
+          fields.filter(([, value]) => value !== undefined),
+        ),
         updatedAt: new Date(),
       },
+      ...(gone.length && { $unset: Object.fromEntries(gone) }),
     },
     { arrayFilters: [{ 'it.workKey': workKey }] },
   );

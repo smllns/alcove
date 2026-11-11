@@ -100,7 +100,9 @@ export function StepSlider<T extends string>({
         id={labelId}
         className={cn(
           'shrink-0',
-          inline ? 'font-serif text-[17px] leading-none text-ink' : labelClass,
+          inline
+            ? 'font-serif text-[1.0625rem] leading-none text-ink'
+            : labelClass,
         )}
       >
         {label}
@@ -142,7 +144,7 @@ export function StepSlider<T extends string>({
             />
             <span
               className={cn(
-                'font-serif text-[14px] leading-tight transition-colors duration-300 ease-soft',
+                'font-serif text-sm leading-tight transition-colors duration-300 ease-soft',
                 i === at ? 'text-ink' : 'text-faint',
               )}
             >

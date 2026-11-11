@@ -10,9 +10,9 @@ import {
   FloatingBar,
   PickedTally,
 } from '@/shared/ui/FloatingBar';
-import type { Arranging } from './arranging';
+import type { Arranging } from '@/features/move-books';
 import { MovePicker } from './MovePicker';
-import type { useBookMoves } from './useBookMoves';
+import type { useBookMoves } from '@/features/move-books';
 import { placeKey, type Target } from './moveTargets';
 
 // How long the word that books were moved stays, with its undo

@@ -3,9 +3,9 @@ import type { Book } from '@/entities/book/types';
 import { BookLine } from '@/entities/book/ui/BookLine';
 import { cn } from '@/shared/lib/cn';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
-import { publishedIn } from './order';
-import { BookLink } from './BookLink';
-import { RemoveBook } from './RemoveBook';
+import { publishedIn } from '@/widgets/book-order';
+import { BookLink } from '@/features/open-book';
+import { RemoveBook } from '@/widgets/book-grid';
 
 const linkClass = 'flex min-w-0 flex-1 items-center';
 

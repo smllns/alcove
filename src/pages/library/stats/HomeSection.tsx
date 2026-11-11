@@ -1,12 +1,12 @@
 import { seedOf } from '@/shared/lib/seed';
-import type { HomeBooks } from '../places/arrange';
+import type { HomeBooks } from '@/entities/place/arrange';
 import { BookStack, Bookcase } from './BookShapes';
 import { booksIn, figures, stacked, stampOf } from './libraryStats';
 import { Ground, LevelMark, SectionDefs, WallWindow } from './drawing';
 import { RoomLamp } from './RoomLamp';
 import { TitleBlock } from './TitleBlock';
 import { UNDER, WALL, useDrawingIds } from './drawingKit';
-import { atticOf, furnish } from '../places/drawing/decor';
+import { atticOf, furnish } from '@/shared/ui/drawing/decor';
 import { ROOF, ROOMS_PER_STOREY, STOREY, inHome } from './measured';
 
 // The drawing's measures, in its own units: a metre, where the ground is,
@@ -117,14 +117,14 @@ export function HomeSection({ home }: { home: HomeBooks }) {
               x={x + 14}
               y={ceiling + 20}
               textAnchor='middle'
-              className='fill-ink text-[8.5px]'
+              className='fill-ink text-[9px]'
             >
               {i + 1}
             </text>
             <text
               x={x + 28}
               y={ceiling + 20}
-              className={`text-[8.5px] tracking-[0.18em] uppercase max-sm:hidden ${on ? 'fill-ink' : 'fill-muted'}`}
+              className={`text-[9px] tracking-[0.18em] uppercase max-sm:hidden ${on ? 'fill-ink' : 'fill-muted'}`}
             >
               {name}
             </text>

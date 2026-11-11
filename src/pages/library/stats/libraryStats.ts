@@ -1,6 +1,6 @@
 import type { Book } from '@/entities/book/types';
-import { counted } from '@/shared/lib/plural';
-import type { HomeBooks } from '../places/arrange';
+import { pagesIn } from '@/entities/book/pages';
+import type { HomeBooks } from '@/entities/place/arrange';
 
 // What the stats tab says of the reader's books, worked out from the
 // books themselves: nothing is asked of the server or the catalogue
@@ -34,13 +34,6 @@ export const stampOf = (found: ReturnType<typeof figures>) =>
     ['Authors', found.authors],
     ['Unread', found.unread],
   ] as [string, number][];
-
-// What's said of a book where its length matters: how many pages it has
-export const pagesOf = (book: Book) => counted(book.pages ?? 0, 'page');
-
-// How many pages the books come to, those with none given counting none
-export const pagesIn = (books: Book[]) =>
-  books.reduce((sum, book) => sum + (book.pages ?? 0), 0);
 
 // When a book came out: first, in any edition, or else this copy's edition
 export const yearOf = (book: Book) =>

@@ -21,6 +21,11 @@ export const paths = {
   addBook: '/library/add',
   // Books brought over from Goodreads or StoryGraph
   importBooks: '/library/import',
+  // Another reader's page, by their username, and all their books (`show`:
+  // only those the reader has too)
+  reader: (username: string) => `/library/readers/${username}`,
+  readerBooks: (username: string, show?: 'yours') =>
+    `/library/readers/${username}/books${show ? `?show=${show}` : ''}`,
   settings: '/settings',
   welcome: '/welcome',
   book: (id: string) => `/library/books/${id}`,

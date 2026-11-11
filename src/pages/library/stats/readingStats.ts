@@ -1,7 +1,7 @@
 import { isPhysical, nonPhysicalWays } from '@/entities/book/nonPhysical';
 import type { Book } from '@/entities/book/types';
 import { thickness } from './libraryStats';
-import type { Tally } from './tallies';
+import type { Tally } from '@/entities/book/tallies';
 
 // What the stats say of how the reader gets on with their books: what's
 // read and what's waiting, the stars they give, the ways they read

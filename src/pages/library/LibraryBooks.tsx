@@ -5,12 +5,17 @@ import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 import { Loading } from '@/shared/ui/Loading';
 import { Universe } from './universe/Universe';
 import type { Shelf } from '@/entities/book/useShelf';
-import { BookGrid } from './views/BookGrid';
+import { BookGrid } from '@/widgets/book-grid';
 import { BookList } from './views/BookList';
-import type { CardSize } from './views/BookCard';
+import type { CardSize } from '@/widgets/book-grid';
 import { useEasedResults } from './views/useEasedResults';
 import { useShelfWindow } from './views/useShelfWindow';
-import { fadesBack, ordered, usual, type Arrangement } from './views/order';
+import {
+  fadesBack,
+  ordered,
+  usual,
+  type Arrangement,
+} from '@/widgets/book-order';
 import type { BookView } from './views/views';
 
 const gridSizes: Partial<Record<BookView, CardSize>> = {

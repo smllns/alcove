@@ -4,10 +4,10 @@
 export const smallInputText = 'text-base sm:text-sm';
 
 // The small spaced-out caps every field is labelled with
-export const labelClass = 'text-[10px] uppercase tracking-[0.24em] text-muted';
+export const labelClass = 'text-xs uppercase tracking-[0.24em] text-muted';
 
 // The same caps a touch larger and darker, for labelling what's shown
 // rather than asked (where a book lives, what shape it's in, a date in
 // its story), read at a glance
 export const captionClass =
-  'text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft';
+  'text-xs font-medium uppercase tracking-[0.16em] text-ink-soft';

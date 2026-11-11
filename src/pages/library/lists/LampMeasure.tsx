@@ -1,4 +1,4 @@
-import { floorLamps } from '../places/drawing/pieces/lamps';
+import { floorLamps } from '@/shared/ui/drawing/pieces/lamps';
 
 const lamp = floorLamps.classic;
 
@@ -36,7 +36,7 @@ export function LampMeasure({
             style={{ bottom: at(n) }}
           >
             <span className='w-2.5 border-t border-(--fine)' />
-            <span className='absolute right-4 translate-y-px text-[11px] tabular-nums text-muted'>
+            <span className='absolute right-4 translate-y-px text-xs tabular-nums text-muted'>
               {n.toLocaleString('en')}
             </span>
           </span>

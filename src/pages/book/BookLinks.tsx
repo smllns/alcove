@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib/cn';
 import { plural } from '@/shared/lib/plural';
 import { outlineCardClass } from '@/shared/ui/surfaces';
 import { ArrowIcon } from '@/shared/ui/ArrowIcon';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 
 // "open.spotify.com" → "spotify.com", for a link's address in brief
 const siteOf = (url: string) => {
@@ -24,7 +24,7 @@ function SiteIcon({ site }: { site: string }) {
   return (
     <span
       aria-hidden
-      className='relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-ink/7 font-serif text-[17px] text-ink uppercase'
+      className='relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-ink/7 font-serif text-[1.0625rem] text-ink uppercase'
     >
       {!shown && site.charAt(0)}
       {!failed && (
@@ -53,7 +53,7 @@ export function BookLinks({ book }: { book: Book }) {
   if (!links.length) return null;
 
   return (
-    <BookSection title={plural(links.length, 'Related link')}>
+    <TitledSection title={plural(links.length, 'Related link')}>
       <ul className='grid gap-3 sm:grid-cols-2'>
         {links.map((link, i) => {
           const site = siteOf(link.url);
@@ -70,7 +70,7 @@ export function BookLinks({ book }: { book: Book }) {
               >
                 <SiteIcon site={site} />
                 <span className='min-w-0 flex-1'>
-                  <span className='block truncate text-[15px] text-ink'>
+                  <span className='block truncate text-[0.9375rem] text-ink'>
                     {link.label || site}
                   </span>
                   {link.label && (
@@ -87,6 +87,6 @@ export function BookLinks({ book }: { book: Book }) {
           );
         })}
       </ul>
-    </BookSection>
+    </TitledSection>
   );
 }

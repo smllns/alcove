@@ -91,11 +91,26 @@ export const recount = (client: QueryClient) => {
   void client.invalidateQueries({ queryKey: ['lists'] });
 };
 
+// Added, it's on the shelf and the reader's copy of its work at once (so
+// a page of the book come back to knows it's theirs from the first look),
+// before the refetch says the same
 export function useAddBook() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: addBook,
-    onSuccess: () => {
+    onSuccess: (book) => {
+      const work = book.openLibrary?.work;
+      if (work) client.setQueryData(bookKeys.byWork(work), book.id);
+      client.setQueryData<InfiniteData<BooksPage>>(
+        bookKeys.shelf,
+        (data) =>
+          data && {
+            ...data,
+            pages: data.pages.map((page, i) =>
+              i ? page : { ...page, books: [book, ...page.books] },
+            ),
+          },
+      );
       recount(client);
       return client.invalidateQueries({ queryKey: bookKeys.all });
     },

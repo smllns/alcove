@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn';
 import { ChoiceCapsule } from '@/shared/ui/ChoiceCapsule';
 import { Crossfade } from '@/shared/ui/Crossfade';
 import { SmoothHeight } from '@/shared/ui/SmoothHeight';
-import { shows, type ShelfShow } from '../views/order';
+import { shows, type ShelfShow } from '@/widgets/book-order';
 import { noteClass, sayClass } from './Chapter';
 
 // A chapter that can count only the physical books or every one, chosen over it

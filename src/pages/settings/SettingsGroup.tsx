@@ -26,7 +26,9 @@ export function SettingsGroup({
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className='mb-3 flex items-baseline justify-between gap-4 px-1'>
-        <h2 className='font-serif text-[22px] tracking-[-0.02em]'>{title}</h2>
+        <h2 className='font-serif text-[1.375rem] tracking-[-0.02em]'>
+          {title}
+        </h2>
         {aside}
       </div>
       <div className={sheetClass}>{children}</div>

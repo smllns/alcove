@@ -34,7 +34,7 @@ export function CoverSticker({ owned }: { owned: boolean }) {
       <span ref={band} className='absolute left-[-6%] top-[30%] block w-[150%]'>
         <span
           className={cn(
-            'block origin-center rotate-45 py-1.5 text-center text-[9px] font-semibold uppercase tracking-[0.16em] shadow-[0_6px_10px_-6px_rgb(var(--shade)/0.6)] sm:text-[10px]',
+            'block origin-center rotate-45 py-1.5 text-center text-xs font-semibold uppercase tracking-[0.16em] shadow-[0_6px_10px_-6px_rgb(var(--shade)/0.6)]',
             owned ? 'bg-button text-button-text' : 'bg-surface text-ink-soft',
           )}
         >

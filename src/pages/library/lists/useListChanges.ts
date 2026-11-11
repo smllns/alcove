@@ -5,7 +5,7 @@ import { catalogueBook } from '@/entities/book/catalogueBook';
 import type { WorksChange } from '@/entities/list/api';
 import { useChangeListWorks } from '@/entities/list/queries';
 import type { BookList } from '@/entities/list/types';
-import { useBookMoves } from '../places/shelf/useBookMoves';
+import { useBookMoves } from '@/features/move-books';
 
 const lists = (book: Book) => book.lists ?? [];
 

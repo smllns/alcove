@@ -4,8 +4,9 @@ import { languageName } from '@/entities/book/languages';
 import { counted } from '@/shared/lib/plural';
 import { Mark } from './Chapter';
 import type { byDecade, extremes } from './libraryStats';
-import type { Tally } from './tallies';
-import { pagesIn, yearOf } from './libraryStats';
+import type { Tally } from '@/entities/book/tallies';
+import { yearOf } from './libraryStats';
+import { pagesIn } from '@/entities/book/pages';
 import { inWords } from './words';
 
 // The sentence each chapter of the stats opens with, saying in words what

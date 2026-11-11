@@ -21,7 +21,7 @@ export function LandingHero() {
           alcove
         </h1>
 
-        <p className='hero-description mx-auto mt-5 max-w-md text-[15px] leading-6 text-muted sm:mt-8 sm:text-base sm:leading-7'>
+        <p className='hero-description mx-auto mt-5 max-w-md text-[0.9375rem] leading-6 text-muted sm:mt-8 sm:text-base sm:leading-7'>
           A home for the books you keep,
           <br className='hidden sm:block' /> and the stories that stay with you.
         </p>

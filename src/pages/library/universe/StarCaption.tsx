@@ -15,16 +15,16 @@ export function StarCaption({ book, author }: { book: Book; author: string }) {
           raisedClass,
         )}
       >
-        <p className='line-clamp-2 font-serif text-[17px] leading-snug tracking-[-0.01em] text-ink'>
+        <p className='line-clamp-2 font-serif text-[1.0625rem] leading-snug tracking-[-0.01em] text-ink'>
           {book.title}
         </p>
         {author && (
-          <p className='mt-1 line-clamp-1 text-[13px] text-ink-soft'>
+          <p className='mt-1 line-clamp-1 text-[0.8125rem] text-ink-soft'>
             {author}
           </p>
         )}
         {book.copy?.rating ? (
-          <Rating value={book.copy.rating} className='mt-1 text-[13px]' />
+          <Rating value={book.copy.rating} className='mt-1 text-[0.8125rem]' />
         ) : null}
       </div>
     </div>

@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { Book } from '@/entities/book/types';
-import type { ShelfShow } from '../views/order';
+import type { ShelfShow } from '@/widgets/book-order';
 import { boundsOf, layoutSky } from './layout';
 import { letGo } from './leaving';
 import { SkyControls } from './SkyControls';
@@ -19,7 +19,7 @@ import { SkyStar } from './SkyStar';
 import { SkyVeil } from './SkyVeil';
 import { useSkyCamera } from './useSkyCamera';
 import { useCoversIn } from './useCoversIn';
-import { leaveForBook } from '../views/leaveForBook';
+import { leaveForBook } from '@/features/open-book';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { cn } from '@/shared/lib/cn';
 import { useFadeSwap } from '@/shared/lib/useFadeSwap';

@@ -4,7 +4,7 @@ import { Fold } from '@/shared/ui/Fold';
 import { SmoothHeight } from '@/shared/ui/SmoothHeight';
 import { Spinner } from '@/shared/ui/Spinner';
 import { aboutTextClass } from './aboutText';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 
 // What a book not in the reader's library is about, as the catalogue tells
 // it, asked for at once (nothing of the reader's own to write it in)
@@ -12,26 +12,26 @@ export function AboutWork({ book }: { book: Book }) {
   const details = useWorkDetails(book.openLibrary?.work);
   const description = details.data?.description;
   return (
-    <BookSection title='What it’s about'>
+    <TitledSection title='What it’s about'>
       <SmoothHeight>
         <div
           key={details.isPending ? 'asking' : 'said'}
           className='animate-fade-in'
         >
           {details.isPending ? (
-            <p className='flex items-center gap-3 text-[15px] text-muted'>
+            <p className='flex items-center gap-3 text-[0.9375rem] text-muted'>
               <Spinner />
               Asking Open Library…
             </p>
           ) : description ? (
             <Fold className={aboutTextClass}>{description}</Fold>
           ) : (
-            <p className='text-[15px] text-muted'>
+            <p className='text-[0.9375rem] text-muted'>
               Open Library doesn’t describe this one.
             </p>
           )}
         </div>
       </SmoothHeight>
-    </BookSection>
+    </TitledSection>
   );
 }

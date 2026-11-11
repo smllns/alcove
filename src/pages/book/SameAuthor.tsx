@@ -9,7 +9,7 @@ import { settled } from '@/shared/lib/settled';
 import { BookRow } from './BookRow';
 import { cn } from '@/shared/lib/cn';
 import { Collapse } from '@/shared/ui/Collapse';
-import { BookSection } from './BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { asRowBook, useTheirOthers } from './useTheirOthers';
 import { useMatchedWorks } from '@/entities/book/useMatchedWorks';
 
@@ -42,7 +42,7 @@ export function SameAuthor({ book }: { book: Book }) {
 
   return (
     <Arriving ready={own || found}>
-      <BookSection
+      <TitledSection
         id={AUTHOR_SECTION}
         title='By the same author'
         className='scroll-mt-28'
@@ -57,7 +57,7 @@ export function SameAuthor({ book }: { book: Book }) {
             <BookRow label='Not on your shelves yet' books={more} />
           </div>
         </Collapse>
-      </BookSection>
+      </TitledSection>
     </Arriving>
   );
 }

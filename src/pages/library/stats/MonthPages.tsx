@@ -1,7 +1,7 @@
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
-import { pagesIn } from './libraryStats';
+import { pagesIn } from '@/entities/book/pages';
 import { ScaleHeading } from './ScaleHeading';
 
 // How deep the month with the most pages hangs
@@ -58,8 +58,8 @@ export function MonthPages({
             </span>
             <span
               className={cn(
-                'mt-1.5 font-serif text-[11px] leading-none whitespace-nowrap sm:text-[13px]',
-                count === most ? 'text-gold' : 'text-muted',
+                'mt-1.5 font-serif text-xs leading-none whitespace-nowrap sm:text-[0.8125rem]',
+                count === most ? 'text-gold-ink' : 'text-muted',
               )}
             >
               {m < soFar ? (count ? short.format(count) : '—') : ' '}

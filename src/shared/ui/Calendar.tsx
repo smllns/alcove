@@ -111,7 +111,7 @@ export function Calendar({
           aria-label={years ? 'Back to the days' : 'Choose a year'}
           className={softClass(
             false,
-            'px-3 py-1 font-serif text-[17px] tracking-[-0.01em] text-ink!',
+            'px-3 py-1 font-serif text-[1.0625rem] tracking-[-0.01em] text-ink!',
           )}
         >
           {years ? `${firstYear} – ${firstYear + YEARS - 1}` : monthName(focus)}

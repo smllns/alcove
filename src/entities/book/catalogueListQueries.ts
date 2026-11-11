@@ -1,13 +1,13 @@
 import { useInfiniteQuery, useQueries, useQuery } from '@tanstack/react-query';
+import { fetchWorkLists } from './api';
 import {
   checkReadersList,
   fetchFeaturedList,
   fetchFeaturedLists,
   fetchReadersList,
   fetchWorkFeatured,
-  fetchWorkLists,
   searchReadersLists,
-} from './api';
+} from './listsApi';
 import type { ReadersList } from './types';
 
 // What's asked of the catalogue about lists of books: those every reader

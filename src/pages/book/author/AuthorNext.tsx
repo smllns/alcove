@@ -4,7 +4,7 @@ import { BookCover } from '@/entities/book/ui/BookCover';
 import { paths } from '@/shared/config/paths';
 import { counted } from '@/shared/lib/plural';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
-import { BookSection } from '../BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { WantToRead } from '../WantToRead';
 
 // The writer's book to read next: of those the reader hasn't, the one most
@@ -14,7 +14,7 @@ import { WantToRead } from '../WantToRead';
 export function AuthorNext({ work }: { work: SimilarBook }) {
   const page = { to: paths.work(work.workKey), state: { work } };
   return (
-    <BookSection title='Read next'>
+    <TitledSection title='Read next'>
       <div className='grid grid-cols-[6rem_minmax(0,1fr)] items-center gap-5 rounded-[20px] border border-gold/30 bg-gold/8 p-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-7 sm:p-6'>
         <TransitionLink {...page} className='group block'>
           <BookCover
@@ -25,7 +25,7 @@ export function AuthorNext({ work }: { work: SimilarBook }) {
           />
         </TransitionLink>
         <div className='min-w-0'>
-          <p className='text-[11px] uppercase tracking-[0.14em] text-muted'>
+          <p className='text-xs uppercase tracking-[0.14em] text-muted'>
             Their most read that you don’t have
           </p>
           <TransitionLink
@@ -47,6 +47,6 @@ export function AuthorNext({ work }: { work: SimilarBook }) {
           </div>
         </div>
       </div>
-    </BookSection>
+    </TitledSection>
   );
 }

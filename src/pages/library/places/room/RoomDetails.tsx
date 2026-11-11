@@ -1,11 +1,14 @@
 import { cn } from '@/shared/lib/cn';
-import type { RoomBooks } from '../arrange';
+import { useMasonry } from '@/shared/lib/useMasonry';
+import type { RoomBooks } from '@/entities/place/arrange';
 import { detailOf, tagOf } from './bookcaseTags';
 import { RoomDetail } from './RoomDetail';
 
 // Each bookcase of a room opened, large, with the books face out on its
 // shelves, and any books kept in the room but in no bookcase. `tagged`:
-// lettered as in the room's drawing above them.
+// lettered as in the room's drawing above them. Side by side on a wide
+// screen, each set under whichever column ends higher (useMasonry), so a
+// full bookcase leaves the next ones to stack beside it.
 export function RoomDetails({
   units,
   loose,
@@ -15,12 +18,15 @@ export function RoomDetails({
   tagged: boolean;
   className?: string;
 }) {
+  const grid = useMasonry<HTMLDivElement>(56);
   return (
     <div
+      ref={grid}
       className={cn(
         'relative grid gap-x-16 gap-y-14',
         className,
-        // Side by side on a wide screen, unless there's only the one
+        // Side by side on a wide screen, unless there's only the one; the
+        // rows' gap (gap-y-14) the one useMasonry leaves under each
         units.length + (loose.length ? 1 : 0) > 1 && 'lg:grid-cols-2',
       )}
     >

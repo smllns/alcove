@@ -7,8 +7,8 @@ import type { Book, CatalogueWork } from '@/entities/book/types';
 import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 import { PHONE, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { OwnBookRow, SearchSection, WorkRow } from '@/widgets/library-header';
-import { BookSearch } from '../views/BookSearch';
-import { FoundBy } from '../views/FoundPanel';
+import { BookSearch } from '@/widgets/book-search';
+import { FoundBy } from '@/widgets/book-search';
 
 // The most of the reader's own books found shown at once
 const OWN = 5;

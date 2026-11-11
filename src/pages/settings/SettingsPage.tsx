@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import { useReadingAt } from '@/shared/lib/useReadingAt';
 import { PageContents } from '@/shared/ui/PageContents';
 import { useAuth } from '@/features/auth';
@@ -10,6 +11,7 @@ import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { DeleteAccount } from './DeleteAccount';
 import { LibrarySettings } from './LibrarySettings';
+import { PageSettings } from './PageSettings';
 import { PlacesSettings } from './PlacesSettings';
 import { ProfileGroup } from './ProfileGroup';
 import { rowLinkClass } from './rowLink';
@@ -21,6 +23,7 @@ import { ThemeChoice } from './ThemeChoice';
 // be undone
 const groups = [
   { id: 'profile', label: 'Profile' },
+  { id: 'page', label: 'Your page' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'places', label: 'Places' },
   { id: 'library', label: 'Library' },
@@ -37,6 +40,12 @@ export function SettingsPage() {
   // The title: the way back up shows once it's scrolled away
   const [top, setTop] = useState<HTMLElement | null>(null);
   const [shown, goTo] = useReadingAt(groups.map(({ id }) => id));
+  // Opened at one of the groups (#page, from the reader's own page), there
+  // from the first look
+  const { hash } = useLocation();
+  useLayoutEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
+  }, [hash]);
   // Behind RequireAuth, so this only covers the moment of deleting the account
   if (!user) return null;
 
@@ -69,7 +78,19 @@ export function SettingsPage() {
 
         <div className='flex min-w-0 flex-col gap-10'>
           <ProfileGroup user={user} delay={delay(0)} />
-          <SettingsGroup id='appearance' title='Appearance' delay={delay(1)}>
+          <SettingsGroup
+            id='page'
+            title='Your page'
+            aside={
+              <TransitionLink to={paths.profile} className={rowLinkClass}>
+                See it →
+              </TransitionLink>
+            }
+            delay={delay(1)}
+          >
+            <PageSettings user={user} />
+          </SettingsGroup>
+          <SettingsGroup id='appearance' title='Appearance' delay={delay(2)}>
             <ThemeChoice />
           </SettingsGroup>
           <SettingsGroup
@@ -80,15 +101,15 @@ export function SettingsPage() {
                 Open in Places →
               </TransitionLink>
             }
-            delay={delay(2)}
+            delay={delay(3)}
           >
             <PlacesSettings />
           </SettingsGroup>
-          <SettingsGroup id='library' title='Library' delay={delay(3)}>
+          <SettingsGroup id='library' title='Library' delay={delay(4)}>
             <LibrarySettings />
           </SettingsGroup>
-          <SignInGroup user={user} delay={delay(4)} />
-          <DeleteAccount id='leaving' delay={delay(5)} />
+          <SignInGroup user={user} delay={delay(5)} />
+          <DeleteAccount id='leaving' delay={delay(6)} />
         </div>
       </div>
       <BackToTop after={top} />

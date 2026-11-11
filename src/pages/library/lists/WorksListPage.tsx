@@ -6,18 +6,25 @@ import type { CatalogueWork } from '@/entities/book/types';
 import { useShelf } from '@/entities/book/useShelf';
 import { counted } from '@/shared/lib/plural';
 import { FormError } from '@/shared/ui/FormError';
+import { ShelfOrderMenu } from '@/widgets/book-order';
 import { ListFrame } from './ListFrame';
 import { ListAbout } from './ListAbout';
 import { ListLamp } from './ListLamp';
 import { ListSearch, NoneFound } from './ListSearch';
-import { useListSearch } from './useListSearch';
-import { WorkGrid, WorkGridSkeleton, type MoreWorks } from './WorkGrid';
+import { useWorkOrder } from '@/widgets/book-order';
+import { useListSearch } from '@/widgets/book-search';
+import {
+  WorkGrid,
+  WorkGridSkeleton,
+  type MoreWorks,
+} from '@/widgets/book-grid';
 
 // A list of books from the catalogue opened (one every reader sees,
 // another reader's, one made on Open Library): its pile by a measure, how
 // many of its books are on the reader's shelves marked in gold, and its
 // books' covers, a book in it found by its title or writer, and what its
-// maker says of it, if anything. `total`: how
+// maker says of it, if anything; its books in the order its maker put
+// them in, or ordered otherwise as the reader's own are. `total`: how
 // many it holds, when not all are here yet (`more` brings the next).
 // While it's `loading`, drawn bare, its books' places held (ListFrame).
 export function WorksListPage({
@@ -50,6 +57,9 @@ export function WorksListPage({
   const books = works.map(catalogueBook);
   const mine = works.filter((work) => owned.has(work.workKey)).length;
   const search = useListSearch(works, catalogueBook);
+  // Ordered as books, the reader's stars on those they have
+  const order = useWorkOrder(works, owned, 'made');
+  const shown = order.sort(search.found);
 
   return (
     <ListFrame
@@ -69,6 +79,7 @@ export function WorksListPage({
         />
       }
       search={<ListSearch search={search} books={books} className='w-full' />}
+      order={works.length > 1 && <ShelfOrderMenu {...order.menu} />}
       waiting={
         error && (
           <FormError message={`This list didn’t load. ${error.message}`} />
@@ -79,9 +90,9 @@ export function WorksListPage({
     >
       {loading ? (
         <WorkGridSkeleton />
-      ) : search.found.length ? (
+      ) : shown.length ? (
         <WorkGrid
-          works={search.found}
+          works={shown}
           owned={owned}
           more={search.asked ? undefined : more}
         />

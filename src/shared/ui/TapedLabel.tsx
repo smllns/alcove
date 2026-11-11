@@ -51,7 +51,7 @@ export function TapedLabel({
       />
       <span
         className={cn(
-          'flex items-center gap-2 whitespace-nowrap rounded-xs px-4 pb-2.5 pt-3.5 text-[11.5px] font-semibold uppercase leading-tight tracking-[0.12em] text-ink transition-shadow duration-500 ease-soft group-hover:shadow-[0_1px_2px_rgb(var(--shade)/calc(0.15*var(--shade-k))),0_16px_22px_-14px_rgb(var(--shade)/calc(0.55*var(--shade-k)))]',
+          'flex items-center gap-2 whitespace-nowrap rounded-xs px-4 pb-2.5 pt-3.5 text-xs font-semibold uppercase leading-tight tracking-[0.12em] text-ink transition-shadow duration-500 ease-soft group-hover:shadow-[0_1px_2px_rgb(var(--shade)/calc(0.15*var(--shade-k))),0_16px_22px_-14px_rgb(var(--shade)/calc(0.55*var(--shade-k)))]',
           paperClass,
         )}
       >

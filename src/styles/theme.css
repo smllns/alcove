@@ -9,9 +9,15 @@
   --bg-edge: #eadabd;
   --ink: #292820;
   --ink-soft: #4a463d;
-  --muted: #6f6656;
-  --faint: #8a806e;
+  /* The greys stop at what still reads as text on the darkest of the paper
+     (4.5:1 at the least, WCAG AA): muted a step over that, faint just on it */
+  --muted: #5f5647;
+  --faint: #685e4d;
   --accent: #a08a68;
+  /* Gold and the accent as words, darkened till they read as text; the
+     stars, rings and marks keep the brighter ones */
+  --gold-ink: #885400;
+  --accent-ink: #715c3c;
   --line: #d6cab4;
   --surface: #f8eedb;
   --button: #292820;
@@ -61,9 +67,11 @@
   --bg-edge: #151311;
   --ink: #e3dbcf;
   --ink-soft: #c3baad;
-  --muted: #a1978a;
-  --faint: #877e73;
+  --muted: #aca295;
+  --faint: #a1988c;
   --accent: #c4a77e;
+  --gold-ink: #e3ac3c;
+  --accent-ink: #c4a77e;
   --line: #433c35;
   --surface: #23201c;
   --button: #e3dbcf;
@@ -111,6 +119,8 @@
   --color-button-text: var(--button-text);
   --color-danger: var(--danger);
   --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-accent-ink: var(--accent-ink);
 }
 
 /* dark: for the odd style that has to differ in the dark theme */

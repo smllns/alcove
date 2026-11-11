@@ -3,7 +3,7 @@ import type { Book, CatalogueWork } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { ListFinder } from './ListFinder';
 import { ListSearch } from './ListSearch';
-import type { useListSearch } from './useListSearch';
+import type { useListSearch } from '@/widgets/book-search';
 
 // Looking for a book in a list, or, while it's changed (`editing`), for
 // books to put in it: the one field fading into the other in its place.

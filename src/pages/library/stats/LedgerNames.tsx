@@ -1,9 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { labelClass } from '@/shared/ui/fieldStyles';
-import { HoverBooks } from './HoverBooks';
-import type { Tally } from './tallies';
-import type { GroupPage } from './useBooksDrawer';
+import { HoverBooks } from '@/widgets/book-cards';
+import type { Tally } from '@/entities/book/tallies';
+import type { GroupPage } from '@/widgets/book-cards';
 
 // Lines of a ledger (`count` of them) read down columns where there's
 // room: two once it's wide enough (`always`, even when it's narrow, for

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Book } from '@/entities/book/types';
 import { byArrival, byMonth, cameOn, finishedOn } from './growth';
 import { byDecade, extremes, figures } from './libraryStats';
-import { tally } from './tallies';
+import { tally } from '@/entities/book/tallies';
 
 let made = 0;
 const book = (fields: Partial<Book> = {}): Book => ({

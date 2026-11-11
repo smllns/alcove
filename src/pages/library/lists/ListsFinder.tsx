@@ -5,8 +5,8 @@ import { PHONE, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { useTransitionNavigate } from '@/shared/lib/useTransitionNavigate';
 import { Collapse } from '@/shared/ui/Collapse';
 import { ListsFound, useListsFound } from '@/widgets/library-header';
-import { BookSearch } from '../views/BookSearch';
-import { FoundBy } from '../views/FoundPanel';
+import { BookSearch } from '@/widgets/book-search';
+import { FoundBy } from '@/widgets/book-search';
 
 // The most of each kind shown before "See all"
 const FEW = 4;

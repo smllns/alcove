@@ -1,13 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { callName, type User } from './types';
 
-const user = (name: string | null, username: string | null): User => ({
-  id: '1',
-  name,
-  username,
-  email: 'a@example.com',
-  createdAt: '2026-01-01',
-});
+const user = (
+  name: string | null,
+  username: string | null,
+): Pick<User, 'name' | 'username'> => ({ name, username });
 
 describe('what a reader is called', () => {
   it('is their name if they gave one, else their @username', () => {

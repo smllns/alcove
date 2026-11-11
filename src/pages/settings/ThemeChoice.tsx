@@ -55,7 +55,7 @@ export function ThemeChoice() {
             aria-label={label}
             onClick={(e) => !on && choose(value, e.currentTarget)}
             className={cn(
-              'min-w-0 flex-1 cursor-pointer rounded-2xl border bg-surface/70 p-2 text-left text-[13px] transition-[border-color,box-shadow] duration-500 ease-soft sm:w-36 sm:flex-none',
+              'min-w-0 flex-1 cursor-pointer rounded-2xl border bg-surface/70 p-2 text-left text-[0.8125rem] transition-[border-color,box-shadow] duration-500 ease-soft sm:w-36 sm:flex-none',
               on
                 ? 'border-ink shadow-[0_0_0_1px_var(--ink)]'
                 : 'border-line hover:border-ink/50',

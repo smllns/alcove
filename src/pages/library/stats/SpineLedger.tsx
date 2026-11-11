@@ -4,12 +4,12 @@ import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { useMeasured } from '@/shared/lib/useMeasured';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
-import type { Tally } from './tallies';
-import { BooksDrawer } from './BooksDrawer';
-import { HoverBooks } from './HoverBooks';
+import type { Tally } from '@/entities/book/tallies';
+import { BooksDrawer } from '@/widgets/book-cards';
+import { HoverBooks } from '@/widgets/book-cards';
 import { LedgerWithMore } from './Ledger';
-import { RisingSpine } from './ToneSpine';
-import { useBooksDrawer } from './useBooksDrawer';
+import { RisingSpine } from '@/widgets/book-cards';
+import { useBooksDrawer } from '@/widgets/book-cards';
 
 // How tall the spines stand against their formats, in the finer lines less
 const TALL = 0.6;
@@ -118,11 +118,11 @@ function Row({
           'flex shrink-0 items-baseline gap-2 font-serif italic transition-colors duration-500 ease-soft group-hover/books:text-ink',
           fine
             ? 'w-28 text-sm text-ink-soft'
-            : 'w-42 pb-0.5 text-[17px] max-sm:w-28',
+            : 'w-42 pb-0.5 text-[1.0625rem] max-sm:w-28',
         )}
       >
         {place !== undefined && (
-          <span className='w-4 shrink-0 font-sans text-[11px] text-faint not-italic'>
+          <span className='w-4 shrink-0 font-sans text-xs text-faint not-italic'>
             {place}
           </span>
         )}
@@ -163,7 +163,7 @@ function Row({
         <span
           className={cn(
             'text-right text-muted',
-            fine ? 'w-7 text-[11px]' : 'w-8 text-xs',
+            fine ? 'w-7 text-xs' : 'w-8 text-xs',
           )}
         >
           {Math.max(1, Math.round(share * 100))}%

@@ -11,7 +11,7 @@ export function Kbd({
   return (
     <kbd
       className={cn(
-        'rounded-md border border-line px-1.5 py-0.5 font-sans text-[11px] text-muted',
+        'rounded-md border border-line px-1.5 py-0.5 font-sans text-xs text-muted',
         className,
       )}
     >

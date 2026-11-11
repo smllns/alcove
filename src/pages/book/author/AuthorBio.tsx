@@ -1,6 +1,6 @@
 import type { CatalogueAuthor } from '@/entities/book/types';
 import { Fold } from '@/shared/ui/Fold';
-import { BookSection } from '../BookSection';
+import { TitledSection } from '@/shared/ui/TitledSection';
 import { SourceCredit } from '../SourceCredit';
 
 // The first lines about a writer, at the top of their page under a
@@ -8,7 +8,7 @@ import { SourceCredit } from '../SourceCredit';
 // from
 export function AuthorBio({ author }: { author: CatalogueAuthor }) {
   return (
-    <BookSection title='About'>
+    <TitledSection title='About'>
       <div className='max-w-2xl'>
         <div lang={author.bioLanguage}>
           <Fold
@@ -26,6 +26,6 @@ export function AuthorBio({ author }: { author: CatalogueAuthor }) {
           />
         )}
       </div>
-    </BookSection>
+    </TitledSection>
   );
 }

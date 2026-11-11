@@ -23,6 +23,10 @@ export type ListedWork = {
   coverUrl?: string;
   firstPublishYear?: number;
   editionCount: number;
+  // How the catalogue's readers rate it, out of five, if they have
+  averageRating?: number;
+  // When it was put in the list, if that's known
+  addedAt?: string;
   // One kept as it came from another site (typed-…): the ISBN it came with
   isbn?: string;
   // One typed in by hand (typed-…): everything said of it

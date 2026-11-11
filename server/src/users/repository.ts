@@ -2,15 +2,22 @@ import type { ObjectId } from 'mongodb';
 import { users, type UserDoc } from '../db.js';
 import { escapedForRegex } from '../lib/text.js';
 
-// What any reader may see of another: how they're found and called
-export type Reader = {
-  username: string;
-  name: string | null;
-  // The one searching
-  you: boolean;
-};
+// What any reader may see of another: how they're found and called, read
+// off them so
+export const listed = {
+  projection: { username: 1, name: 1, avatarUrl: 1 },
+} as const;
+export const asReader = (
+  user: Pick<UserDoc, 'username' | 'name' | 'avatarUrl'>,
+) => ({
+  username: user.username!,
+  name: user.name || null,
+  avatarUrl: user.avatarUrl || null,
+});
 
-const shown = { projection: { username: 1, name: 1 } } as const;
+// A reader found, and whether it's the one searching
+export type Reader = ReturnType<typeof asReader> & { you: boolean };
+
 const MOST = 8;
 
 // Readers whose username starts with `query`, found by its index; then, if
@@ -22,7 +29,7 @@ export async function searchReaders(query: string, me: ObjectId) {
   const byHandle = await users()
     .find(
       { username: { $regex: `^${escapedForRegex(plain.toLowerCase())}` } },
-      { ...shown, limit: MOST },
+      { ...listed, limit: MOST },
     )
     .toArray();
   const byName =
@@ -34,16 +41,13 @@ export async function searchReaders(query: string, me: ObjectId) {
               name: { $regex: escapedForRegex(plain), $options: 'i' },
               _id: { $nin: byHandle.map((user) => user._id) },
             },
-            { ...shown, limit: MOST - byHandle.length },
+            { ...listed, limit: MOST - byHandle.length },
           )
           .toArray()
       : [];
   const found = [...byHandle, ...byName];
-  return found.map(
-    (user: Pick<UserDoc, '_id' | 'username' | 'name'>): Reader => ({
-      username: user.username!,
-      name: user.name || null,
-      you: user._id.equals(me),
-    }),
-  );
+  return found.map((user): Reader => ({
+    ...asReader(user),
+    you: user._id.equals(me),
+  }));
 }

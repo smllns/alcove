@@ -38,7 +38,7 @@ export function TextField({
         {marked && (
           <span
             aria-hidden
-            className='ml-1 align-[-0.15em] text-[14px] leading-none text-danger'
+            className='ml-1 align-[-0.15em] text-sm leading-none text-danger'
           >
             *
           </span>

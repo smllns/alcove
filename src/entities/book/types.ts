@@ -122,6 +122,10 @@ export type CatalogueWork = {
   firstPublishYear?: number;
   coverUrl?: string;
   editionCount: number;
+  // How the catalogue's readers rate it, out of five, if they have
+  averageRating?: number;
+  // One in a list: when it was put in, if that's known
+  addedAt?: string;
   // One kept in a list as it came from another site: its ISBN, if any
   isbn?: string;
   // One typed in by hand: everything said of it

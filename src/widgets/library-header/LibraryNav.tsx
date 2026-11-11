@@ -117,14 +117,18 @@ export function LibraryNav({ current }: { current?: SectionKey }) {
                   'relative flex',
                   me
                     ? 'p-1'
-                    : 'whitespace-nowrap px-2.5 py-2 font-serif text-[15px] tracking-[-0.01em] sm:px-5 sm:text-[17px]',
+                    : 'whitespace-nowrap px-2.5 py-2 font-serif text-[0.9375rem] tracking-[-0.01em] sm:px-5 sm:text-[1.0625rem]',
                   // The open one's shading is the pill under them all
                   lit
                     ? 'cursor-pointer rounded-full text-ink transition-colors duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]'
                     : softClass(false),
                 )}
               >
-                {me ? <Avatar name={callName(user)} /> : section.label}
+                {me ? (
+                  <Avatar name={callName(user)} url={user?.avatarUrl} />
+                ) : (
+                  section.label
+                )}
               </TransitionLink>
             </li>
           );

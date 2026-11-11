@@ -1,6 +1,6 @@
 import { counted } from '@/shared/lib/plural';
 import { Mark } from './Chapter';
-import { countIn, type Tally } from './tallies';
+import { countIn, type Tally } from '@/entities/book/tallies';
 import type { byReading, byStars } from './readingStats';
 import { inWords, tallness } from './words';
 

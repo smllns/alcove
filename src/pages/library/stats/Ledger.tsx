@@ -4,10 +4,10 @@ import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { Collapse } from '@/shared/ui/Collapse';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
-import { HoverBooks } from './HoverBooks';
+import { HoverBooks } from '@/widgets/book-cards';
 import { LedgerColumns, LedgerNames } from './LedgerNames';
-import type { GroupPage } from './useBooksDrawer';
-import { FEW, type Tally } from './tallies';
+import type { GroupPage } from '@/widgets/book-cards';
+import { FEW, type Tally } from '@/entities/book/tallies';
 
 // Names and their numbers, one under another, dotted across from one to
 // the other as in a book's contents

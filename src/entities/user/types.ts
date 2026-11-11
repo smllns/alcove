@@ -8,13 +8,27 @@ export type User = {
   username: string | null;
   email: string;
   createdAt: string;
+  // A line or two about themselves, and who sees what of their page
+  about: string | null;
+  privacy: Privacy;
+  // Their photo, if they've uploaded one
+  avatarUrl: string | null;
 };
+
+// Who may see a part of a reader's page. Mirrors users/privacy.ts.
+export type Audience = 'everyone' | 'followers' | 'me';
+// The parts of a page with a say of their own
+export type PagePart = 'books' | 'reading' | 'stars' | 'year' | 'quotes';
+// Who may open the page at all (`ask`: only those let in), and who may see
+// each part
+export type Privacy = { page: 'open' | 'ask' } & Record<PagePart, Audience>;
 
 // A username as it's shown, and found: @name
 export const handle = (username: string) => `@${username}`;
 
-// What to call a reader: their name, or else their @username
-export const callName = (user: User | null) =>
+// What to call a reader (this one, or another): their name, or else their
+// @username
+export const callName = (user: Pick<User, 'name' | 'username'> | null) =>
   user?.name ?? (user?.username ? handle(user.username) : '');
 
 // Another reader, as far as anyone may see them. Mirrors Reader in
@@ -22,6 +36,7 @@ export const callName = (user: User | null) =>
 export type Reader = {
   username: string;
   name: string | null;
+  avatarUrl: string | null;
   // The one looking
   you: boolean;
 };

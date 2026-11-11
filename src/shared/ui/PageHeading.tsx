@@ -20,7 +20,7 @@ export function Eyebrow({ children, className, rise }: TextProps) {
   return (
     <p
       className={cn(
-        'text-[10px] uppercase tracking-[0.32em] text-muted sm:text-xs',
+        'text-xs uppercase tracking-[0.32em] text-muted',
         rise !== undefined && 'animate-rise',
         className,
       )}
@@ -70,7 +70,7 @@ export function Lead({ children, className, rise }: TextProps) {
   return (
     <p
       className={cn(
-        'text-[15px] leading-6 text-muted sm:leading-7',
+        'text-[0.9375rem] leading-6 text-muted sm:leading-7',
         rise !== undefined && 'animate-rise',
         className,
       )}

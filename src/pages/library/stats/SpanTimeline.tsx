@@ -2,11 +2,11 @@ import type { Book } from '@/entities/book/types';
 import { dayMonth, monthLetters, monthOfYear } from '@/shared/lib/dates';
 import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { BooksDrawer } from './BooksDrawer';
-import { HoverBooks } from './HoverBooks';
+import { BooksDrawer } from '@/widgets/book-cards';
+import { HoverBooks } from '@/widgets/book-cards';
 import type { readingYear, Span } from './readingYears';
-import { ToneSpine } from './ToneSpine';
-import { useBooksDrawer } from './useBooksDrawer';
+import { ToneSpine } from '@/widgets/book-cards';
+import { useBooksDrawer } from '@/widgets/book-cards';
 
 // How far apart the rows of books lie, and how thick each book is drawn
 const ROW = 11;
@@ -89,7 +89,7 @@ export function SpanTimeline({
       <div className='stats-plank' />
       <div className='grid grid-cols-12 pt-2'>
         {monthLetters.map((letter, m) => (
-          <span key={m} className='text-center text-[11px] text-muted'>
+          <span key={m} className='text-center text-xs text-muted'>
             {letter}
           </span>
         ))}

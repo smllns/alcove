@@ -34,7 +34,7 @@ function EndCard({ kind, book, value }: End & { value: ReactNode }) {
           />
         </span>
         <span className='min-w-0'>
-          <span className='line-clamp-2 font-serif text-[15px] leading-snug italic transition-colors duration-300 group-hover:text-ink-soft'>
+          <span className='line-clamp-2 font-serif text-[0.9375rem] leading-snug italic transition-colors duration-300 group-hover:text-ink-soft'>
             {book.title}
           </span>
           {author && (
@@ -89,7 +89,7 @@ export function BookEnds({
         <span className='absolute inset-x-3 top-1/2 h-px bg-(--fine)' />
         <span className='absolute top-1/2 left-3 h-2 w-px -translate-y-1/2 bg-(--fine)' />
         <span className='absolute top-1/2 right-3 h-2 w-px -translate-y-1/2 bg-(--fine)' />
-        <span className='absolute inset-x-0 top-1/2 -translate-y-[calc(100%+4px)] text-center font-serif text-[13px] text-ink-soft'>
+        <span className='absolute inset-x-0 top-1/2 -translate-y-[calc(100%+4px)] text-center font-serif text-[0.8125rem] text-ink-soft'>
           {measure}
         </span>
       </span>

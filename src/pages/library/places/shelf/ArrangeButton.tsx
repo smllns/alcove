@@ -1,6 +1,6 @@
 import { ArrowLeftRight } from 'lucide-react';
 import { ChoiceToggle } from '@/shared/ui/ChoiceToggle';
-import type { Arranging } from './arranging';
+import type { Arranging } from '@/features/move-books';
 
 // Over the books it arranges: arranging them, or done with it; a book held
 // on turns it on too
