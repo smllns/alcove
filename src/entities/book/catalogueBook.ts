@@ -55,3 +55,21 @@ export const isTyped = (workKey: string) => workKey.startsWith('typed-');
 const READERS = 'book-';
 export const isReadersOwn = (workKey: string) => workKey.startsWith(READERS);
 export const readersOwnId = (workKey: string) => workKey.slice(READERS.length);
+
+// A book another reader has (on their page, in the feed) as a work from the
+// catalogue, to open it by: one the catalogue doesn't know opens what's
+// known of it here
+export const asWork = (book: {
+  workKey: string;
+  title: string;
+  authors: string[];
+  coverUrl?: string;
+  firstPublishedYear?: number;
+}): CatalogueWork => ({
+  workKey: book.workKey,
+  title: book.title,
+  authors: book.authors,
+  coverUrl: book.coverUrl,
+  firstPublishYear: book.firstPublishedYear,
+  editionCount: 0,
+});

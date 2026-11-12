@@ -29,12 +29,13 @@ export function CoverSticker({ owned }: { owned: boolean }) {
   }, [owned]);
 
   return (
-    // The corner it lies across, cutting it off at the cover's edges
-    <span className='pointer-events-none absolute right-0 top-0 aspect-square w-[46%] overflow-hidden'>
+    // The corner it lies across, cutting it off at the cover's edges: more
+    // of a narrow cover's (a phone's), for its words to fit across it
+    <span className='pointer-events-none absolute right-0 top-0 aspect-square w-[60%] overflow-hidden @min-[15rem]:w-[46%]'>
       <span ref={band} className='absolute left-[-6%] top-[30%] block w-[150%]'>
         <span
           className={cn(
-            'block origin-center rotate-45 py-1.5 text-center text-xs font-semibold uppercase tracking-[0.16em] shadow-[0_6px_10px_-6px_rgb(var(--shade)/0.6)]',
+            'block origin-center rotate-45 py-1.5 text-center text-xs font-semibold uppercase tracking-[0.12em] shadow-[0_6px_10px_-6px_rgb(var(--shade)/0.6)]',
             owned ? 'bg-button text-button-text' : 'bg-surface text-ink-soft',
           )}
         >

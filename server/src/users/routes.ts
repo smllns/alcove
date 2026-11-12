@@ -6,6 +6,9 @@ import { queryText } from '../lib/validation.js';
 import { answer, follow, people, unfollow } from './follows.js';
 import { readerPage, sightOf } from './profile.js';
 import { readerBook } from './readerBook.js';
+import { feedOf } from './feed.js';
+import { heartsOnMine, likeReview } from './reviewLikes.js';
+import { readersReviews } from './reviews.js';
 import { sharedBooksBy } from './sharedBooks.js';
 import { searchReaders } from './repository.js';
 
@@ -66,6 +69,52 @@ usersRouter.get('/readers/:username/:side', async (req, res) => {
 usersRouter.get('/books-by', async (req, res) => {
   const name = queryText(req, 'name', 120);
   res.json({ works: await sharedBooksBy(name, currentUser(req)._id) });
+});
+
+// What other readers wrote of a book: ?work= (its work in the catalogue),
+// &title= and &author=
+usersRouter.get('/reviews', async (req, res) => {
+  res.json({
+    reviews: await readersReviews(
+      {
+        work: queryText(req, 'work', 40) || undefined,
+        title: queryText(req, 'title', 300),
+        author: queryText(req, 'author', 120) || undefined,
+      },
+      currentUser(req)._id,
+    ),
+  });
+});
+
+// The reader's feed: what those they follow did, and what was done for
+// them, with how many are new since they last looked
+usersRouter.get('/feed', async (req, res) => {
+  const me = currentUser(req);
+  res.json(await feedOf(me._id, me.feedSeenAt));
+});
+
+// The feed looked at: nothing in it new any more
+usersRouter.post('/feed/seen', async (req, res) => {
+  await users().updateOne(
+    { _id: currentUser(req)._id },
+    { $set: { feedSeenAt: new Date() } },
+  );
+  res.status(204).end();
+});
+
+// Who gave their hearts to the reader's own review, the latest first
+usersRouter.get('/reviews/:id/hearts', async (req, res) => {
+  res.json(await heartsOnMine(String(req.params.id), currentUser(req)._id));
+});
+
+// A heart on another reader's review, or taken back
+usersRouter.post('/reviews/:id/like', async (req, res) => {
+  await likeReview(String(req.params.id), currentUser(req)._id, true);
+  res.status(204).end();
+});
+usersRouter.delete('/reviews/:id/like', async (req, res) => {
+  await likeReview(String(req.params.id), currentUser(req)._id, false);
+  res.status(204).end();
 });
 
 // One of another reader's books the catalogue doesn't know, as far as

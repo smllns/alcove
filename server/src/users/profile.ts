@@ -72,7 +72,13 @@ export function seenBook(
   if (sees.stars && copy?.rating) seen.rating = copy.rating;
   if (reading)
     Object.assign(seen, { reading: 'reading', started: copy?.started });
-  if (read) Object.assign(seen, { reading: 'read', finished: copy?.finished });
+  // Read, when it was begun too, for how long it took (start to finish)
+  if (read)
+    Object.assign(seen, {
+      reading: 'read',
+      started: copy?.started,
+      finished: copy?.finished,
+    });
   if (sees.quotes && copy?.quotes?.length) seen.quotes = copy.quotes;
   return seen;
 }
@@ -89,6 +95,20 @@ export async function sightOf(owner: UserDoc, viewer: ObjectId) {
       ? 'follower'
       : 'reader';
   return { state, standing, ...shown(privacyOf(owner), standing) };
+}
+
+// A reader's favourite books among `all` of theirs, in their order; one
+// since gone, left out
+function favouritesOf(
+  owner: UserDoc,
+  all: BookDoc[],
+  parts: Record<Part, boolean>,
+) {
+  const byId = new Map(all.map((book) => [book._id.toHexString(), book]));
+  return (owner.favourites ?? []).flatMap((id) => {
+    const book = byId.get(id.toHexString());
+    return (book && seenBook(book, parts)) ?? [];
+  });
 }
 
 export async function readerPage(owner: UserDoc, viewer: ObjectId) {
@@ -116,9 +136,6 @@ export async function readerPage(owner: UserDoc, viewer: ObjectId) {
     counts: {
       ...counts,
       books: parts.books ? all.length : null,
-      read: parts.year
-        ? all.filter((book) => book.copy?.reading === 'read').length
-        : null,
     },
     open,
     shows: parts,
@@ -126,6 +143,8 @@ export async function readerPage(owner: UserDoc, viewer: ObjectId) {
     // to follow them
     ...(you && { privacy: privacyOf(owner), asking }),
     books: all.flatMap((book) => seenBook(book, parts) ?? []),
+    // The four they'd most have seen, first to last, as their books are
+    favourites: parts.books ? favouritesOf(owner, all, parts) : [],
     lists,
   };
 }

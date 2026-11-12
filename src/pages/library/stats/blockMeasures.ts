@@ -12,4 +12,6 @@ export const TALL = BLOCK_STOREYS * STOREY * M;
 export { WALL } from './drawingKit';
 export const [SX, SW] = [X + WIDE + 54, 52];
 export const MARKS = SX + SW + 30;
+// How wide the drawing is designed, before a wide column widens it
+export const BASE = 470;
 export const SHELF = 0.38 * M;

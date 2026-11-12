@@ -11,6 +11,7 @@ import { listRouter } from './listRoutes.js';
 import { noneIfMissing, workKeyOf } from './params.js';
 import { listsOfWork } from './workLists.js';
 import { similarWorks } from './similar.js';
+import { aboutRouter } from './aboutRoutes.js';
 import { authorRouter } from './authorRoutes.js';
 import { searchAuthors } from './authors.js';
 import { workSummary } from './work.js';
@@ -24,7 +25,8 @@ import {
 } from '../catalogue/repository.js';
 import { editionByIsbn, workEditions } from './editions.js';
 import { cleanIsbn, looksLikeIsbn, searchWorks } from './openLibrary.js';
-import { workDetails, workRatings } from './workDoc.js';
+import { workRatings } from './workDoc.js';
+import { alcoveStars, blended } from './alcoveRatings.js';
 
 // Finding books to add: search the catalogue, then pick an edition.
 // Mounted behind requireUser.
@@ -52,6 +54,8 @@ lookupRouter.use(
 lookupRouter.use(listRouter);
 // Who wrote a book
 lookupRouter.use(authorRouter);
+// What a book is about
+lookupRouter.use(aboutRouter);
 
 lookupRouter.get('/search', async (req, res) => {
   const query = String(req.query.q ?? '').trim();
@@ -129,24 +133,17 @@ lookupRouter.get('/works/:workKey/summary', async (req, res) => {
   });
 });
 
-// What the book is about and its genres; nothing when the catalogue
-// doesn't say
-lookupRouter.get('/works/:workKey', async (req, res) => {
-  const workKey = workKeyOf(req);
-  const details = await cached(`about2:${workKey}`, 30, () =>
-    workDetails(workKey).catch(noneIfMissing),
-  );
-  res.json(details ?? { description: null, genres: [] });
-});
-
-// How the catalogue's readers rate it. Ratings come in all the time, so
-// they're kept for days, not weeks.
+// How readers rate it: the catalogue's (kept for days, not weeks, as
+// ratings come in all the time) and alcove's (as they are now), together
 lookupRouter.get('/works/:workKey/ratings', async (req, res) => {
   const workKey = workKeyOf(req);
-  const ratings = await cached(`ratings1:${workKey}`, 3, () =>
-    workRatings(workKey).catch(noneIfMissing),
-  );
-  res.json({ ratings });
+  const [theirs, ours] = await Promise.all([
+    cached(`ratings1:${workKey}`, 3, () =>
+      workRatings(workKey).catch(noneIfMissing),
+    ),
+    alcoveStars([workKey]),
+  ]);
+  res.json({ ratings: blended(theirs, ours.get(workKey)) });
 });
 
 // The lists every reader sees that the book is in

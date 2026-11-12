@@ -1,25 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { keepWhileTyping } from '@/shared/lib/keepWhileTyping';
-import { searchable } from './matches';
 import {
   fetchBookQuotes,
   fetchEditions,
   fetchSimilarBooks,
-  fetchAuthor,
   fetchWorkDetails,
   fetchWorkRatings,
   fetchWorkSummary,
   searchAuthors,
   searchCatalogue,
 } from './api';
-import type { AuthorAsk } from './authorAsk';
-import type { CatalogueAuthor, CatalogueWork } from './types';
+import type { CatalogueWork } from './types';
 
 // What's asked of the book catalogues (Open Library, Wikiquote) about books
 // in general, rather than the reader's own: finding a book, its editions,
-// what it's about, how it's rated, lines from it, who wrote it, books like
-// it (and the lists of books, catalogueListQueries)
+// what it's about, how it's rated, lines from it, books like it (who wrote
+// it, authorQueries; the lists of books, catalogueListQueries)
 
 const catalogueKeys = {
   search: (query: string) => ['catalogue', 'search', query] as const,
@@ -28,14 +25,6 @@ const catalogueKeys = {
   about: (workKey: string) => ['catalogue', 'about2', workKey] as const,
   ratings: (workKey: string) => ['catalogue', 'ratings', workKey] as const,
   similar: (workKey: string) => ['catalogue', 'similar', workKey] as const,
-  author: ({ work, name, title, read, original }: AuthorAsk) =>
-    [
-      'catalogue',
-      'author4',
-      work ?? `${name}|${title}`,
-      read ?? '',
-      original ?? '',
-    ] as const,
   quotes: (title: string, author: string) =>
     ['catalogue', 'quotes', title, author] as const,
 };
@@ -106,45 +95,6 @@ export const useWorkRatings = (workKey: string | undefined) =>
     staleTime: 60 * 60 * 1000,
   });
 
-// A writer's name as names are matched: no case, accents, spaces or dots,
-// so "J. R. R. Tolkien" is "J.R.R. Tolkien"
-const nameKey = (name: string) => [
-  'catalogue',
-  'author-by-name',
-  searchable(name).replace(/[^\p{L}\p{N}]/gu, ''),
-];
-
-// Who wrote a book, as asked by it (useBookAuthor, and a writer's page,
-// which asks by a few of their books)
-export const authorQuery = (ask: AuthorAsk) => ({
-  queryKey: catalogueKeys.author(ask),
-  queryFn: () => fetchAuthor(ask),
-  enabled: Boolean(ask.work || ask.name),
-  staleTime: Infinity,
-});
-
-// Who wrote the book, asked once per book: it hardly changes. Kept by the
-// writer's name too (theirs as the book has it, and as the catalogue does),
-// so another book of theirs opened next shows them at once, while its own
-// answer is asked for (in case the catalogue tells it differently)
-export function useBookAuthor(ask: AuthorAsk) {
-  const { name } = ask;
-  const client = useQueryClient();
-  const query = useQuery({
-    ...authorQuery(ask),
-    placeholderData: () =>
-      name ? client.getQueryData<CatalogueAuthor>(nameKey(name)) : undefined,
-  });
-  // Remembered by name whenever it's known, asked now or long ago
-  const author = query.isPlaceholderData ? undefined : query.data;
-  useEffect(() => {
-    if (!author) return;
-    for (const each of [name, author.name])
-      if (each) client.setQueryData(nameKey(each), author);
-  }, [author, name, client]);
-  return query;
-}
-
 // Books to read next. Asked again each time the page opens (the server
 // keeps the catalogue's answer), so those added since show as on the
 // shelves.
@@ -176,6 +126,8 @@ export function useCatalogueDescription(workKey: string | undefined) {
   const known = query.data?.description;
   return {
     known,
+    // Whose words they are: a reader of alcove's, or the catalogue's
+    fromReaders: query.data?.from === 'readers',
     // Worth offering while the catalogue may yet say
     available: Boolean(workKey) && known !== null,
     loading: query.isFetching,
@@ -189,6 +141,7 @@ export function useCatalogueDescription(workKey: string | undefined) {
   };
 }
 
-// The words for asking the catalogue for a description, as it's asked
+// The words for asking for a description (the catalogue's, or a reader's
+// of alcove), as it's asked
 export const loadDescriptionLabel = (loading: boolean) =>
-  loading ? 'Asking Open Library…' : 'Load from Open Library';
+  loading ? 'Looking for one…' : 'Load a description';

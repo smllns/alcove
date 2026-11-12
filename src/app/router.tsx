@@ -17,9 +17,11 @@ import { SharedListPage } from '@/pages/library/lists/SharedListPage';
 import { ReaderBooksPage } from '@/pages/library/reader/ReaderBooksPage';
 import { ReaderPage } from '@/pages/library/reader/ReaderPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
+import { NewsPage } from '@/pages/news/NewsPage';
 import { SettingsPage } from '@/pages/settings/SettingsPage';
 import { WelcomePage } from '@/pages/welcome/WelcomePage';
 import { sections } from '@/widgets/library-header';
+import { WritersKnown } from './WritersKnown';
 import { RootLayout } from './RootLayout';
 import { paths } from '@/shared/config/paths';
 
@@ -42,34 +44,43 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          // One page for every section of the library, each at its own
-          // address
-          ...sections.map((section) => ({
-            path: section.path,
-            element: <LibraryPage section={section.key} />,
-            handle: { page: 'library' },
-          })),
-          { path: paths.addBook, element: <AddBookPage /> },
-          { path: paths.importBooks, element: <ImportPage /> },
-          { path: paths.book(':id'), element: <BookPage /> },
-          { path: paths.editBook(':id'), element: <EditBookPage /> },
-          { path: paths.work(':workKey'), element: <WorkPage /> },
-          { path: paths.author(':name'), element: <AuthorPage /> },
-          { path: paths.editWork(':workKey'), element: <EditWorkPage /> },
-          { path: paths.list(':id'), element: <ListPage /> },
-          { path: paths.featuredList(':id'), element: <FeaturedListPage /> },
-          { path: paths.sharedList(':id'), element: <SharedListPage /> },
           {
-            path: paths.readersList(':owner', ':id'),
-            element: <ReadersListPage />,
+            element: <WritersKnown />,
+            children: [
+              // One page for every section of the library, each at its own
+              // address
+              ...sections.map((section) => ({
+                path: section.path,
+                element: <LibraryPage section={section.key} />,
+                handle: { page: 'library' },
+              })),
+              { path: paths.addBook, element: <AddBookPage /> },
+              { path: paths.importBooks, element: <ImportPage /> },
+              { path: paths.book(':id'), element: <BookPage /> },
+              { path: paths.editBook(':id'), element: <EditBookPage /> },
+              { path: paths.work(':workKey'), element: <WorkPage /> },
+              { path: paths.author(':name'), element: <AuthorPage /> },
+              { path: paths.editWork(':workKey'), element: <EditWorkPage /> },
+              { path: paths.list(':id'), element: <ListPage /> },
+              {
+                path: paths.featuredList(':id'),
+                element: <FeaturedListPage />,
+              },
+              { path: paths.sharedList(':id'), element: <SharedListPage /> },
+              {
+                path: paths.readersList(':owner', ':id'),
+                element: <ReadersListPage />,
+              },
+              { path: paths.reader(':username'), element: <ReaderPage /> },
+              {
+                path: paths.readerBooks(':username'),
+                element: <ReaderBooksPage />,
+              },
+              { path: paths.settings, element: <SettingsPage /> },
+              { path: paths.news, element: <NewsPage /> },
+              { path: paths.welcome, element: <WelcomePage /> },
+            ],
           },
-          { path: paths.reader(':username'), element: <ReaderPage /> },
-          {
-            path: paths.readerBooks(':username'),
-            element: <ReaderBooksPage />,
-          },
-          { path: paths.settings, element: <SettingsPage /> },
-          { path: paths.welcome, element: <WelcomePage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

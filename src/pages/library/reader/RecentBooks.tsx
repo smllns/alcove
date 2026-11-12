@@ -4,7 +4,8 @@ import { paths } from '@/shared/config/paths';
 import { counted } from '@/shared/lib/plural';
 import { WorkGrid } from '@/widgets/book-grid';
 import { AllLink } from './AllLink';
-import { asWork, theirStars } from './readerBooks';
+import { asWork } from '@/entities/book/catalogueBook';
+import { theirStars } from './readerBooks';
 import { PagePart } from './PagePart';
 
 // The books a reader brought to their shelves last, two rows of them,

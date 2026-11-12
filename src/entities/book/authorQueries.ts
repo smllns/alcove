@@ -1,12 +1,21 @@
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import {
+  useQueries,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query';
 import { settled } from '@/shared/lib/settled';
 import {
   fetchAuthorWorks,
   fetchWorkTitles,
   fetchWriterQuotes,
 } from './authorApi';
-import { authorAskOf } from './authorAsk';
-import type { Book } from './types';
+import { fetchAuthor } from './api';
+import { authorAskOf, type AuthorAsk } from './authorAsk';
+import { searchable } from './matches';
+import { sameWritersKey } from './sameWriters';
+import type { Book, CatalogueAuthor } from './types';
 
 // A writer's books in the catalogue. Asked again each time their page
 // opens (the server keeps the catalogue's answer), so those added since
@@ -53,4 +62,58 @@ export function useWorkTitles(books: Book[]) {
     ),
     known: queries.every(settled),
   };
+}
+
+// Who wrote a book, as it was asked about
+const authorKey = ({ work, name, title, read, original }: AuthorAsk) =>
+  [
+    'catalogue',
+    'author4',
+    work ?? `${name}|${title}`,
+    read ?? '',
+    original ?? '',
+  ] as const;
+
+// A writer's name as names are matched: no case, accents, spaces or dots,
+// so "J. R. R. Tolkien" is "J.R.R. Tolkien"
+const nameKey = (name: string) => [
+  'catalogue',
+  'author-by-name',
+  searchable(name).replace(/[^\p{L}\p{N}]/gu, ''),
+];
+
+// Who wrote a book, as asked by it (useBookAuthor, and a writer's page,
+// which asks by a few of their books)
+export const authorQuery = (ask: AuthorAsk) => ({
+  queryKey: authorKey(ask),
+  queryFn: async ({ client }: { client: QueryClient }) => {
+    const { author, moreNames } = await fetchAuthor(ask);
+    // More of their names known: who's one asked afresh
+    if (moreNames) void client.invalidateQueries({ queryKey: sameWritersKey });
+    return author;
+  },
+  enabled: Boolean(ask.work || ask.name),
+  staleTime: Infinity,
+});
+
+// Who wrote the book, asked once per book: it hardly changes. Kept by the
+// writer's name too (theirs as the book has it, and as the catalogue does),
+// so another book of theirs opened next shows them at once, while its own
+// answer is asked for (in case the catalogue tells it differently)
+export function useBookAuthor(ask: AuthorAsk) {
+  const { name } = ask;
+  const client = useQueryClient();
+  const query = useQuery({
+    ...authorQuery(ask),
+    placeholderData: () =>
+      name ? client.getQueryData<CatalogueAuthor>(nameKey(name)) : undefined,
+  });
+  // Remembered by name whenever it's known, asked now or long ago
+  const author = query.isPlaceholderData ? undefined : query.data;
+  useEffect(() => {
+    if (!author) return;
+    for (const each of [name, author.name])
+      if (each) client.setQueryData(nameKey(each), author);
+  }, [author, name, client]);
+  return query;
 }

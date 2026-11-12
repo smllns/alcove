@@ -1,8 +1,6 @@
 import { authorAskOf } from '@/entities/book/authorAsk';
-import {
-  useBookAuthor,
-  useSimilarBooks,
-} from '@/entities/book/catalogueQueries';
+import { useBookAuthor } from '@/entities/book/authorQueries';
+import { useSimilarBooks } from '@/entities/book/catalogueQueries';
 import type { Book } from '@/entities/book/types';
 import { Arriving } from './Arriving';
 import { settled } from '@/shared/lib/settled';

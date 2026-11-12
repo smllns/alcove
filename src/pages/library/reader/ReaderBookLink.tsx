@@ -3,7 +3,7 @@ import type { AddBookState, Book } from '@/entities/book/types';
 import type { ReaderBook } from '@/entities/reader/types';
 import { paths } from '@/shared/config/paths';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
-import { asWork } from './readerBooks';
+import { asWork } from '@/entities/book/catalogueBook';
 
 // A book on a reader's page, opening the reader's own copy of it (by its
 // work, `owned`: on their own page, the book itself), or else its page as

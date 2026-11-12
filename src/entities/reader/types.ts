@@ -1,3 +1,4 @@
+import type { News } from '@/entities/news/types';
 import type { SavedList } from '@/entities/list/types';
 import type { PagePart, Privacy } from '@/entities/user/types';
 
@@ -34,11 +35,10 @@ export type ReaderPage = {
   you: boolean;
   follow: FollowState;
   followsYou: boolean;
-  // How many books they have and have read (null where that's not seen),
-  // how many follow them and they follow
+  // How many books they have (null where that's not seen), how many follow
+  // them and they follow
   counts: {
     books: number | null;
-    read: number | null;
     followers: number;
     following: number;
   };
@@ -51,6 +51,8 @@ export type ReaderPage = {
   privacy?: Privacy;
   asking?: number;
   books: ReaderBook[];
+  // The four they'd most have seen, first to last
+  favourites: ReaderBook[];
   // Their public lists, as a list kept from another reader is
   lists: SavedList[];
 };
@@ -61,3 +63,56 @@ export type ListedReader = {
   name: string | null;
   avatarUrl: string | null;
 };
+
+// What another reader wrote of a book, for its page: who, their stars (if
+// they let anyone see them) and when. Mirrors readersReviews in
+// server/src/users/reviews.ts.
+export type ReaderReview = {
+  // The copy it's kept on, by which it's liked
+  id: string;
+  reader: ListedReader;
+  // Its hearts, and whether the one looking gave one
+  likes: number;
+  liked: boolean;
+  review: string;
+  rating?: number;
+  at: string;
+};
+
+// What a reader did with a book (or for the one looking alone), as their
+// feed tells it
+export type ActivityKind =
+  | 'added'
+  | 'started'
+  | 'finished'
+  | 'reviewed'
+  | 'liked'
+  | 'followed'
+  | 'asked';
+
+// One thing in the reader's feed: alcove's own news, or what one they follow
+// did with a book, or what was done for them alone (`forYou`). Mirrors
+// feedOf in server/src/users/feed.ts.
+export type FeedItem =
+  | { id: string; kind: 'news'; at: string; news: News }
+  | {
+      id: string;
+      kind: ActivityKind;
+      at: string;
+      forYou: boolean;
+      // Who did it
+      reader: ListedReader;
+      book?: {
+        // Their copy (or, a heart, the reader's own copy reviewed)
+        id: string;
+        workKey: string;
+        title: string;
+        authors: string[];
+        coverUrl?: string;
+        rating?: number;
+        review?: string;
+      };
+    };
+
+// The reader's feed, and how much of it is new since they last looked
+export type Feed = { items: FeedItem[]; unread: number };

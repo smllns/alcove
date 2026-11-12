@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createApp } from '../server/src/app.js';
-import { connectDb } from '../server/src/db.js';
+import { openDb } from '../server/src/migrations.js';
 
 // Vercel entry: the whole API as one serverless function. vercel.json sends
 // every /api/* request here. Locally the API runs from server/src/index.ts.
@@ -16,7 +16,7 @@ export default async function handler(
   res: ServerResponse,
 ) {
   try {
-    await (connecting ??= connectDb());
+    await (connecting ??= openDb());
   } catch (err) {
     connecting = null;
     console.error('Could not connect to MongoDB:', err);

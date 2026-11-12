@@ -3,6 +3,7 @@ import { RoundPhoto } from './RoundPhoto';
 
 const sizes = {
   sm: 'size-8 text-[0.9375rem]',
+  md: 'size-11 text-xl',
   lg: 'size-16 text-[1.75rem]',
 };
 

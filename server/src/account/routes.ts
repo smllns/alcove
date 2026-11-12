@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { ObjectId } from 'mongodb';
 import { currentUser } from '../auth/middleware.js';
 import { endAllSessions, endOtherSessions } from '../auth/sessions.js';
 import {
@@ -8,7 +9,7 @@ import {
   usernameTaken,
 } from '../auth/users.js';
 import { deleteAllBooks } from '../books/repository.js';
-import type { UserDoc } from '../db.js';
+import { books, type UserDoc } from '../db.js';
 import { HttpError } from '../lib/errors.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
 import { passwordAttempts } from '../lib/rateLimit.js';
@@ -16,6 +17,8 @@ import { parseBody } from '../lib/validation.js';
 import { deleteLists } from '../lists/repository.js';
 import { deletePlaces } from '../places/repository.js';
 import { deleteFollows, letAllIn } from '../users/follows.js';
+import { forgetReader } from '../users/activity.js';
+import { deleteLikes } from '../users/reviewLikes.js';
 import { privacyOf } from '../users/privacy.js';
 import {
   deleteAllCovers,
@@ -24,6 +27,7 @@ import {
 } from '../uploads/storage.js';
 import {
   aboutSchema,
+  favouritesSchema,
   avatarSchema,
   deleteSchema,
   emailSchema,
@@ -75,6 +79,22 @@ accountRouter.patch('/avatar', async (req, res) => {
   res.json({ user: toPublicUser(user!) });
 });
 
+// Their favourite books, chosen among their own
+accountRouter.patch('/favourites', async (req, res) => {
+  const ids = parseBody(favouritesSchema, req.body).books.map(
+    (id) => new ObjectId(id),
+  );
+  const me = currentUser(req);
+  const theirs = await books().countDocuments({
+    _id: { $in: ids },
+    userId: me._id,
+  });
+  if (theirs !== ids.length)
+    throw new HttpError(400, 'not_yours', 'Choose from your own books.');
+  const user = await updateUser(me._id, { favourites: ids });
+  res.json({ user: toPublicUser(user!) });
+});
+
 // Who sees what; a page opened to everyone lets in all who were asking
 accountRouter.patch('/privacy', async (req, res) => {
   const change = parseBody(privacySchema, req.body);
@@ -115,8 +135,11 @@ accountRouter.delete('/', passwordAttempts, async (req, res) => {
   const me = currentUser(req);
   await confirmPassword(me, password, 'password');
   await endAllSessions(res, me._id);
-  // Their books and photos go with them: the photos last, once nothing of
-  // theirs uses them (those another reader added with a book stay)
+  // Their hearts, and those on their reviews, while their books still say
+  // which those are; then their books and photos go with them: the photos
+  // last, once nothing of theirs uses them (those another reader added
+  // with a book stay)
+  await Promise.all([deleteLikes(me._id), forgetReader(me._id)]);
   await Promise.all([
     deleteAllBooks(me._id),
     deletePlaces(me._id),

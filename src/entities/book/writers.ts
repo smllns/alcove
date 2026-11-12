@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from 'react';
 import { inLatin, misspelt } from '@/shared/lib/spelling';
 import { searchable } from './matches';
 import type { Book } from './types';
@@ -54,14 +55,45 @@ function parsed(name: string) {
 // Worked out once per name: the same names come up over and over, matching
 // the whole shelf against a writer
 const keys = new Map<string, string>();
+const spelled = (name: string) => {
+  const { surname, first } = parsed(name);
+  return `${first ? sound(first)[0] : ''}:${sound(surname)}`;
+};
 export function writerKey(name: string) {
   const known = keys.get(name);
   if (known !== undefined) return known;
-  const { surname, first } = parsed(name);
-  const key = `${first ? sound(first)[0] : ''}:${sound(surname)}`;
+  const raw = spelled(name);
+  const key = merged.get(raw) ?? raw;
   keys.set(name, key);
   return key;
 }
+
+// Writers found to be one under names that don't sound alike ("Annie
+// Ernaux", "Анни Эрно": one person on Wikidata, as the server knows from
+// finding them, sameWriters): each of a writer's names told as the first
+// of them, and so every other way of writing those
+const merged = new Map<string, string>();
+// How many times that's been told, and who's to hear of it next time
+let told = 0;
+const listeners = new Set<() => void>();
+export function knowSameWriters(groups: string[][]) {
+  told += 1;
+  merged.clear();
+  keys.clear();
+  for (const group of groups) {
+    const [first, ...rest] = group.map(spelled);
+    for (const key of rest) if (key !== first) merged.set(key, first);
+  }
+  listeners.forEach((listener) => listener());
+}
+const listen = (listener: () => void) => {
+  listeners.add(listener);
+  return () => void listeners.delete(listener);
+};
+
+// How many times who's one has been told, for what's worked out of
+// writers to be worked out again (a memo's dependency), and drawn again
+export const useWritersKnown = () => useSyncExternalStore(listen, () => told);
 
 // Two keys a letter apart in the surname, with the same first letter, are
 // one writer misspelled

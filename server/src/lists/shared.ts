@@ -9,7 +9,7 @@ import {
   type UserDoc,
 } from '../db.js';
 import { escapedForRegex } from '../lib/text.js';
-import { countByList } from './repository.js';
+import { countByList, countsByOwner } from './counts.js';
 
 // Lists other readers have made public: found by their names, and opened,
 // never changed. Only what any reader may see of them goes out: the
@@ -51,17 +51,18 @@ export async function searchSharedLists(query: string, me: ObjectId) {
       { $project: { list: '$lists' } },
     ])
     .toArray();
-  const owners = await users()
-    .find({ _id: { $in: rows.map((row) => row._id) } }, ownerProjection)
-    .toArray();
-  return Promise.all(
-    rows.map(async ({ _id, list }): Promise<SharedList> => ({
-      id: list.id,
-      name: list.name,
-      owner: calledBy(owners.find((owner) => owner._id.equals(_id))),
-      books: (await countByList(_id, [list]))[list.id] ?? 0,
-    })),
-  );
+  const [owners, counts] = await Promise.all([
+    users()
+      .find({ _id: { $in: rows.map((row) => row._id) } }, ownerProjection)
+      .toArray(),
+    countsByOwner(rows.map((row) => ({ userId: row._id, lists: [row.list] }))),
+  ]);
+  return rows.map(({ _id, list }): SharedList => ({
+    id: list.id,
+    name: list.name,
+    owner: calledBy(owners.find((owner) => owner._id.equals(_id))),
+    books: counts.get(_id.toHexString())?.[list.id] ?? 0,
+  }));
 }
 
 // A book in a public list as any reader may see it: what the catalogue

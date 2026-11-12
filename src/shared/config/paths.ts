@@ -27,6 +27,8 @@ export const paths = {
   readerBooks: (username: string, show?: 'yours') =>
     `/library/readers/${username}/books${show ? `?show=${show}` : ''}`,
   settings: '/settings',
+  // Where alcove's team writes its news
+  news: '/settings/news',
   welcome: '/welcome',
   book: (id: string) => `/library/books/${id}`,
   // A book from the catalogue, not on the reader's shelves (yet)

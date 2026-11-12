@@ -8,7 +8,8 @@ import {
 } from 'react';
 import type { Book } from '@/entities/book/types';
 import type { ShelfShow } from '@/widgets/book-order';
-import { boundsOf, layoutSky } from './layout';
+import { boundsOf } from './layout';
+import { useSkyLayout } from './useSkyLayout';
 import { letGo } from './leaving';
 import { SkyControls } from './SkyControls';
 import { SkyDust } from './SkyDust';
@@ -65,7 +66,7 @@ export function Universe({
 }) {
   const sky = useRef<HTMLDivElement>(null);
   const [drawn, fading] = useFadeSwap(books, show, FADE_OUT_MS);
-  const layout = useMemo(() => layoutSky(drawn), [drawn]);
+  const layout = useSkyLayout(drawn);
   const [shape, nextShape, reshaping] = useSkyShape();
   const litStars = useMemo(
     () => (lit ? layout.stars.filter((star) => lit.has(star.book.id)) : []),

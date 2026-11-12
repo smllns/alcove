@@ -1,6 +1,7 @@
-import { MongoServerError, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { users, type UserDoc } from '../db.js';
-import { HttpError } from '../lib/errors.js';
+import { HttpError, isDuplicateKey } from '../lib/errors.js';
+import { isAdmin } from '../news/repository.js';
 import { privacyOf, type Privacy } from '../users/privacy.js';
 
 // What the client is allowed to see about a user
@@ -16,6 +17,10 @@ export type PublicUser = {
   privacy: Privacy;
   // Their photo, if they've uploaded one
   avatarUrl: string | null;
+  // Their favourite books, by id, first to last
+  favourites: string[];
+  // One of those who run alcove (writes its news)
+  admin: boolean;
 };
 
 export const toPublicUser = (user: UserDoc): PublicUser => ({
@@ -28,6 +33,8 @@ export const toPublicUser = (user: UserDoc): PublicUser => ({
   about: user.about || null,
   privacy: privacyOf(user),
   avatarUrl: user.avatarUrl || null,
+  favourites: (user.favourites ?? []).map((id) => id.toHexString()),
+  admin: isAdmin(user),
 });
 
 export const findUserByEmail = (email: string) => users().findOne({ email });
@@ -36,7 +43,7 @@ export const findUserById = (id: ObjectId) => users().findOne({ _id: id });
 
 // Which of them someone else has already, when one has
 const takenOf = (err: unknown) =>
-  err instanceof MongoServerError && err.code === 11000
+  isDuplicateKey(err)
     ? err.keyPattern?.username
       ? ('username' as const)
       : ('email' as const)
@@ -76,6 +83,7 @@ export async function updateUser(
       | 'about'
       | 'privacy'
       | 'avatarUrl'
+      | 'favourites'
     >
   >,
 ) {
@@ -86,7 +94,7 @@ export async function updateUser(
       { returnDocument: 'after' },
     );
   } catch (err) {
-    if (err instanceof MongoServerError && err.code === 11000) return null;
+    if (isDuplicateKey(err)) return null;
     throw err;
   }
 }

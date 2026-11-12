@@ -13,6 +13,10 @@ export type User = {
   privacy: Privacy;
   // Their photo, if they've uploaded one
   avatarUrl: string | null;
+  // Their favourite books, by id, first to last
+  favourites: string[];
+  // One of those who run alcove (writes its news)
+  admin: boolean;
 };
 
 // Who may see a part of a reader's page. Mirrors users/privacy.ts.

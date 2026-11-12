@@ -22,6 +22,7 @@ import { EditionFacts } from './EditionFacts';
 import { PassageQuotes } from './PassageQuotes';
 import { QuoteSuggestions } from './QuoteSuggestions';
 import { SameAuthor } from './SameAuthor';
+import { ReadersReviews } from './ReadersReviews';
 import { ReadNext } from './ReadNext';
 import { AddToList } from './AddToList';
 import { WantToRead } from './WantToRead';
@@ -170,6 +171,8 @@ export function BookView({
               <BookLinks book={book} />
             </>
           )}
+          {/* What other readers wrote of it */}
+          <ReadersReviews book={book} />
           {catalogued && (
             <>
               <BookLists book={book} />

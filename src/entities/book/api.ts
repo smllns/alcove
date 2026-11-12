@@ -30,14 +30,6 @@ export const addBook = async (input: BookInput) =>
   (await request<{ book: Book }>('/books', { method: 'POST', body: input }))
     .book;
 
-// The reader's books by a writer
-export const fetchBooksByWriter = async (name: string) =>
-  (
-    await request<{ books: Book[] }>(
-      `/books/by-writer?${new URLSearchParams({ name })}`,
-    )
-  ).books;
-
 export const fetchBook = async (id: string) =>
   (await request<{ book: Book }>(`/books/${id}`)).book;
 
@@ -89,9 +81,14 @@ export const fetchEditions = async (workKey: string) =>
 // What the book is about, as the catalogue describes it (null if it
 // doesn't), and the genres its subjects point to
 export const fetchWorkDetails = (workKey: string) =>
-  request<{ description: string | null; genres: string[] }>(
-    `/lookup/works/${workKey}`,
-  );
+  request<{
+    description: string | null;
+    genres: string[];
+    // Written by a reader of alcove, the catalogue not describing it
+    from?: 'readers';
+    // A cover a reader of alcove gave it, if any did
+    readersCover?: string;
+  }>(`/lookup/works/${workKey}`);
 
 // How the catalogue's readers rate the book; null if none have
 export const fetchWorkRatings = async (workKey: string) =>
@@ -101,8 +98,8 @@ export const fetchWorkRatings = async (workKey: string) =>
     )
   ).ratings;
 
-// Who wrote the book, told of in a language the reader reads; null if
-// neither the catalogue nor Wikipedia says
+// Who wrote the book, told of in a language the reader reads (null if
+// neither the catalogue nor Wikipedia says)
 export async function fetchAuthor(ask: AuthorAsk) {
   const params = new URLSearchParams();
   const add = (key: string, value: string | undefined) =>
@@ -115,9 +112,10 @@ export async function fetchAuthor(ask: AuthorAsk) {
   // name alone
   add('name', ask.name);
   const path = ask.work ? `/lookup/works/${ask.work}/author` : '/lookup/writer';
-  return (
-    await request<{ author: CatalogueAuthor | null }>(`${path}?${params}`)
-  ).author;
+  // And whether more of the writer's names are known for it
+  return request<{ author: CatalogueAuthor | null; moreNames?: boolean }>(
+    `${path}?${params}`,
+  );
 }
 
 // Books to read next: on the same themes, and by the same author

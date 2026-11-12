@@ -14,6 +14,7 @@ import { EditableText } from '@/shared/ui/EditableText';
 import { EditingHint } from '@/shared/ui/EditingHint';
 import { InlineEditor } from '@/shared/ui/InlineEditor';
 import { useWriteInPlace } from '@/shared/lib/useWriteInPlace';
+import { ReviewHearts } from './ReviewHearts';
 
 // One ruled line of the page, and how far down the first one starts; the
 // writing sits a line to each, on the rule
@@ -32,7 +33,8 @@ const lines: CSSProperties = {
 };
 
 // What the reader thought of the book, written out on an old notebook's
-// page. Changed right here with a click. With none written there's
+// page, with the hearts other readers gave it under it (ReviewHearts).
+// Changed right here with a click. With none written there's
 // nothing here, until the reader asks to write one (`starting`): then it's
 // a blank page to write on, gone again if left blank (`onStarted` either
 // way).
@@ -135,6 +137,7 @@ export function BookReview({
               </SmoothHeight>
             </div>
             <EditingHint show={writing} />
+            {review && <ReviewHearts bookId={book.id} />}
             <FormError message={error} small className='mt-2' />
           </TitledSection>
         </div>

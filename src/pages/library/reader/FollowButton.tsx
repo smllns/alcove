@@ -3,9 +3,9 @@ import { useFollow } from '@/entities/reader/queries';
 import { Button } from '@/shared/ui/Button';
 import { FormError } from '@/shared/ui/FormError';
 
-// Following another reader, or no longer: Follow (Ask to follow, for a
-// page they open only to those they let in); once followed, Following,
-// turning to Unfollow as it's pointed at; once asked, Asked, turning to
+// Following another reader, or no longer: Follow (Request, for a page
+// they open only to those they let in); once followed, Following, turning
+// to Unfollow as it's pointed at; once requested, Requested, turning to
 // Cancel
 export function FollowButton({
   page,
@@ -33,10 +33,10 @@ export function FollowButton({
         {state === 'following'
           ? swap('Following', 'Unfollow')
           : state === 'asked'
-            ? swap('Asked', 'Cancel')
+            ? swap('Requested', 'Cancel')
             : page.open
               ? 'Follow'
-              : 'Ask to follow'}
+              : 'Request'}
       </Button>
       <FormError
         message={follow.error?.message ?? null}

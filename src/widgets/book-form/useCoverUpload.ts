@@ -5,6 +5,7 @@ import {
   uploadCover,
 } from '@/entities/book/api';
 import type { BookCover } from '@/entities/book/types';
+import { errorText } from '@/shared/lib/errorText';
 import { shrinkImage } from '@/shared/lib/image';
 
 // The reader's own cover: a photo from their device or a picture from a
@@ -32,9 +33,7 @@ export function useCoverUpload(
       choose({ url, source: 'upload' });
       return url;
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'That picture didn’t work.',
-      );
+      setError(errorText(err, 'That picture didn’t work.'));
       return null;
     } finally {
       setBusy(false);

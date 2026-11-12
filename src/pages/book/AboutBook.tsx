@@ -70,7 +70,7 @@ export function AboutBook({ book }: { book: Book }) {
               </div>
               <Collapse open={catalogue.missing}>
                 <p className='mt-2 text-xs text-faint'>
-                  Open Library doesn’t describe this one.
+                  No one has described this one yet.
                 </p>
               </Collapse>
               <FormError

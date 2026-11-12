@@ -5,7 +5,8 @@ import { paths } from '@/shared/config/paths';
 import { counted } from '@/shared/lib/plural';
 import { WorkGrid } from '@/widgets/book-grid';
 import { AllLink } from './AllLink';
-import { asWork, inCommon, theirStars } from './readerBooks';
+import { asWork } from '@/entities/book/catalogueBook';
+import { inCommon, theirStars } from './readerBooks';
 import { PagePart } from './PagePart';
 
 // On another reader's page, the books the reader looking has too: a line

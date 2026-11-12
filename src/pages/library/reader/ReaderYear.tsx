@@ -1,13 +1,20 @@
 import type { Book } from '@/entities/book/types';
 import type { ReaderPage } from '@/entities/reader/types';
 import { pagesOf } from '@/entities/book/pages';
-import { MonthShelf } from '@/widgets/book-cards';
+import {
+  MonthShelf,
+  readingYear,
+  readSpans,
+  YearSpans,
+} from '@/widgets/book-cards';
 import { asBook, yearOf } from './readerBooks';
 import { PagePart } from './PagePart';
 
 // A reader's year in reading so far: how many books they finished, their
-// pages and the stars given on average, and the year as a shelf of months
-// with the books finished in each (MonthShelf, as in the stats)
+// pages and the stars given on average, the year as a shelf of months
+// with the books finished in each (MonthShelf, as in the stats), and each
+// book from start to finish under it (SpanTimeline), where the days are
+// given
 export function ReaderYear({
   page,
   owned,
@@ -19,6 +26,12 @@ export function ReaderYear({
   const year = now.getFullYear();
   const { read, pages, average, months } = yearOf(page.books, year);
   if (!page.shows.year || !read.length) return null;
+  // Each book read this year from the day it was begun to the day it was
+  // finished, as in the stats (SpanTimeline)
+  const span = readingYear(
+    readSpans(page.books.map((book) => asBook(book, owned))),
+    year,
+  );
   const figures = [
     { label: read.length === 1 ? 'Book' : 'Books', value: read.length },
     ...(pages > 0
@@ -52,6 +65,7 @@ export function ReaderYear({
           detail={pagesOf}
         />
       </div>
+      <YearSpans found={span} year={year} className='mt-10' />
     </PagePart>
   );
 }

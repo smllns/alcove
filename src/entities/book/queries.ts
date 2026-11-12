@@ -11,7 +11,6 @@ import {
   deleteBook,
   fetchBook,
   fetchBooks,
-  fetchBooksByWriter,
   fetchOwnedWork,
   fetchUploadsEnabled,
   type BooksPage,
@@ -23,7 +22,6 @@ export const bookKeys = {
   all: ['books'] as const,
   shelf: ['books', 'shelf'] as const,
   book: (id: string) => ['books', 'one', id] as const,
-  byWriter: (name: string) => ['books', 'by-writer', name] as const,
   byWork: (workKey: string) => ['books', 'by-work', workKey] as const,
 };
 
@@ -72,17 +70,6 @@ export function useBook(id: string) {
       client.getQueryState(bookKeys.shelf)?.dataUpdatedAt,
   });
 }
-
-// The reader's books by a writer; refreshed with the shelf, as books come
-// and go
-export const useBooksByWriter = (name: string | undefined) =>
-  useQuery({
-    queryKey: bookKeys.byWriter(name ?? ''),
-    queryFn: () => fetchBooksByWriter(name!),
-    enabled: Boolean(name),
-    // Asked afresh with the rest of the shelf, whenever a book changes
-    staleTime: Infinity,
-  });
 
 // A book added, changed or taken off: how many books each place and list
 // holds may have changed with it

@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { books, lists, type BookListNode, type ListedWorkNode } from '../db.js';
+import { isDuplicateKey } from '../lib/errors.js';
 import { sameButCase } from '../lib/text.js';
 
 // Most a reader can have, and most books from the catalogue in one; far
@@ -35,7 +36,7 @@ export async function getLists(userId: ObjectId) {
     );
   } catch (error) {
     // Put there meanwhile by the other
-    if ((error as { code?: number }).code !== 11000) throw error;
+    if (!isDuplicateKey(error)) throw error;
   }
   return [wantList, ...found];
 }
@@ -139,36 +140,6 @@ export async function changeListWorks(
     $set: { updatedAt: new Date() },
   });
   return 'changed';
-}
-
-// How many books are in each list, by id: those on the shelves in it, and
-// those from the catalogue in it, but not twice over for a work there is
-// a copy of in it too
-export async function countByList(userId: ObjectId, all: BookListNode[]) {
-  const rows = await books()
-    .aggregate<{ _id: string; count: number; works: string[] }>([
-      { $match: { userId, lists: { $exists: true, $ne: [] } } },
-      { $unwind: '$lists' },
-      {
-        $group: {
-          _id: '$lists',
-          count: { $sum: 1 },
-          works: { $addToSet: '$openLibrary.work' },
-        },
-      },
-    ])
-    .toArray();
-  const shelved = new Map(rows.map((row) => [row._id, row]));
-  return Object.fromEntries(
-    all.map((list) => {
-      const row = shelved.get(list.id);
-      const copies = new Set(row?.works);
-      const works = (list.works ?? []).filter(
-        (work) => !copies.has(work.workKey),
-      );
-      return [list.id, (row?.count ?? 0) + works.length];
-    }),
-  );
 }
 
 // Of `ids`, those of lists the reader has, once each

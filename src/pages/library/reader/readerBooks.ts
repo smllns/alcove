@@ -1,4 +1,4 @@
-import { catalogueBook } from '@/entities/book/catalogueBook';
+import { asWork, catalogueBook } from '@/entities/book/catalogueBook';
 import type { Book, CatalogueWork } from '@/entities/book/types';
 import type { ReaderBook, ReaderPage } from '@/entities/reader/types';
 import { callName } from '@/entities/user/types';
@@ -6,17 +6,6 @@ import { halves } from '@/shared/lib/halves';
 
 // A reader's books as their page shows them, from what the server lets be
 // seen of them (ReaderBook)
-
-// One as a book from the catalogue, for a grid of them (WorkGrid): one the
-// catalogue doesn't know opens what's known of it here
-export const asWork = (book: ReaderBook): CatalogueWork => ({
-  workKey: book.workKey,
-  title: book.title,
-  authors: book.authors,
-  coverUrl: book.coverUrl,
-  firstPublishYear: book.firstPublishedYear,
-  editionCount: 0,
-});
 
 // One as a book of the app's, for what's worked out of books (favourite
 // authors, the months of a year) and drawn of them: the catalogue's book

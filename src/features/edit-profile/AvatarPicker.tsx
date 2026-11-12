@@ -4,37 +4,32 @@ import { uploadCover } from '@/entities/book/api';
 import { useUploadsEnabled } from '@/entities/book/queries';
 import { updateAvatar } from '@/entities/user/api';
 import { callName, type User } from '@/entities/user/types';
-import { useAuth } from '@/features/auth';
-
+import { useAuth, useUserChange } from '@/features/auth';
+import { cn } from '@/shared/lib/cn';
 import { Avatar } from '@/shared/ui/Avatar';
+import { textLinkClass } from '@/shared/ui/buttonStyles';
 import { FormError } from '@/shared/ui/FormError';
 import { Spinner } from '@/shared/ui/Spinner';
 import { AvatarCropper } from './AvatarCropper';
-import { rowLinkClass } from './rowLink';
 
 // The reader's circle, their photo in it if they've one: tapped, a photo
 // from their device, placed in the circle (AvatarCropper) and uploaded, in
-// its place; "Remove" takes it away, their initial back. Without uploads
-// set up, only the circle.
+// its place ("Add a photo" or "Change photo" says so in words); "Remove"
+// takes it away, their initial back. Without uploads set up, only the
+// circle.
 export function AvatarPicker({ user }: { user: User }) {
   const { replaceUser } = useAuth();
+  const { error, run } = useUserChange('That didn’t work.');
   const enabled = useUploadsEnabled();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   // The photo being placed, kept as its dialog closes
   const [file, setFile] = useState<File | null>(null);
   const [placing, setPlacing] = useState(false);
   const remove = async () => {
     setBusy(true);
-    setError(null);
-    try {
-      replaceUser(await updateAvatar(null));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'That didn’t work.');
-    } finally {
-      setBusy(false);
-    }
+    await run(() => updateAvatar(null));
+    setBusy(false);
   };
   const choose = (chosen: File) => {
     setFile(chosen);
@@ -58,16 +53,27 @@ export function AvatarPicker({ user }: { user: User }) {
           {busy ? <Spinner /> : <Camera size={18} />}
         </span>
       </button>
-      {user.avatarUrl && (
+      {/* Said in words too, for a finger that can't point at it first */}
+      <span className='flex gap-3'>
         <button
           type='button'
           disabled={busy}
-          onClick={() => void remove()}
-          className={`${rowLinkClass} text-xs`}
+          onClick={() => input.current?.click()}
+          className={cn('text-xs text-ink-soft', textLinkClass)}
         >
-          Remove
+          {user.avatarUrl ? 'Change photo' : 'Add a photo'}
         </button>
-      )}
+        {user.avatarUrl && (
+          <button
+            type='button'
+            disabled={busy}
+            onClick={() => void remove()}
+            className={cn('text-xs text-ink-soft', textLinkClass)}
+          >
+            Remove
+          </button>
+        )}
+      </span>
       <input
         ref={input}
         type='file'

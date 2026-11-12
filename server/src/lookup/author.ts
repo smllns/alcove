@@ -2,14 +2,8 @@ import { cached } from './cache.js';
 import { cleanDescription } from './description.js';
 import { fromOpenLibrary, yearOf } from './openLibrary.js';
 import { firstAuthor, workDoc } from './workDoc.js';
-import {
-  articleOnItem,
-  articleOnWriter,
-  words,
-  type Languages,
-} from './wikipedia.js';
-import { searchAuthors } from './authors.js';
-import { inLatin } from '../lib/text.js';
+import { articleOnItem, articleOnWriter, type Languages } from './wikipedia.js';
+import { catalogueKey, soundAlike } from './catalogueWriter.js';
 import { itemFacts } from './wikidataItem.js';
 import { writerOfBook } from './workTitles.js';
 
@@ -33,7 +27,16 @@ type AuthorAbout = {
   // the language it's written in
   wikipedia?: string;
   bioLanguage?: string;
+  // Their item on Wikidata, by which however their name is written they're
+  // one writer (writerNames)
+  item?: string;
 };
+
+// What's said of a writer, without the word that they're bare
+export const unmarked = <T extends { bare?: boolean }>({
+  bare: _bare,
+  ...about
+}: T) => about;
 
 type AuthorDoc = {
   name?: string;
@@ -65,7 +68,8 @@ const withArticle = (about: AuthorAbout, wiki: Article): AuthorAbout =>
 // Cyrillic (a record the catalogue made from a Russian edition, with a
 // book or two), the catalogue's key for them under their name in English,
 // where the rest of their books are
-async function withItem(about: AuthorAbout, item: string | undefined) {
+async function withItem(found: AuthorAbout, item: string | undefined) {
+  const about = item ? { ...found, item } : found;
   const cyrillic = /\p{Script=Cyrillic}/u.test(about.name);
   const keyless = !about.key || cyrillic;
   if (!item || (about.born && !keyless)) return about;
@@ -110,7 +114,17 @@ export async function workAuthor(
 ): Promise<(AuthorAbout & { bare?: boolean }) | null> {
   const work = await workDoc(workKey);
   const key = firstAuthor(work);
-  if (!key) return null;
+  return key ? keyedAuthor(key, work.title, titles, languages) : null;
+}
+
+// A writer by their key in the catalogue, as workAuthor tells them; `first`:
+// the title of the book they're asked about by, if any
+async function keyedAuthor(
+  key: string,
+  first: string | undefined,
+  titles: string[],
+  languages: Languages,
+): Promise<AuthorAbout & { bare?: boolean }> {
   // Theirs for every book of theirs on anyone's shelves: asked once
   const doc = await cached(`olauthor1:${key}`, 30, () =>
     fromOpenLibrary<AuthorDoc>(`/authors/${key}.json`),
@@ -139,7 +153,7 @@ export async function workAuthor(
           about.name,
           [
             ...titles,
-            ...(await booksBy(key, work.title).catch(() => [work.title ?? ''])),
+            ...(await booksBy(key, first).catch(() => [first ?? ''])),
           ],
           languages,
         ).catch(() => null)
@@ -150,7 +164,9 @@ export async function workAuthor(
 
 // A writer of a book the catalogue doesn't have, by their name and the
 // book's titles, from Wikipedia, or, not found there by name, by the book
-// on Wikidata, which says who wrote it; none when neither knows them. Their
+// on Wikidata, which says who wrote it, or, a name in Cyrillic, by how it
+// sounds among the catalogue's writers (soundAlike); none when nothing
+// knows them. Their
 // years and their name in English from Wikidata, and by that name, their
 // key in the catalogue, if it has them, for their books there.
 export async function writerAbout(
@@ -163,23 +179,12 @@ export async function writerAbout(
   // Not found by name: by their book, whose item on Wikidata says who
   // wrote it, and theirs links their article
   const item = await writerOfBook(titles, languages).catch(() => undefined);
-  if (!item) return null;
+  if (!item) {
+    // Nor that: one the catalogue has under their name in Latin letters
+    const alike = await soundAlike(name).catch(() => undefined);
+    if (!alike) return null;
+    return unmarked(await keyedAuthor(alike.key, undefined, titles, languages));
+  }
   const linked = await articleOnItem(item, name, languages).catch(() => null);
   return withItem(withArticle({ name }, linked), item);
-}
-
-// The catalogue's key for a writer by their name in English, as Wikidata
-// gives it (one put in in Russian is seldom found by that): the writer
-// with the most books whose name has every word of it, in either alphabet
-async function catalogueKey(english: string) {
-  const wanted = words(english);
-  const found = await cached(`authors1:${english.toLowerCase()}`, 7, () =>
-    searchAuthors(english),
-  );
-  // The catalogue may keep its main record in Cyrillic ("Александр
-  // Иванович Куприн", with 112 books, over "Aleksandr Kuprín" with 23)
-  return found.find((each) => {
-    const theirs = words(inLatin(each.name));
-    return wanted.every((word) => theirs.includes(word));
-  })?.key;
 }

@@ -2,13 +2,20 @@ import { Router, type Request } from 'express';
 import { currentUser } from '../auth/middleware.js';
 import { ownCopies } from '../books/repository.js';
 import { queryText } from '../lib/validation.js';
-import { writerAbout, workAuthor } from './author.js';
+import { unmarked, writerAbout, workAuthor } from './author.js';
 import { authorWorks } from './authorWorks.js';
 import { cached } from './cache.js';
 import { authorKeyOf, noneIfMissing, workKeyOf } from './params.js';
 import { writerQuotes } from './wikiquote.js';
 import { workTitles } from './workTitles.js';
 import type { Languages } from './wikipedia.js';
+import {
+  nameNoted,
+  noteWriterNames,
+  ownAuthors,
+  sameWriters,
+} from './writerNames.js';
+import { itemNames } from './wikidataItem.js';
 
 // Who wrote a book: name, years, picture and a few lines about them, in a
 // language the reader reads; and for their page, their books and their
@@ -37,19 +44,34 @@ function asked(req: Request) {
   return { languages, titles, key };
 }
 
-// What's said of a writer, without the word that they're bare
-const unmarked = <T extends { bare?: boolean }>({ bare: _bare, ...about }: T) =>
-  about;
-
 // A writer of a book the catalogue doesn't have, by their name, kept by
 // it and the book's first title
 const writerNamed = (name: string, req: Request) => {
   const { languages, titles, key } = asked(req);
   if (!titles.length) return Promise.resolve(null);
   return cached(
-    `writer5:${name.toLowerCase()}:${titles[0].toLowerCase()}:${key}`,
+    `writer7:${name.toLowerCase()}:${titles[0].toLowerCase()}:${key}`,
     30,
     () => writerAbout(name, titles, languages),
+  );
+};
+
+// A writer found by `name` (the reader's way of writing it) noted as going
+// by it, by the name they were found under, and by every name Wikidata
+// gives them (in Russian, French, …), where Wikidata knows them; once
+// they're known by it, not again. Whether more of their names are known
+// now, for the reader to ask again who's one (moreNames).
+const knownAs = async (
+  author: { item?: string; name?: string } | null | undefined,
+  name: string,
+) => {
+  const item = author?.item;
+  if (!item || (await nameNoted(item, name || author.name || ''))) return false;
+  const known = await cached(`itemnames1:${item}`, 30, () =>
+    itemNames(item),
+  ).catch(() => []);
+  return noteWriterNames(item, [name, author.name ?? '', ...known]).catch(
+    () => false,
   );
 };
 
@@ -60,22 +82,40 @@ const writerNamed = (name: string, req: Request) => {
 authorRouter.get('/works/:workKey/author', async (req, res) => {
   const workKey = workKeyOf(req);
   const { languages, titles, key } = asked(req);
-  const found = await cached(`author10:${workKey}:${key}`, 30, () =>
+  const found = await cached(`author11:${workKey}:${key}`, 30, () =>
     workAuthor(workKey, titles, languages).catch(noneIfMissing),
   );
   const named = queryText(req, 'name', 200);
   const byName = found?.bare && named ? await writerNamed(named, req) : null;
-  res.json({
-    author: byName
-      ? { ...byName, key: byName.key ?? found?.key }
-      : found && unmarked(found),
-  });
+  const author = byName
+    ? { ...byName, key: byName.key ?? found?.key }
+    : found && unmarked(found);
+  res.json({ author, moreNames: await knownAs(author, named) });
 });
 
 // A book the catalogue doesn't have, by its writer's name
 authorRouter.get('/writer', async (req, res) => {
   const name = queryText(req, 'name', 200);
-  res.json({ author: name ? await writerNamed(name, req) : null });
+  const author = name ? await writerNamed(name, req) : null;
+  res.json({ author, moreNames: await knownAs(author, name) });
+});
+
+// For the names given (?names=, one to a line), each writer's other names
+// known here, in a group for each
+authorRouter.get('/writers/same', async (req, res) => {
+  const names = queryText(req, 'names', 20000)
+    .split('\n')
+    .map((each) => each.trim())
+    .filter(Boolean)
+    .slice(0, 500);
+  res.json({ groups: await sameWriters(names) });
+});
+
+// The same for the writers on the reader's own shelves
+authorRouter.get('/writers/same/mine', async (req, res) => {
+  res.json({
+    groups: await sameWriters(await ownAuthors(currentUser(req)._id)),
+  });
 });
 
 // A writer's books, the most read first. The catalogue's answer is kept

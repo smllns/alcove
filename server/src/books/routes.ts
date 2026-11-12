@@ -1,8 +1,7 @@
 import { Router, type Request } from 'express';
-import { ObjectId } from 'mongodb';
 import { currentUser } from '../auth/middleware.js';
 import { HttpError } from '../lib/errors.js';
-import { parseBody, queryText } from '../lib/validation.js';
+import { objectIdOr, parseBody } from '../lib/validation.js';
 import { getLists, ownLists, WANT_LIST } from '../lists/repository.js';
 import { takeWanted } from '../lists/wanted.js';
 import { takeTyped } from '../lists/typed.js';
@@ -12,7 +11,6 @@ import { storedCoverSources, type BookDoc } from '../db.js';
 import { deleteCover, discardCover } from '../uploads/storage.js';
 import {
   addBook,
-  booksByWriter,
   countBooks,
   deleteBook,
   findBook,
@@ -25,6 +23,7 @@ import {
 import { addBookSchema, bookInputSchema, type BookInput } from './schemas.js';
 import { rememberAdded, rememberChanged } from '../catalogue/repository.js';
 import { begun } from './copy.js';
+import { withShared } from './fromReaders.js';
 import { importsRouter } from './imports.js';
 
 // A reader's own books. Mounted behind requireUser.
@@ -37,11 +36,7 @@ const me = (req: Request) => currentUser(req)._id;
 const notOnShelves = () =>
   new HttpError(404, 'not_found', 'That book isn’t on your shelves.');
 
-const objectId = (value: unknown) => {
-  if (typeof value !== 'string' || !ObjectId.isValid(value))
-    throw notOnShelves();
-  return new ObjectId(value);
-};
+const objectId = (value: unknown) => objectIdOr(value, notOnShelves);
 
 // The question the form asks before adding a second copy
 const alreadyShelved = (book: { title: string; createdAt: Date }) => {
@@ -135,17 +130,10 @@ booksRouter.post('/', async (req, res) => {
     const same = await findSameBook(me(req), input);
     if (same) throw alreadyShelved(same);
   }
-  const book = await addBook(me(req), input);
+  const book = await addBook(me(req), await withShared(input));
   warmLists(book);
   await rememberAdded([input]);
   res.status(201).json({ book: toPublicBook(book) });
-});
-
-// The reader's books by a writer, e.g. the one of a book about to be added
-booksRouter.get('/by-writer', async (req, res) => {
-  const name = queryText(req, 'name', 200);
-  const found = name ? await booksByWriter(me(req), name) : [];
-  res.json({ books: found.map(toPublicBook) });
 });
 
 // The reader's own copy of a work from the catalogue, if they have it

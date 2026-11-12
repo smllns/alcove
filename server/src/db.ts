@@ -1,8 +1,12 @@
 import { MongoClient, type Db, type ObjectId } from 'mongodb';
 import { config } from './config.js';
+import { ensureIndexes } from './indexes.js';
 import type { BookDoc } from './models/books.js';
 import type { CatalogueEditionDoc } from './models/catalogue.js';
 import type { FollowDoc } from './models/follows.js';
+import type { ReviewLikeDoc } from './models/likes.js';
+import type { ActivityDoc } from './models/activity.js';
+import type { NewsDoc } from './models/news.js';
 import type { ListsDoc } from './models/lists.js';
 import type { PlacesDoc } from './models/places.js';
 
@@ -10,6 +14,9 @@ import type { PlacesDoc } from './models/places.js';
 export * from './models/books.js';
 export * from './models/catalogue.js';
 export * from './models/follows.js';
+export * from './models/likes.js';
+export * from './models/activity.js';
+export * from './models/news.js';
 export * from './models/lists.js';
 export * from './models/places.js';
 
@@ -27,9 +34,14 @@ export type UserDoc = {
   // Their own photo, uploaded (uploads/storage.ts); taken away, it's
   // stored empty
   avatarUrl?: string;
+  // When they last looked at their feed, for what's new since
+  feedSeenAt?: Date;
   // Who may open their page, and see each part of it (users/privacy.ts);
   // what's not said, as usual
   privacy?: Partial<PrivacyNode>;
+  // Up to four of their own books they'd most have others see, first to
+  // last, at the top of their page
+  favourites?: ObjectId[];
   passwordHash: string;
   createdAt: Date;
   // When their uploads were last swept for ones no book uses
@@ -94,6 +106,17 @@ export const books = () => database().collection<BookDoc>('books');
 export const places = () => database().collection<PlacesDoc>('places');
 export const lists = () => database().collection<ListsDoc>('lists');
 export const follows = () => database().collection<FollowDoc>('follows');
+export const reviewLikes = () =>
+  database().collection<ReviewLikeDoc>('reviewLikes');
+export const activity = () => database().collection<ActivityDoc>('activity');
+export const news = () => database().collection<NewsDoc>('news');
+// What's been done once to what's kept (migrations.ts), by its id
+export const meta = () =>
+  database().collection<{ _id: string; at: Date }>('meta');
+// A name a writer goes by, and their item on Wikidata (lookup/writerNames.ts)
+export type WriterNameDoc = { _id: string; item: string; at: Date };
+export const writerNames = () =>
+  database().collection<WriterNameDoc>('writerNames');
 export const editions = () =>
   database().collection<CatalogueEditionDoc>('editions');
 export const lookupCache = () =>
@@ -101,52 +124,4 @@ export const lookupCache = () =>
 
 export async function pingDb() {
   await database().command({ ping: 1 });
-}
-
-async function ensureIndexes(db: Db) {
-  await db.collection<UserDoc>('users').createIndexes([
-    { key: { email: 1 }, unique: true },
-    // Each taken once, among those who've chosen one
-    {
-      key: { username: 1 },
-      unique: true,
-      partialFilterExpression: { username: { $type: 'string' } },
-    },
-  ]);
-  // Mongo deletes sessions on its own once expiresAt passes
-  await db
-    .collection<SessionDoc>('sessions')
-    .createIndexes([
-      { key: { expiresAt: 1 }, expireAfterSeconds: 0 },
-      { key: { userId: 1 } },
-    ]);
-  // Each reader followed once by each other; and those a reader follows,
-  // and who follow them (or ask to), found and counted by either side,
-  // the latest first
-  await db
-    .collection<FollowDoc>('follows')
-    .createIndexes([
-      { key: { follower: 1, followee: 1 }, unique: true },
-      { key: { followee: 1, state: 1, createdAt: -1 } },
-      { key: { follower: 1, state: 1, createdAt: -1 } },
-    ]);
-  // A reader's shelf, newest first; the sort key doubles as the page cursor.
-  // And as it came to them, newest first (their page, their lists)
-  await db
-    .collection<BookDoc>('books')
-    .createIndexes([
-      { key: { userId: 1, _id: -1 } },
-      { key: { userId: 1, createdAt: -1 } },
-    ]);
-  await db
-    .collection<LookupCacheDoc>('lookupCache')
-    .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-  // alcove's own printings found by words of their titles and writers, in
-  // any language (no stemming)
-  await db
-    .collection<CatalogueEditionDoc>('editions')
-    .createIndex(
-      { title: 'text', authors: 'text' },
-      { weights: { title: 3, authors: 1 }, default_language: 'none' },
-    );
 }

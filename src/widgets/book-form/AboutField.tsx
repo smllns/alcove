@@ -28,9 +28,9 @@ export function AboutField({
   };
 
   const hint = fromCatalogue
-    ? 'From Open Library. Make it your own if you like.'
+    ? `From ${catalogue.fromReaders ? 'another reader of alcove' : 'Open Library'}. Make it your own if you like.`
     : catalogue.missing
-      ? 'Open Library doesn’t describe this one. Write a few lines yourself?'
+      ? 'No one has described this one yet. Write a few lines yourself?'
       : catalogue.failed
         ? 'Open Library didn’t answer. Try again in a moment.'
         : undefined;

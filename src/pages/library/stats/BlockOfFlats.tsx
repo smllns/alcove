@@ -3,6 +3,7 @@ import { seedOf } from '@/shared/lib/seed';
 import { furnish } from '@/shared/ui/drawing/decor';
 import { BlockCut, Stair } from './BlockCut';
 import {
+  BASE,
   FLAT,
   G,
   M,
@@ -22,6 +23,7 @@ import { UNDER, useDrawingIds } from './drawingKit';
 import { figures, stacked, stampOf } from './libraryStats';
 import { BLOCK_STOREYS, PARAPET, STOREY, inBlock, ordinal } from './measured';
 import { TitleBlock } from './TitleBlock';
+import { useDrawingWidth } from './useDrawingWidth';
 
 // Every flat furnished as the places furnish a room, for its lamp: lit
 // on the floor the stack comes up to, and in a few flats up and down the
@@ -41,6 +43,11 @@ const flats = [
 // Taller than will fit, the stack is broken off, its level still true.
 export function BlockOfFlats({ books }: { books: Book[] }) {
   const ids = useDrawingIds();
+  // Wider on a wide column: the levels' marks at its right, the stack
+  // midway between them and the block
+  const { svg, width } = useDrawingWidth(BASE);
+  const marks = MARKS + (width - BASE);
+  const sx = width > BASE ? (X + WIDE + WALL + marks - SW) / 2 : SX;
   const stack = stacked(books, M, TALL + 2 * M);
   const found = figures(books);
   const height = stack.tall / M;
@@ -56,10 +63,11 @@ export function BlockOfFlats({ books }: { books: Book[] }) {
 
   return (
     <svg
-      viewBox={`0 ${first} 470 ${G + UNDER - first}`}
+      ref={svg}
+      viewBox={`0 ${first} ${width} ${G + UNDER - first}`}
       role='img'
       aria-label={`All the books stacked up, ${height.toFixed(1)} metres tall, beside a six-storey block of flats`}
-      className='block w-full max-w-160 overflow-visible'
+      className='block w-full overflow-visible'
     >
       <SectionDefs ids={ids} />
       {Array.from({ length: BLOCK_STOREYS }, (_, f) => {
@@ -93,9 +101,9 @@ export function BlockOfFlats({ books }: { books: Book[] }) {
         );
       })}
       <BlockCut />
-      <Ground ids={ids} from={10} to={460} y={G} />
-      <TitleBlock y={G + 34} width={470} metre={M} figures={stampOf(found)} />
-      <BookStack books={books} x={SX} width={SW} ground={G} {...stack} />
+      <Ground ids={ids} from={10} to={width - 10} y={G} />
+      <TitleBlock y={G + 34} width={width} metre={M} figures={stampOf(found)} />
+      <BookStack books={books} x={sx} width={SW} ground={G} {...stack} />
       {[0, 2, 4, 6].map((f) => {
         const y = G - f * STOREY * M;
         const gap = G - stack.drawn * 0.62;
@@ -106,7 +114,7 @@ export function BlockOfFlats({ books }: { books: Book[] }) {
             {f > 0 && (
               <line
                 x1={X + WIDE + WALL + 6}
-                x2={MARKS - 8}
+                x2={marks - 8}
                 y1={y}
                 y2={y}
                 stroke='var(--fine)'
@@ -115,7 +123,7 @@ export function BlockOfFlats({ books }: { books: Book[] }) {
               />
             )}
             <LevelMark
-              x={MARKS}
+              x={marks}
               y={y}
               value={`${f * STOREY} m`}
               name={
@@ -130,14 +138,14 @@ export function BlockOfFlats({ books }: { books: Book[] }) {
         );
       })}
       <line
-        x1={lit === null ? SX - 8 : X + WIDE + WALL + 6}
-        x2={MARKS - 8}
+        x1={lit === null ? sx - 8 : X + WIDE + WALL + 6}
+        x2={marks - 8}
         y1={top}
         y2={top}
         stroke='var(--gold)'
         strokeDasharray={lit === null ? undefined : '3 3'}
       />
-      <LevelMark x={MARKS} y={top} value={`${height.toFixed(2)} m`} gold />
+      <LevelMark x={marks} y={top} value={`${height.toFixed(2)} m`} gold />
     </svg>
   );
 }

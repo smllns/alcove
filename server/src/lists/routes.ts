@@ -4,13 +4,13 @@ import { HttpError } from '../lib/errors.js';
 import { parseBody, queryText } from '../lib/validation.js';
 import {
   changeListWorks,
-  countByList,
   createList,
   deleteList,
   getLists,
   changeList,
   WANT_LIST,
 } from './repository.js';
+import { countByList } from './counts.js';
 import { getSaved, saveList, unsaveList } from './saved.js';
 import { wantAll } from './wanted.js';
 import { changeTyped, putTyped } from './typed.js';

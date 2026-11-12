@@ -11,7 +11,6 @@ import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { DeleteAccount } from './DeleteAccount';
 import { LibrarySettings } from './LibrarySettings';
-import { PageSettings } from './PageSettings';
 import { PlacesSettings } from './PlacesSettings';
 import { ProfileGroup } from './ProfileGroup';
 import { rowLinkClass } from './rowLink';
@@ -23,13 +22,14 @@ import { ThemeChoice } from './ThemeChoice';
 // be undone
 const groups = [
   { id: 'profile', label: 'Profile' },
-  { id: 'page', label: 'Your page' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'places', label: 'Places' },
   { id: 'library', label: 'Library' },
   { id: 'sign-in', label: 'Sign-in' },
   { id: 'leaving', label: 'Leaving', danger: true },
 ];
+// For alcove's team, its news too, after the profile
+const forTeam = [groups[0], { id: 'news', label: 'News' }, ...groups.slice(1)];
 // Each group rises in a beat after the one above
 const delay = (i: number) => 160 + i * 80;
 
@@ -39,8 +39,9 @@ export function SettingsPage() {
   const { user } = useAuth();
   // The title: the way back up shows once it's scrolled away
   const [top, setTop] = useState<HTMLElement | null>(null);
-  const [shown, goTo] = useReadingAt(groups.map(({ id }) => id));
-  // Opened at one of the groups (#page, from the reader's own page), there
+  const parts = user?.admin ? forTeam : groups;
+  const [shown, goTo] = useReadingAt(parts.map(({ id }) => id));
+  // Opened at one of the groups (#places, say, from elsewhere), there
   // from the first look
   const { hash } = useLocation();
   useLayoutEffect(() => {
@@ -69,7 +70,7 @@ export function SettingsPage() {
           >
             <PageContents
               label='Settings'
-              parts={groups}
+              parts={parts}
               shown={shown}
               onGo={goTo}
             />
@@ -78,19 +79,23 @@ export function SettingsPage() {
 
         <div className='flex min-w-0 flex-col gap-10'>
           <ProfileGroup user={user} delay={delay(0)} />
-          <SettingsGroup
-            id='page'
-            title='Your page'
-            aside={
-              <TransitionLink to={paths.profile} className={rowLinkClass}>
-                See it →
-              </TransitionLink>
-            }
-            delay={delay(1)}
-          >
-            <PageSettings user={user} />
-          </SettingsGroup>
-          <SettingsGroup id='appearance' title='Appearance' delay={delay(2)}>
+          {user.admin && (
+            <SettingsGroup
+              id='news'
+              title='News'
+              aside={
+                <TransitionLink to={paths.news} className={rowLinkClass}>
+                  Write news →
+                </TransitionLink>
+              }
+              delay={delay(0)}
+            >
+              <p className='px-5 py-4 text-sm leading-relaxed text-muted sm:px-6'>
+                What you write there goes to every reader’s feed.
+              </p>
+            </SettingsGroup>
+          )}
+          <SettingsGroup id='appearance' title='Appearance' delay={delay(1)}>
             <ThemeChoice />
           </SettingsGroup>
           <SettingsGroup
@@ -101,15 +106,15 @@ export function SettingsPage() {
                 Open in Places →
               </TransitionLink>
             }
-            delay={delay(3)}
+            delay={delay(2)}
           >
             <PlacesSettings />
           </SettingsGroup>
-          <SettingsGroup id='library' title='Library' delay={delay(4)}>
+          <SettingsGroup id='library' title='Library' delay={delay(3)}>
             <LibrarySettings />
           </SettingsGroup>
-          <SignInGroup user={user} delay={delay(5)} />
-          <DeleteAccount id='leaving' delay={delay(6)} />
+          <SignInGroup user={user} delay={delay(4)} />
+          <DeleteAccount id='leaving' delay={delay(5)} />
         </div>
       </div>
       <BackToTop after={top} />

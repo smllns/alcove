@@ -2,7 +2,7 @@ import { sources, ways } from '@/entities/book/acquired';
 import type { Book } from '@/entities/book/types';
 import { counted } from '@/shared/lib/plural';
 import type { Tally } from '@/entities/book/tallies';
-import { ScaleHeading } from './ScaleHeading';
+import { ScaleHeading } from '@/shared/ui/ScaleHeading';
 import { SpineLedger } from './SpineLedger';
 
 // What's said of a book in a way's card: who it was from or where it was

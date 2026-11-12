@@ -3,7 +3,7 @@ import { authors } from '@/entities/book/favouriteAuthors';
 import { byDecade, extremes } from './libraryStats';
 import { publishers } from './publishers';
 import { byStars } from './readingStats';
-import { readSpans } from './readingYears';
+import { readSpans } from '@/widgets/book-cards';
 import { tally, type Tally } from '@/entities/book/tallies';
 
 // What the chapters that count either the physical books or every one

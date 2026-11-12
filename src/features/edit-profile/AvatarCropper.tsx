@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { cropOf, MAX_ZOOM, scaleOf, type Size } from '@/shared/lib/crop';
+import { errorText } from '@/shared/lib/errorText';
 import { cropImage } from '@/shared/lib/image';
 import { Button } from '@/shared/ui/Button';
 import { FormError } from '@/shared/ui/FormError';
@@ -60,7 +61,7 @@ export function AvatarCropper({
     try {
       await onSave(await cropImage(file, cropOf(photo, frame, placed)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'That photo didn’t work.');
+      setError(errorText(err, 'That photo didn’t work.'));
     } finally {
       setBusy(false);
     }

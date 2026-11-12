@@ -30,6 +30,9 @@ const schema = z.object({
   // An email (or phone) Open Library can reach us at. Sent with every
   // request, it lets us make 3 a second instead of 1.
   OPENLIBRARY_CONTACT: optional,
+  // Who writes alcove's own news (everyone sees it in their feed): their
+  // emails, comma between
+  ADMIN_EMAILS: optional,
 });
 
 const parsed = schema.safeParse(process.env);
@@ -44,4 +47,10 @@ if (!parsed.success) {
 export const config = {
   ...parsed.data,
   isProduction: parsed.data.NODE_ENV === 'production',
+  admins: new Set(
+    (parsed.data.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  ),
 };

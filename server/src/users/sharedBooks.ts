@@ -1,9 +1,9 @@
 import type { Filter, ObjectId } from 'mongodb';
 import { wantedBookSchema } from '../books/schemas.js';
 import { asShelved, shelvedProjection } from '../books/shelvedWork.js';
-import { books, users, type BookDoc } from '../db.js';
+import { books, type BookDoc } from '../db.js';
 import { escapedForRegex, titleKey } from '../lib/text.js';
-import { booksHiddenFromStrangers } from './privacy.js';
+import { strangersSee } from './privacy.js';
 
 // A writer's books as alcove's readers have them, for a writer the
 // catalogue knows little or nothing of: found by the last word of their
@@ -39,13 +39,12 @@ export function sharedWork(book: BookDoc) {
 }
 
 // Every reader's books but `me`'s that `filter` finds, of readers who let
-// anyone see their books (booksHiddenFromStrangers); each once (by its
+// anyone see their books (strangersSee); each once (by its
 // title), the one the catalogue knows, or with a cover, first
 async function sharedBooks(filter: Filter<BookDoc>, me: ObjectId) {
-  const hidden = await users().distinct('_id', booksHiddenFromStrangers);
   const found = await books()
     .find(
-      { ...filter, userId: { $nin: [me, ...hidden] } },
+      { ...filter, ...(await strangersSee('books', me)) },
       { projection, limit: LOOKED },
     )
     .toArray();
@@ -64,11 +63,17 @@ async function sharedBooks(filter: Filter<BookDoc>, me: ObjectId) {
   });
 }
 
-export async function sharedBooksBy(name: string, me: ObjectId) {
+// Books with a writer of `name`'s last name (of two letters or more), as a
+// filter; null for a name without one
+export function bySurname(name: string) {
   const surname = name.trim().split(/\s+/).at(-1);
-  if (!surname || surname.length < 2) return [];
-  const regex = { $regex: escapedForRegex(surname), $options: 'i' };
-  return (await sharedBooks({ authors: regex }, me)).map(sharedWork);
+  if (!surname || surname.length < 2) return null;
+  return { authors: { $regex: escapedForRegex(surname), $options: 'i' } };
+}
+
+export async function sharedBooksBy(name: string, me: ObjectId) {
+  const surname = bySurname(name);
+  return surname ? (await sharedBooks(surname, me)).map(sharedWork) : [];
 }
 
 // Readers' own books the catalogue doesn't know whose title or writer has
@@ -83,4 +88,29 @@ export async function sharedBooksMatching(query: string, me: ObjectId) {
     me,
   );
   return found.slice(0, MOST).map(sharedWork);
+}
+
+// What alcove's readers have of a work the catalogue may say nothing of:
+// what it's about as one wrote it on their copy, and the cover one gave
+// theirs; each the latest, of readers who let anyone see their books, or
+// null
+export async function sharedAbout(workKey: string) {
+  const seen = await strangersSee('books');
+  const latest = (field: 'description' | 'cover.url') =>
+    books().findOne(
+      {
+        'openLibrary.work': workKey,
+        [field]: { $type: 'string', $ne: '' },
+        ...seen,
+      },
+      { projection: { description: 1, cover: 1 }, sort: { updatedAt: -1 } },
+    );
+  const [described, covered] = await Promise.all([
+    latest('description'),
+    latest('cover.url'),
+  ]);
+  return {
+    description: described?.description ?? null,
+    cover: covered?.cover ?? null,
+  };
 }

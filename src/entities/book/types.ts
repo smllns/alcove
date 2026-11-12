@@ -190,6 +190,9 @@ export type CatalogueAuthor = {
   photoUrl?: string;
   wikipedia?: string;
   bioLanguage?: string;
+  // Their item on Wikidata: found, the server knows the name it was found
+  // by as theirs (sameWriters)
+  item?: string;
 };
 
 // A book to read next, and its id if it's on the reader's shelves already,
@@ -226,4 +229,10 @@ export type CatalogueEdition = {
 
 // How the catalogue's readers rate a book: the average out of five, and
 // how many of them rated it
-export type CatalogueRatings = { average: number; count: number };
+// How readers rate a book: the catalogue's and alcove's together, and how
+// many of them gave it here
+export type CatalogueRatings = {
+  average: number;
+  count: number;
+  alcove?: number;
+};

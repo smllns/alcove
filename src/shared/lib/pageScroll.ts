@@ -34,6 +34,21 @@ export const scrollPageToElement = (el: Element) =>
     el,
   );
 
+// The page's box made to measure what it holds afresh, once a page has
+// turned in place: Safari, the contents having grown or shrunk under the
+// View Transition (a room opened in its home, a section shown after the
+// sky), goes on scrolling the box only as far as it reached before (not
+// at all, after a home a screen tall) until a reload. A pixel more room
+// at its foot for a frame has it look again.
+export function remeasurePageScroll() {
+  const box = document.querySelector<HTMLElement>(BOX);
+  if (!box) return;
+  box.style.paddingBottom = '1px';
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => box.style.removeProperty('padding-bottom')),
+  );
+}
+
 // The window put back where it always is, at the top, once a phone's
 // keyboard has gone and left it scrolled (as an iPhone does, bringing a
 // field into view): left so, the page is drawn where it was but takes taps

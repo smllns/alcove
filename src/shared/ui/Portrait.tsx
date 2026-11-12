@@ -41,7 +41,9 @@ export function Portrait({
           'cover-zoom relative grid size-full place-items-center overflow-hidden rounded-[26px] bg-line/40 font-serif text-5xl text-muted shadow-[0_24px_40px_-24px_rgb(var(--shade)/calc(0.7*var(--shade-k))),inset_0_0_0_1px_rgb(255_255_255/0.3)] lg:text-6xl',
           big && 'rounded-[32px]',
           // Small on a phone, its initials smaller too
-          round && 'rounded-full max-lg:text-4xl',
+          // A reader's, small beside their name, its initial small too
+          round && 'rounded-full',
+          round && !big && 'text-[1.75rem] lg:text-[1.75rem]',
         )}
       >
         <span aria-hidden>{initials(name)}</span>

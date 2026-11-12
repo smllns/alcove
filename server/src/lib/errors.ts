@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
+import { MongoServerError } from 'mongodb';
 
 // An error that's safe to show the client: a stable code, a human message,
 // and optionally a message per form field.
@@ -19,6 +20,10 @@ export class HttpError extends Error {
     this.fields = fields;
   }
 }
+
+// Mongo turning away a second of what's kept once (a unique index)
+export const isDuplicateKey = (err: unknown): err is MongoServerError =>
+  err instanceof MongoServerError && err.code === 11000;
 
 export const notFound: RequestHandler = (_req, _res, next) =>
   next(new HttpError(404, 'not_found', 'Nothing here.'));

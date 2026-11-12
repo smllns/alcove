@@ -1,4 +1,4 @@
-import { authorKey } from '@/entities/book/authors';
+import { writerKey } from '@/entities/book/writers';
 import type { Book } from '@/entities/book/types';
 import { linksBetween, type Link, type Point } from './constellations';
 import { createPacker, type Box } from './packing';
@@ -132,7 +132,8 @@ export function layoutSky(books: Book[]) {
     );
     lastSlot = Math.max(lastSlot, slot);
     packer.add(box);
-    const writer = authorKey(book.authors);
+    const first = book.authors[0]?.trim();
+    const writer = first ? writerKey(first) : '';
     if (writer) {
       const theirs = byWriter.get(writer);
       if (theirs) theirs.push(box);

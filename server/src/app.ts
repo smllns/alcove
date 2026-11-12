@@ -13,6 +13,7 @@ import { errorHandler, HttpError, notFound } from './lib/errors.js';
 import { lookupRouter } from './lookup/routes.js';
 import { listsRouter } from './lists/routes.js';
 import { placesRouter } from './places/routes.js';
+import { newsRouter } from './news/routes.js';
 import { usersRouter } from './users/routes.js';
 import { uploadsRouter } from './uploads/routes.js';
 
@@ -67,6 +68,7 @@ export function createApp() {
   api.use('/places', requireUser, placesRouter);
   api.use('/uploads', requireUser, uploadsRouter);
   api.use('/users', requireUser, usersRouter);
+  api.use('/news', requireUser, newsRouter);
   api.use(notFound);
 
   app.use('/api', helmet(), api);

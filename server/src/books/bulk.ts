@@ -1,7 +1,7 @@
 import type { ObjectId } from 'mongodb';
 import { books, type BookDoc } from '../db.js';
 import { sameButCase } from '../lib/text.js';
-import { newBookDoc, storedCoversWhere } from './repository.js';
+import { forgetBooks, newBookDoc, storedCoversWhere } from './repository.js';
 import type { BookInput } from './schemas.js';
 
 // Many books at once: brought over together, told apart from those on the
@@ -85,14 +85,18 @@ export async function sameBooks(userId: ObjectId, inputs: BookInput[]) {
 
 // Books taken off the shelves together (all of them, or one import's):
 // how many went, and the photos of their covers the reader uploaded, to
-// be thrown away with them
+// be thrown away with them; all said of them in the feeds gone too
 export async function deleteBooksWhere(
   userId: ObjectId,
   where: { importId?: string } = {},
 ) {
   const filter = { userId, ...where };
-  const covers = await storedCoversWhere(filter);
+  const [covers, ids] = await Promise.all([
+    storedCoversWhere(filter),
+    books().distinct('_id', filter),
+  ]);
   const { deletedCount } = await books().deleteMany(filter);
+  await forgetBooks(ids);
   return { deleted: deletedCount, covers };
 }
 

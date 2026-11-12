@@ -3,8 +3,8 @@ import type { Book } from '@/entities/book/types';
 import { BookCover } from '@/entities/book/ui/BookCover';
 import { cn } from '@/shared/lib/cn';
 import { PickMark } from '@/shared/ui/PickMark';
-import { AverageRating, Rating } from '@/shared/ui/Rating';
 import { BookLink } from '@/features/open-book';
+import { CardStars } from './CardStars';
 import { RemoveBook } from './RemoveBook';
 
 export type CardSize = 'S' | 'M' | 'L';
@@ -79,11 +79,11 @@ export function BookCard({
         {work && (
           <p className='mt-0.5 text-xs text-faint'>Not in your library</p>
         )}
-        {book.copy?.rating ? (
-          <Rating value={book.copy.rating} className='mt-1 text-xs' />
-        ) : average && book.averageRating ? (
-          <AverageRating value={book.averageRating} className='mt-1 text-xs' />
-        ) : null}
+        <CardStars
+          stars={book.copy?.rating}
+          average={average ? book.averageRating : undefined}
+          className='mt-1 text-xs'
+        />
       </BookLink>
       {/* Rides up with the cover */}
       {removable && !picking && (

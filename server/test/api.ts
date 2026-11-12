@@ -8,9 +8,9 @@ let server: Server;
 let base = '';
 
 beforeAll(async () => {
-  const { connectDb } = await import('../src/db.js');
+  const { openDb } = await import('../src/migrations.js');
   const { createApp } = await import('../src/app.js');
-  await connectDb();
+  await openDb();
   server = createApp().listen(0);
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}/api`;
 });

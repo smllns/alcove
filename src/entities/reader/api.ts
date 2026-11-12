@@ -1,6 +1,12 @@
 import { request } from '@/shared/api/http';
 import type { CatalogueWork } from '@/entities/book/types';
-import type { FollowState, ListedReader, ReaderPage } from './types';
+import type {
+  FollowState,
+  ListedReader,
+  ReaderPage,
+  ReaderReview,
+  Feed,
+} from './types';
 
 const at = (username: string) =>
   `/users/readers/${encodeURIComponent(username)}`;
@@ -36,3 +42,40 @@ export const answerAsking = (username: string, yes: boolean) =>
     method: 'POST',
     body: { yes },
   });
+
+// What other readers wrote of a book: by its work in the catalogue, or its
+// title and writer
+export const fetchReviews = async (book: {
+  work?: string;
+  title: string;
+  author?: string;
+}) =>
+  (
+    await request<{ reviews: ReaderReview[] }>(
+      `/users/reviews?${new URLSearchParams({
+        ...(book.work && { work: book.work }),
+        title: book.title,
+        ...(book.author && { author: book.author }),
+      })}`,
+    )
+  ).reviews;
+
+// A heart on another reader's review, or taken back
+export const likeReview = (id: string, on: boolean) =>
+  request<void>(`/users/reviews/${id}/like`, {
+    method: on ? 'POST' : 'DELETE',
+  });
+
+// The reader's feed, and how much of it is new since they last looked
+export const fetchFeed = () => request<Feed>('/users/feed');
+
+// The feed looked at
+export const markFeedSeen = () =>
+  request<void>('/users/feed/seen', { method: 'POST' });
+
+// Who gave their hearts to the reader's own review (kept on their copy
+// `id`): how many, and the latest of them
+export const fetchHeartsOnMine = (id: string) =>
+  request<{ likes: number; readers: ListedReader[] }>(
+    `/users/reviews/${id}/hearts`,
+  );

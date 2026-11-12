@@ -6,7 +6,8 @@ import { Tooltip } from './Tooltip';
 
 // A small capsule of choices; the chosen one sits in a soft pill. Each
 // is its icon, explained as it's hovered (`tips`), or said beside it, or
-// alone (`words`)
+// alone (`words`). `stretch`: as wide as where it's set, the choices
+// sharing it, a little taller
 export function ChoiceCapsule<T extends string>({
   label,
   options,
@@ -14,6 +15,7 @@ export function ChoiceCapsule<T extends string>({
   onChange,
   words = false,
   tips = !words,
+  stretch = false,
   className,
 }: {
   label: string;
@@ -23,6 +25,7 @@ export function ChoiceCapsule<T extends string>({
   words?: boolean;
   // Hover labels, for icons that need explaining (none for words)
   tips?: boolean;
+  stretch?: boolean;
   className?: string;
 }) {
   return (
@@ -47,6 +50,7 @@ export function ChoiceCapsule<T extends string>({
                 words
                   ? 'flex items-center gap-1.5 px-3'
                   : 'grid place-items-center px-2',
+                stretch && 'h-10 flex-1 justify-center gap-2 text-[0.8125rem]',
                 option.wide && 'max-sm:hidden',
               ),
             )}

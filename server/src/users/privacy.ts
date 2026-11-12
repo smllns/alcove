@@ -1,4 +1,5 @@
-import type { Audience, PrivacyNode, UserDoc } from '../db.js';
+import type { ObjectId } from 'mongodb';
+import { users, type Audience, type PrivacyNode, type UserDoc } from '../db.js';
 
 // Who may open a reader's page, and who may see each part of it: everyone,
 // only those who follow them, or only themselves. A reader whose page is
@@ -37,15 +38,33 @@ export const seen = (audience: Audience, standing: Standing) =>
   audience === 'everyone' ||
   (audience === 'followers' && standing === 'follower');
 
-// Readers whose books a stranger doesn't see (shown(…, 'reader') has no
-// books): their page is to be asked for, or their books aren't everyone's;
-// as a filter on users, for what's looked up among every reader's books
-export const booksHiddenFromStrangers = {
+// Readers whose `part` (their books, their stars) a stranger doesn't see,
+// as shown(…, 'reader') has it: their page is to be asked for, or that
+// part isn't everyone's (said so, or so as usual); as a filter on users
+const hiddenFromStrangers = (part: 'books' | 'stars') => ({
   $or: [
     { 'privacy.page': 'ask' },
-    { 'privacy.books': { $in: ['followers', 'me'] } },
+    { [`privacy.${part}`]: { $in: ['followers', 'me'] } },
+    ...(usualPrivacy[part] === 'everyone'
+      ? []
+      : [{ [`privacy.${part}`]: { $exists: false } }]),
   ],
-};
+});
+
+// For what's looked up among every reader's books: only those of readers
+// who let a stranger see their `part`, and none of `except`'s; as a filter
+// on books
+export const strangersSee = async (
+  part: 'books' | 'stars',
+  ...except: ObjectId[]
+) => ({
+  userId: {
+    $nin: [
+      ...except,
+      ...(await users().distinct('_id', hiddenFromStrangers(part))),
+    ],
+  },
+});
 
 // Which parts of a page the one looking sees, and whether they see beyond
 // who it is at all (a page to be asked for, they don't till they follow)

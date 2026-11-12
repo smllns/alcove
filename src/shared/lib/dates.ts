@@ -47,6 +47,16 @@ export const longDate = (date: Date) =>
 export const dayMonth = (date: Date) =>
   date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
+// How long ago, shortly: "now", "5m", "3h", "2d", and past a week the day
+export function ago(date: Date, now = new Date()) {
+  const minutes = Math.floor((+now - +date) / 60000);
+  if (minutes < 1) return 'now';
+  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)}h`;
+  if (minutes < 7 * 24 * 60) return `${Math.floor(minutes / (24 * 60))}d`;
+  return dayMonth(date);
+}
+
 export const monthName = (date: Date) =>
   date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 

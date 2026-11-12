@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react';
+import { readStoredJson } from '@/shared/lib/storage';
 import { clothFor, sizedCover } from './coverImage';
 
 // The colour a cover mostly is, for a book's spine: worked out once from
@@ -11,14 +12,9 @@ const KEY = 'alcove.coverTones';
 // Pictures looked into at once, so a full bookcase never holds the page up
 const AT_ONCE = 4;
 
-const read = (): [string, string | null][] => {
-  try {
-    return Object.entries(JSON.parse(localStorage.getItem(KEY) ?? '{}'));
-  } catch {
-    return [];
-  }
-};
-const tones = new Map<string, string | null>(read());
+const tones = new Map<string, string | null>(
+  Object.entries(readStoredJson<Record<string, string | null>>(KEY, {})),
+);
 const listeners = new Set<() => void>();
 const waiting: string[] = [];
 // Every picture asked about on this visit, waiting, being looked into or done

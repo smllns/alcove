@@ -4,7 +4,7 @@ import { lifespan } from '@/entities/book/authors';
 import { authorAskOf, type WriterPageState } from '@/entities/book/authorAsk';
 import { paths } from '@/shared/config/paths';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
-import { useBookAuthor } from '@/entities/book/catalogueQueries';
+import { useBookAuthor } from '@/entities/book/authorQueries';
 import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';

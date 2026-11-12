@@ -5,6 +5,7 @@ import { IconButton } from '@/shared/ui/IconButton';
 import { SiteHeader } from '@/shared/ui/SiteHeader';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { AddBookButton } from './AddBookButton';
+import { useFeed } from '@/entities/reader/queries';
 import { FeedDrawer } from './FeedDrawer';
 import { HeaderSearch } from './HeaderSearch';
 import { SearchDialog } from './search/SearchDialog';
@@ -25,6 +26,7 @@ export function LibraryHeader({
   className?: string;
 }) {
   const [open, setOpen] = useState<'search' | 'feed' | null>(null);
+  const unread = useFeed().data?.unread ?? 0;
   const close = () => setOpen(null);
   // On a phone, the keyboard comes up with it, the field taking it at once
   const search = useCallback(() => {
@@ -47,12 +49,14 @@ export function LibraryHeader({
         <Search size={16} />
       </IconButton>
       <IconButton
-        aria-label='Feed'
+        aria-label={unread ? `Feed, ${unread} new` : 'Feed'}
         onClick={() => setOpen('feed')}
         className='relative'
       >
         <Newspaper size={16} />
-        <span className='absolute right-1.5 top-1.5 size-2 rounded-full bg-accent ring-2 ring-surface sm:right-2 sm:top-2' />
+        {unread > 0 && (
+          <span className='absolute right-1.5 top-1.5 size-2 rounded-full bg-accent ring-2 ring-surface sm:right-2 sm:top-2' />
+        )}
       </IconButton>
       <TransitionLink
         to={paths.settings}

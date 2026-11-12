@@ -1,10 +1,17 @@
+import { useEffect, useState } from 'react';
 import { Users } from 'lucide-react';
+import { useFeed, useMarkFeedSeen } from '@/entities/reader/queries';
 import { Drawer } from '@/shared/ui/Drawer';
 import { IconDot } from '@/shared/ui/IconDot';
+import { Spinner } from '@/shared/ui/Spinner';
+import { FeedRow } from './FeedRow';
+import { NewsRow } from './NewsRow';
 
-// What's new: from alcove itself first, and then (once there's anyone to
-// follow) what the readers followed have added, finished and loved. For
-// now, only the news, and a word on what's coming.
+// What's new: what the readers followed added, began, finished and
+// reviewed, and what was done for the reader (a heart on their review, a
+// follow), and alcove's own news, the latest first, those new since the
+// feed was last opened lit as long as it stays open (it's looked at as it
+// opens). With nothing from anyone, a word on following.
 export function FeedDrawer({
   open,
   onClose,
@@ -12,38 +19,57 @@ export function FeedDrawer({
   open: boolean;
   onClose: () => void;
 }) {
+  const feed = useFeed();
+  // How many were new as it opened (or as they came, opened), kept lit
+  // while it's open; adjusted as it renders, the React way
+  const unread = feed.data?.unread ?? 0;
+  const [lit, setLit] = useState({ open, fresh: 0 });
+  if (open !== lit.open || (open && unread > lit.fresh))
+    setLit({ open, fresh: open ? Math.max(unread, lit.fresh) : 0 });
+  const fresh = lit.fresh;
+  // Looked at: nothing new in it any more
+  const { mutate } = useMarkFeedSeen();
+  useEffect(() => {
+    if (open && unread) mutate();
+  }, [open, unread, mutate]);
+  const items = feed.data?.items ?? [];
   return (
     <Drawer open={open} onClose={onClose} title='Feed'>
-      <article className='flex gap-3.5 border-b border-line/70 bg-accent/7 px-6 py-5'>
-        <span className='grid size-9 shrink-0 place-items-center rounded-full bg-button font-serif text-[0.9375rem] tracking-[-0.04em] text-button-text'>
-          <span>
-            a<span className='text-accent'>.</span>
-          </span>
-        </span>
-        <div className='min-w-0'>
-          <p className='text-sm'>
-            <b className='font-medium'>alcove</b>
-            <span className='text-muted'> · news</span>
+      {feed.isPending ? (
+        <div className='grid place-items-center py-10'>
+          <Spinner />
+        </div>
+      ) : (
+        items.map((item, i) =>
+          item.kind === 'news' ? (
+            <NewsRow
+              key={item.id}
+              news={item.news}
+              fresh={i < fresh}
+              onGo={onClose}
+            />
+          ) : (
+            <FeedRow
+              key={item.id}
+              item={item}
+              fresh={i < fresh}
+              onGo={onClose}
+            />
+          ),
+        )
+      )}
+      {!feed.isPending && !items.length && (
+        <div className='flex flex-col items-center px-8 py-12 text-center'>
+          <IconDot icon={Users} />
+          <p className='mt-4 font-serif text-lg tracking-[-0.01em]'>
+            Nothing here yet
           </p>
-          <h3 className='mt-1 font-serif text-lg leading-snug tracking-[-0.01em]'>
-            Places is here: your books, room by room
-          </h3>
-          <p className='mt-1 text-sm leading-6 text-muted'>
-            Draw your home, put every book on its shelf, and find any of them in
-            a second.
+          <p className='mt-1.5 max-w-xs text-sm leading-6 text-muted'>
+            Follow readers whose shelves you like, and see here what they add,
+            begin, finish and review.
           </p>
         </div>
-      </article>
-      <div className='flex flex-col items-center px-8 py-12 text-center'>
-        <IconDot icon={Users} />
-        <p className='mt-4 font-serif text-lg tracking-[-0.01em]'>
-          Readers to follow, coming soon
-        </p>
-        <p className='mt-1.5 max-w-xs text-sm leading-6 text-muted'>
-          Follow people whose shelves you like, and see here what they add,
-          finish and love.
-        </p>
-      </div>
+      )}
     </Drawer>
   );
 }

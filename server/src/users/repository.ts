@@ -15,6 +15,27 @@ export const asReader = (
   avatarUrl: user.avatarUrl || null,
 });
 
+// The readers of `ids` who have a username, in that order, as any reader
+// may see them; and each one's own, by id, for what else is read of them
+// (`also`, their privacy say)
+export async function readersByIds(
+  ids: ObjectId[],
+  also: Partial<Record<keyof UserDoc, 1>> = {},
+) {
+  const found = await users()
+    .find(
+      { _id: { $in: ids }, username: { $type: 'string' } },
+      { projection: { ...listed.projection, ...also } },
+    )
+    .toArray();
+  const byId = new Map(found.map((user) => [user._id.toHexString(), user]));
+  const readers = ids.flatMap((id) => {
+    const user = byId.get(id.toHexString());
+    return user ? [asReader(user)] : [];
+  });
+  return { readers, byId };
+}
+
 // A reader found, and whether it's the one searching
 export type Reader = ReturnType<typeof asReader> & { you: boolean };
 

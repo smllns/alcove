@@ -27,7 +27,7 @@ export function AboutWork({ book }: { book: Book }) {
             <Fold className={aboutTextClass}>{description}</Fold>
           ) : (
             <p className='text-[0.9375rem] text-muted'>
-              Open Library doesn’t describe this one.
+              No one has described this one yet.
             </p>
           )}
         </div>

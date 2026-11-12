@@ -1,4 +1,4 @@
-import { useBooksByWriter } from '@/entities/book/queries';
+import { useWriterBooks } from '@/entities/book/useWriterBooks';
 import { BookLine } from '@/entities/book/ui/BookLine';
 import { cn } from '@/shared/lib/cn';
 import { monthName } from '@/shared/lib/dates';
@@ -10,10 +10,11 @@ const SHOWN = 3;
 
 // Before adding a book: what the reader has by the same writer already,
 // so it's plain where it'll join them (and in the sky, which
-// constellation). Nothing when there's nothing of theirs yet.
+// constellation): told apart as the sky tells them, once all the shelves
+// are in. Nothing when there's nothing of theirs yet.
 export function ShelvedByWriter({ writer }: { writer: string | undefined }) {
-  const theirs = useBooksByWriter(writer).data ?? [];
-  if (!theirs.length) return null;
+  const { books: theirs, known } = useWriterBooks(writer);
+  if (!known || !theirs.length) return null;
   const rest = theirs.length - SHOWN;
   return (
     <div className={cn(noticeClass, 'mb-8 animate-fade-in')}>

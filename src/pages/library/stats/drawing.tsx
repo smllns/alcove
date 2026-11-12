@@ -1,3 +1,4 @@
+import { seedOf } from '@/shared/lib/seed';
 import { WALL, type Ids } from './drawingKit';
 
 // The pieces the stats' sections through a building are drawn with, as
@@ -107,5 +108,31 @@ export function WallWindow({
         strokeWidth='0.6'
       />
     </g>
+  );
+}
+
+// A window in the outer walls (at `walls`) of some storeys, each `storey`
+// tall from the ground at `ground`, picked by the home (`seed`)
+export function WallWindows({
+  walls,
+  ground,
+  storey,
+  storeys,
+  seed,
+}: {
+  walls: number[];
+  ground: number;
+  storey: number;
+  storeys: number;
+  seed: string;
+}) {
+  return Array.from({ length: storeys }, (_, f) =>
+    walls.map((x, side) => {
+      if (seedOf(`${seed}:${f}:${side}`) > 0.7) return null;
+      const y = ground - (f + 1) * storey + storey * 0.3;
+      return (
+        <WallWindow key={`${f}${side}`} x={x} y={y} tall={storey * 0.38} />
+      );
+    }),
   );
 }

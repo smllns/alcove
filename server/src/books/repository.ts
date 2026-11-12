@@ -1,6 +1,7 @@
 import { ObjectId, type Filter } from 'mongodb';
 import { books, storedCoverSources, type BookDoc } from '../db.js';
-import { unaccented } from '../lib/text.js';
+import { forget, noteBook } from '../users/activity.js';
+import { deleteLikesOn } from '../users/reviewLikes.js';
 import type { BookInput } from './schemas.js';
 
 // What the client sees of a book
@@ -46,9 +47,11 @@ export const newBookDoc = (
   updatedAt: at,
 });
 
+// A book added, and told to the reader's followers
 export async function addBook(userId: ObjectId, input: BookInput) {
   const book = newBookDoc(userId, input);
   await books().insertOne(book);
+  await noteBook(userId, null, book);
   return book;
 }
 
@@ -120,36 +123,13 @@ export async function ownCopies(userId: ObjectId, works: string[]) {
   );
 }
 
-// A writer's name without case, accents, spaces or punctuation, so "J. R. R.
-// Tolkien" and "J.R.R. Tolkien" are the one writer. Must match how the
-// client tells writers apart (src/entities/book/authors.ts).
-const writerKey = (name: string) =>
-  unaccented(name).replace(/[^\p{L}\p{N}]/gu, '');
-
-// The reader's books by the same writer (their first author), newest
-// first: only names are read to find them, then the books themselves
-export async function booksByWriter(userId: ObjectId, name: string) {
-  const wanted = writerKey(name);
-  if (!wanted) return [];
-  const all = await books()
-    .find({ userId }, { projection: { authors: 1 } })
-    .toArray();
-  const ids = all
-    .filter((b) => writerKey(b.authors[0] ?? '') === wanted)
-    .map((b) => b._id);
-  if (!ids.length) return [];
-  return books()
-    .find({ _id: { $in: ids }, userId })
-    .sort({ _id: -1 })
-    .toArray();
-}
-
 export const findBook = (userId: ObjectId, id: ObjectId) =>
   books().findOne({ _id: id, userId });
 
 // The book as the reader now describes it, everything replaced but when
 // it was added. The cover it had stays as it was (a copy we keep, say)
-// when it's still the same picture. Null when it isn't theirs.
+// when it's still the same picture. What changed is told to the reader's
+// followers. Null when it isn't theirs.
 export async function updateBook(
   userId: ObjectId,
   id: ObjectId,
@@ -170,11 +150,21 @@ export async function updateBook(
     updatedAt: new Date(),
   };
   await books().replaceOne({ _id: id, userId }, book);
+  await noteBook(userId, old, book);
   return { book, old };
 }
 
-export const deleteBook = (userId: ObjectId, id: ObjectId) =>
-  books().findOneAndDelete({ _id: id, userId });
+// What the feeds and the hearts had of the books `ids`, gone with them
+export const forgetBooks = (ids: ObjectId[]) =>
+  Promise.all([forget({ book: { $in: ids } }), deleteLikesOn(ids)]);
+
+// A book taken off the shelves, with all said of it; null when it isn't
+// theirs
+export async function deleteBook(userId: ObjectId, id: ObjectId) {
+  const book = await books().findOneAndDelete({ _id: id, userId });
+  if (book) await forgetBooks([book._id]);
+  return book;
+}
 
 // The covers in our storage (uploaded photos, copied catalogue covers)
 // that a book still shows

@@ -5,7 +5,8 @@ import {
   type AuthorAsk,
   type WriterPageState,
 } from '@/entities/book/authorAsk';
-import { authorQuery, useAuthorSearch } from '@/entities/book/catalogueQueries';
+import { authorQuery } from '@/entities/book/authorQueries';
+import { useAuthorSearch } from '@/entities/book/catalogueQueries';
 import type { CatalogueAuthor } from '@/entities/book/types';
 import { useWriterBooks } from '@/entities/book/useWriterBooks';
 import { sameWriter } from '@/entities/book/writers';

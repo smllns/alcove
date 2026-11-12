@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 import type { ReaderPage } from '@/entities/reader/types';
-import { callName } from '@/entities/user/types';
 import { cn } from '@/shared/lib/cn';
 import { paths } from '@/shared/config/paths';
 import { BackLink } from '@/shared/ui/BackLink';
 import { sheetClass } from '@/shared/ui/surfaces';
 import { AskingPart } from './AskingPart';
+import { ClosedPage } from './ClosedPage';
+import { FavouriteBooks } from './FavouriteBooks';
 import { FavouriteWriters } from './FavouriteWriters';
 import { InCommon } from './InCommon';
 import { ReaderLists } from './ReaderLists';
@@ -20,7 +21,8 @@ import { useOwned } from './useOwned';
 // staying in view on a wide screen as it scrolls by, and on a sheet of its
 // own each part of it they let the one looking see. Their books open the
 // one looking's own copy where they have one (on their own page, the book
-// itself). A page opened only to those let in says so instead.
+// itself). A page opened only to those let in shows a lock instead
+// (ClosedPage).
 export function ReaderView({
   page,
   back = false,
@@ -32,14 +34,24 @@ export function ReaderView({
   const owned = useOwned(page);
   const empty = !page.books.length && !page.lists.length;
   return (
-    <div className='grid gap-10 lg:grid-cols-[minmax(0,15rem)_1fr] lg:gap-14 xl:grid-cols-[minmax(0,17rem)_1fr] xl:gap-20'>
+    <div className='grid gap-10 lg:grid-cols-[minmax(0,19rem)_1fr] lg:gap-10 xl:grid-cols-[minmax(0,21rem)_1fr] xl:gap-14'>
       <div className='lg:sticky lg:top-28 lg:self-start xl:top-7'>
         {back && (
           <div className='hidden lg:block'>
             <BackLink to={paths.library} returns />
           </div>
         )}
-        <ReaderSide page={page} />
+        {/* On a sheet of its own on a wide screen, as the page beside it
+            is; on a phone, plainly over it */}
+        <div
+          className={cn(
+            sheetClass,
+            'lg:p-7 xl:p-8',
+            'max-lg:rounded-none max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none max-lg:backdrop-blur-none max-lg:dark:bg-transparent max-lg:dark:shadow-none',
+          )}
+        >
+          <ReaderSide page={page} />
+        </div>
       </div>
       <div
         className={cn(
@@ -48,10 +60,7 @@ export function ReaderView({
         )}
       >
         {!page.open ? (
-          <Note>
-            {callName(page)} lets only the readers they say yes to see their
-            page. Ask to follow, and it opens once they do.
-          </Note>
+          <ClosedPage page={page} />
         ) : empty ? (
           <Note>
             {page.you
@@ -60,6 +69,7 @@ export function ReaderView({
           </Note>
         ) : null}
         <AskingPart page={page} />
+        <FavouriteBooks page={page} owned={owned} />
         <ReadingNow page={page} owned={owned} />
         <InCommon page={page} owned={owned} />
         <RecentBooks page={page} owned={owned} />

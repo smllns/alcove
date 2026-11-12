@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { HttpError } from './errors.js';
 import { tidyName } from './text.js';
@@ -18,11 +19,18 @@ function validationError(error: z.ZodError) {
   );
 }
 
-// One of the address's ?key= values as plain text: trimmed, and no longer
-// than `max`, so an endless one costs nothing
 // An id as the database writes one: 24 hex figures
 export const OBJECT_ID = /^[0-9a-f]{24}$/;
 
+// An id from the address as the database's, or `missing()` thrown (what
+// such an id would have found isn't there)
+export function objectIdOr(raw: unknown, missing: () => HttpError) {
+  if (typeof raw !== 'string' || !ObjectId.isValid(raw)) throw missing();
+  return new ObjectId(raw);
+}
+
+// One of the address's ?key= values as plain text: trimmed, and no longer
+// than `max`, so an endless one costs nothing
 export const queryText = (req: Request, key: string, max: number) =>
   String(req.query[key] ?? '')
     .trim()

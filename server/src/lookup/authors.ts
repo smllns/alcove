@@ -20,11 +20,14 @@ type AuthorDoc = {
   work_count?: number;
 };
 
-// Writers by name, those with the most books first
-export async function searchAuthors(query: string): Promise<AuthorResult[]> {
+// Writers by name (as many as `limit`), those with the most books first
+export async function searchAuthors(
+  query: string,
+  limit = 6,
+): Promise<AuthorResult[]> {
   const params = new URLSearchParams({
     q: query,
-    limit: '6',
+    limit: String(limit),
     fields: 'key,name,birth_date,death_date,top_work,work_count',
   });
   const { docs } = await fromOpenLibrary<{ docs: AuthorDoc[] }>(

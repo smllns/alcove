@@ -43,3 +43,8 @@ export const fetchSharedBooksBy = async (name: string) =>
       `/users/books-by?${new URLSearchParams({ name })}`,
     )
   ).works;
+
+// Which of the writers on the reader's shelves go by other names too, in a
+// group for each
+export const fetchSameWriters = async () =>
+  (await request<{ groups: string[][] }>('/lookup/writers/same/mine')).groups;

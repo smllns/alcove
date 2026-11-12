@@ -2,7 +2,7 @@ import type { Book } from '@/entities/book/types';
 import { cn } from '@/shared/lib/cn';
 import { counted } from '@/shared/lib/plural';
 import { pagesIn } from '@/entities/book/pages';
-import { ScaleHeading } from './ScaleHeading';
+import { ScaleHeading } from '@/shared/ui/ScaleHeading';
 
 // How deep the month with the most pages hangs
 const DEEPEST = 56;

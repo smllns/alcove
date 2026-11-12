@@ -11,6 +11,7 @@
 // turning into an error, and ends one that's stuck rather than leave it hanging
 // over the page.
 
+import { remeasurePageScroll } from './pageScroll';
 import { pageTurning } from './pageTurn';
 
 // Plays once, on the page itself (not the transition's own sheet), and
@@ -94,6 +95,7 @@ export function settleEntrances() {
       .finally(() => {
         live.delete(transition);
         window.clearTimeout(stuck);
+        remeasurePageScroll();
       });
     const kind = document.documentElement.dataset.transition;
     if (!['forward', 'return', 'onward', 'swap', 'shown'].includes(kind ?? ''))

@@ -12,7 +12,8 @@ import { useWorkOrder } from '@/widgets/book-order';
 import { WorkGrid } from '@/widgets/book-grid';
 import { BookSearch } from '@/widgets/book-search';
 import { ShelfOrderMenu } from '@/widgets/book-order';
-import { asWork, theirStars } from './readerBooks';
+import { asWork } from '@/entities/book/catalogueBook';
+import { theirStars } from './readerBooks';
 import { useOwned } from './useOwned';
 
 // Which of their books are shown: all, those the reader looking has too,

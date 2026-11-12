@@ -1,3 +1,4 @@
+import { useWorkDetails } from '@/entities/book/catalogueQueries';
 import { liftedCover } from '@/entities/book/coverImage';
 import type { Book } from '@/entities/book/types';
 import { BookCover } from '@/entities/book/ui/BookCover';
@@ -6,17 +7,23 @@ import { ZoomShowcase } from '@/shared/ui/ZoomShowcase';
 import { CoverSticker } from './CoverSticker';
 
 // The book's cover on its page, opening up to fill the screen as a
-// picture does (ZoomShowcase), with a deeper shadow as it lifts
+// picture does (ZoomShowcase), with a deeper shadow as it lifts. One with
+// none of its own, a cover a reader of alcove gave the same work, if any
+// did
 export function CoverShowcase({
   book,
-  owned = false,
+  owned,
   className,
 }: {
   book: Book;
   // On the reader's shelves, or not: a sticker on the cover's corner says
-  owned?: boolean;
+  owned: boolean;
   className?: string;
 }) {
+  const details = useWorkDetails(
+    book.cover ? undefined : book.openLibrary?.work,
+  );
+  const url = book.cover?.url ?? details.data?.readersCover;
   return (
     <ZoomShowcase
       label='See the cover larger'
@@ -28,7 +35,7 @@ export function CoverShowcase({
         <BookCover
           title={book.title}
           author={book.authors[0]}
-          url={book.cover?.url}
+          url={url}
           size='L'
           bookId={big ? undefined : book.id}
           home={!big}

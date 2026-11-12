@@ -1,9 +1,10 @@
 import { createApp } from './app.js';
 import { config } from './config.js';
-import { connectDb, disconnectDb } from './db.js';
+import { disconnectDb } from './db.js';
+import { openDb } from './migrations.js';
 
 try {
-  await connectDb();
+  await openDb();
 } catch (err) {
   console.error('\nCould not connect to MongoDB.');
   console.error(

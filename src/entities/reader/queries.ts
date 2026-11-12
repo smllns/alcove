@@ -11,16 +11,12 @@ import {
   fetchPeople,
   fetchReader,
   fetchReaderBook,
+  fetchFeed,
+  markFeedSeen,
   setFollowing,
 } from './api';
-import type { ReaderPage } from './types';
-
-const readerKeys = {
-  page: (username: string) => ['reader', username] as const,
-  people: (username: string, side: string) =>
-    ['reader', username, side] as const,
-  asking: ['reader-asking'] as const,
-};
+import { readerKeys } from './keys';
+import type { Feed, ReaderPage } from './types';
 
 // A reader's page, as far as the one looking may see it
 export const useReader = (username: string | undefined) =>
@@ -118,9 +114,45 @@ export function useAnswer() {
   return useMutation({
     mutationFn: ({ username, yes }: { username: string; yes: boolean }) =>
       answerAsking(username, yes),
-    onSuccess: () => {
+    onSuccess: (_done, { username, yes }) => {
       void client.invalidateQueries({ queryKey: readerKeys.asking });
       void client.invalidateQueries({ queryKey: ['reader'] });
+      // In the feed, their request now a follow, or gone
+      client.setQueryData<Feed>(
+        readerKeys.feed,
+        (feed) =>
+          feed && {
+            ...feed,
+            items: feed.items.flatMap((item) =>
+              item.kind === 'asked' && item.reader.username === username
+                ? yes
+                  ? [{ ...item, kind: 'followed' as const }]
+                  : []
+                : [item],
+            ),
+          },
+      );
     },
+  });
+}
+
+// The reader's feed, asked for afresh every minute or so it's looked at
+export const useFeed = () =>
+  useQuery({
+    queryKey: readerKeys.feed,
+    queryFn: fetchFeed,
+    staleTime: 60 * 1000,
+  });
+
+// The feed looked at: nothing new in it any more, at once
+export function useMarkFeedSeen() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: markFeedSeen,
+    onMutate: () =>
+      client.setQueryData<Feed>(
+        readerKeys.feed,
+        (feed) => feed && { ...feed, unread: 0 },
+      ),
   });
 }

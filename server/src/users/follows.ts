@@ -1,7 +1,8 @@
 import type { ObjectId } from 'mongodb';
-import { follows, users, type UserDoc } from '../db.js';
+import { activity, follows, type UserDoc } from '../db.js';
+import { forget, note } from './activity.js';
 import { privacyOf } from './privacy.js';
-import { asReader, listed } from './repository.js';
+import { readersByIds } from './repository.js';
 
 // Readers following readers: followed at once, or asked for of one whose
 // page opens only to those they let in, and let in or turned away by them
@@ -24,14 +25,27 @@ export async function follow(follower: ObjectId, followee: UserDoc) {
   const done = await follows().findOneAndUpdate(
     { follower, followee: followee._id },
     { $setOnInsert: { state, createdAt: new Date() } },
-    { upsert: true, returnDocument: 'after' },
+    { upsert: true, returnDocument: 'after', includeResultMetadata: true },
   );
-  return done?.state ?? state;
+  // Told to the one followed, the first time
+  if (!done.lastErrorObject?.updatedExisting)
+    await note({
+      userId: follower,
+      kind: state === 'asked' ? 'asked' : 'followed',
+      target: followee._id,
+    });
+  return done.value?.state ?? state;
 }
 
-// No longer followed, nor asked to be
-export const unfollow = (follower: ObjectId, followee: ObjectId) =>
-  follows().deleteOne({ follower, followee });
+// No longer followed, nor asked to be; nor told so
+export async function unfollow(follower: ObjectId, followee: ObjectId) {
+  await follows().deleteOne({ follower, followee });
+  await forget({
+    userId: follower,
+    target: followee,
+    kind: { $in: ['followed', 'asked'] },
+  });
+}
 
 // How many follow `id`, and how many they follow
 export async function followCounts(id: ObjectId) {
@@ -63,14 +77,7 @@ export async function people(
   const ids = rows.map((row) =>
     side === 'following' ? row.followee : row.follower,
   );
-  const found = await users()
-    .find({ _id: { $in: ids }, username: { $type: 'string' } }, listed)
-    .toArray();
-  const byId = new Map(found.map((user) => [user._id.toHexString(), user]));
-  return ids.flatMap((each) => {
-    const user = byId.get(each.toHexString());
-    return user ? [asReader(user)] : [];
-  });
+  return (await readersByIds(ids)).readers;
 }
 
 // One asking to follow `followee` let in (true) or turned away; whether
@@ -84,15 +91,24 @@ export async function answer(
   const { matchedCount } = yes
     ? await follows().updateOne(where, { $set: { state: 'following' } })
     : { matchedCount: (await follows().deleteOne(where)).deletedCount };
+  // Their ask, now a follow, or gone
+  const asked = { userId: follower, target: followee, kind: 'asked' as const };
+  if (yes) await activity().updateOne(asked, { $set: { kind: 'followed' } });
+  else await forget(asked);
   return matchedCount > 0;
 }
 
 // A page opened to everyone: all who were asking let in
-export const letAllIn = (followee: ObjectId) =>
-  follows().updateMany(
+export async function letAllIn(followee: ObjectId) {
+  await follows().updateMany(
     { followee, state: 'asked' },
     { $set: { state: 'following' } },
   );
+  await activity().updateMany(
+    { target: followee, kind: 'asked' },
+    { $set: { kind: 'followed' } },
+  );
+}
 
 // A reader leaving: every follow on either side gone with them
 export const deleteFollows = (id: ObjectId) =>

@@ -8,7 +8,9 @@ type TextFieldProps = ComponentProps<'input'> & {
   error?: string;
   // Quiet helper text, replaced by the error when there is one
   hint?: string;
-  // Rendered inside the field, on the right (e.g. a show-password button)
+  // Rendered inside the field, on the left (e.g. the @ of a username) and
+  // on the right (e.g. a show-password button)
+  leading?: ReactNode;
   trailing?: ReactNode;
   // Shows a small * after the label, where most fields around are optional
   marked?: boolean;
@@ -21,6 +23,7 @@ export function TextField({
   label,
   error,
   hint,
+  leading,
   trailing,
   marked,
   labelHidden,
@@ -50,6 +53,7 @@ export function TextField({
           error ? 'border-danger' : 'border-line',
         )}
       >
+        {leading}
         <input
           id={id}
           aria-invalid={error ? true : undefined}

@@ -1,10 +1,10 @@
-import { seedOf } from '@/shared/lib/seed';
 import type { HomeBooks } from '@/entities/place/arrange';
 import { BookStack, Bookcase } from './BookShapes';
 import { booksIn, figures, stacked, stampOf } from './libraryStats';
-import { Ground, LevelMark, SectionDefs, WallWindow } from './drawing';
+import { Ground, LevelMark, SectionDefs, WallWindows } from './drawing';
 import { RoomLamp } from './RoomLamp';
 import { TitleBlock } from './TitleBlock';
+import { useDrawingWidth } from './useDrawingWidth';
 import { UNDER, WALL, useDrawingIds } from './drawingKit';
 import { atticOf, furnish } from '@/shared/ui/drawing/decor';
 import { ROOF, ROOMS_PER_STOREY, STOREY, inHome } from './measured';
@@ -21,6 +21,8 @@ const [SX, SW] = [X + WIDE + 50, 44];
 const SHELF = 0.38 * M;
 // How large the places' lamps are drawn, against the plan of a home
 const LAMP = M / 30;
+// How wide the drawing is designed, before a wide column widens it
+const BASE = 500;
 
 // The books on a bookcase's shelves, and those only as far as the
 // bookcase on its lowest
@@ -47,6 +49,9 @@ export function HomeSection({ home }: { home: HomeBooks }) {
   const roomIds = home.rooms.map(({ room }) => room.id);
   const decors = furnish(roomIds);
   const attic = atticOf(home.home.id, roomIds);
+  // Wider on a wide column: the stack midway across what's beside the home
+  const { svg, width } = useDrawingWidth(BASE);
+  const sx = SX + (width - BASE) / 2;
   const stack = stacked(books, M, G - ridge + M);
   const reach = inHome(stack.tall / M, names);
   const stackTop = G - stack.drawn;
@@ -56,10 +61,11 @@ export function HomeSection({ home }: { home: HomeBooks }) {
 
   return (
     <svg
-      viewBox={`0 ${first} 500 ${G + UNDER - first}`}
+      ref={svg}
+      viewBox={`0 ${first} ${width} ${G + UNDER - first}`}
       role='img'
       aria-label={`${home.home.name} in section, the books kept there stacked up beside it`}
-      className='block w-full max-w-160 overflow-visible'
+      className='block w-full overflow-visible'
     >
       <SectionDefs ids={ids} />
       <RoomLamp
@@ -154,44 +160,38 @@ export function HomeSection({ home }: { home: HomeBooks }) {
           <rect key={x} x={x} y={top} width={WALL} height={G - top} />
         ))}
       </g>
-      <Windows storeys={storeys} seed={home.home.id} />
+      <WallWindows
+        walls={[X - WALL, X + WIDE]}
+        ground={G}
+        storey={STOREY * M}
+        storeys={storeys}
+        seed={home.home.id}
+      />
       <path
         d={`M${X - WALL - eaves} ${top + drop}L${X + WIDE / 2} ${ridge}L${X + WIDE + WALL + eaves} ${top + drop}`}
         fill='none'
         stroke='var(--poche)'
         strokeWidth={M * 0.18}
       />
-      <Ground ids={ids} from={0} to={500} y={G} />
-      <TitleBlock y={G + 34} width={500} metre={M} figures={stampOf(found)} />
-      <BookStack books={books} x={SX} width={SW} ground={G} {...stack} />
+      <Ground ids={ids} from={0} to={width} y={G} />
+      <TitleBlock y={G + 34} width={width} metre={M} figures={stampOf(found)} />
+      <BookStack books={books} x={sx} width={SW} ground={G} {...stack} />
       <line
         x1={
-          reach.room !== undefined || reach.attic ? X + WIDE + WALL + 6 : SX - 6
+          reach.room !== undefined || reach.attic ? X + WIDE + WALL + 6 : sx - 6
         }
-        x2={SX + SW + 14}
+        x2={sx + SW + 14}
         y1={stackTop}
         y2={stackTop}
         stroke='var(--gold)'
         strokeDasharray='3 3'
       />
       <LevelMark
-        x={SX + SW + 22}
+        x={sx + SW + 22}
         y={stackTop}
         value={`${(stack.tall / M).toFixed(2)} m`}
         gold
       />
     </svg>
-  );
-}
-
-// A window in the outer walls of some storeys, picked by the home
-function Windows({ storeys, seed }: { storeys: number; seed: string }) {
-  return Array.from({ length: storeys }, (_, f) =>
-    [X - WALL, X + WIDE].map((x, side) => {
-      if (seedOf(`${seed}:${f}:${side}`) > 0.7) return null;
-      const y = G - (f + 1) * STOREY * M + STOREY * M * 0.3;
-      const tall = STOREY * M * 0.38;
-      return <WallWindow key={`${f}${side}`} x={x} y={y} tall={tall} />;
-    }),
   );
 }

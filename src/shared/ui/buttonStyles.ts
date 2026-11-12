@@ -1,6 +1,7 @@
 import { cn } from '@/shared/lib/cn';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'pill' | 'danger';
+export type ButtonVariant =
+  'primary' | 'secondary' | 'pill' | 'solidPill' | 'danger';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
@@ -11,6 +12,9 @@ const variants: Record<ButtonVariant, string> = {
   danger:
     'min-h-11 [--gap:--spacing(2.5)] border border-danger/60 px-6 py-2.5 text-danger text-shadow-none sm:min-h-12 sm:px-7 sm:py-3 hover:border-danger hover:bg-danger hover:text-button-text',
   pill: '[--gap:--spacing(2)] border border-line bg-surface/85 px-4 py-2 text-[0.8125rem] backdrop-blur-sm sm:px-5 sm:py-2.5 sm:text-sm hover:border-ink',
+  // A pill for the one thing to do among pills (accepting, beside declining)
+  solidPill:
+    '[--gap:--spacing(2)] border border-button bg-button px-4 py-2 text-[0.8125rem] text-button-text sm:px-5 sm:py-2.5 sm:text-sm hover:bg-button-hover',
 };
 
 // Shared by <Button> and <ButtonLink>, so a link and a button can look alike.

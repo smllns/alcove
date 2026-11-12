@@ -20,6 +20,8 @@ export type WorkResult = {
   editionCount: number;
   // How the catalogue's readers rate it, out of five, if they have
   averageRating?: number;
+  // How many gave it, on the catalogue
+  ratingsCount?: number;
 };
 
 export const coverUrl = (id: number | undefined) =>
@@ -114,10 +116,11 @@ export type SearchDoc = {
   // The languages its editions are in ("rus", "eng")
   language?: string[];
   ratings_average?: number | null;
+  ratings_count?: number | null;
 };
 
 export const SEARCH_FIELDS =
-  'key,title,subtitle,author_name,first_publish_year,cover_i,edition_count,language,ratings_average';
+  'key,title,subtitle,author_name,first_publish_year,cover_i,edition_count,language,ratings_average,ratings_count';
 
 // The search also gives printings Open Library hasn't put under any work
 // ("OL12586306M"): not books to point at, so left out
@@ -143,6 +146,7 @@ export const toWork = (doc: SearchDoc): WorkResult => ({
   averageRating: doc.ratings_average
     ? Math.round(doc.ratings_average * 100) / 100
     : undefined,
+  ratingsCount: doc.ratings_count ?? undefined,
 });
 
 // The catalogue's search, answering with its own records of the works

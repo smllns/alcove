@@ -10,6 +10,8 @@ type TextAreaProps = ComponentProps<'textarea'> & {
   hint?: string;
   // Rendered beside the label, on the right (e.g. a remove button)
   action?: ReactNode;
+  // One line at first, as a single field is, rather than room for three
+  short?: boolean;
 };
 
 // TextField's multi-line sibling; grows with what's typed
@@ -18,6 +20,7 @@ export function TextArea({
   error,
   hint,
   action,
+  short = false,
   className,
   ...props
 }: TextAreaProps) {
@@ -35,11 +38,12 @@ export function TextArea({
       </div>
       <textarea
         id={id}
-        rows={3}
+        rows={short ? 1 : 3}
         aria-invalid={error ? true : undefined}
         aria-describedby={described ? noteId : undefined}
         className={cn(
-          'field-sizing-content min-h-18 resize-none border-b bg-transparent py-2 text-base leading-relaxed text-ink outline-none transition-colors duration-500 ease-soft placeholder:text-faint focus:border-ink',
+          'field-sizing-content resize-none border-b bg-transparent py-2 text-base leading-relaxed text-ink outline-none transition-colors duration-500 ease-soft placeholder:text-faint focus:border-ink',
+          !short && 'min-h-18',
           error ? 'border-danger' : 'border-line',
         )}
         {...props}

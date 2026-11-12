@@ -8,8 +8,8 @@ import { StarRating } from '@/shared/ui/StarRating';
 
 // The reader's own stars, large and to be changed with a click right here
 // (for a book of theirs: one with a copy), and beside them (under them, on
-// a phone) how readers at large rate the book: the catalogue's readers, or
-// else the average the reader gave it themselves. That comes later than
+// a phone) how readers at large rate the book: the catalogue's readers and
+// alcove's together, or else the average the reader gave it themselves. That comes later than
 // the page, so it opens out softly.
 export function BookRatings({ book }: { book: Book }) {
   const { save, pending, error } = useEditCopy(book);

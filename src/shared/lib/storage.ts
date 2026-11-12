@@ -31,3 +31,14 @@ const ownKey = (key: string) => (owner ? `${key}:${owner}` : key);
 export const readOwn = (key: string) => readStored(ownKey(key));
 export const storeOwn = (key: string, value: string) =>
   store(ownKey(key), value);
+
+// What's kept under `key` as JSON, or `fallback` with nothing (or nothing
+// readable) kept
+export function readStoredJson<T>(key: string, fallback: T): T {
+  try {
+    const text = readStored(key);
+    return text ? ((JSON.parse(text) as T | null) ?? fallback) : fallback;
+  } catch {
+    return fallback;
+  }
+}

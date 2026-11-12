@@ -2,11 +2,11 @@ import type { Book } from '@/entities/book/types';
 import { dayMonth, monthLetters, monthOfYear } from '@/shared/lib/dates';
 import { counted } from '@/shared/lib/plural';
 import { HOVER, useMediaQuery } from '@/shared/lib/useMediaQuery';
-import { BooksDrawer } from '@/widgets/book-cards';
-import { HoverBooks } from '@/widgets/book-cards';
+import { BooksDrawer } from './BooksDrawer';
+import { HoverBooks } from './HoverBooks';
 import type { readingYear, Span } from './readingYears';
-import { ToneSpine } from '@/widgets/book-cards';
-import { useBooksDrawer } from '@/widgets/book-cards';
+import { ToneSpine } from './ToneSpine';
+import { useBooksDrawer } from './useBooksDrawer';
 
 // How far apart the rows of books lie, and how thick each book is drawn
 const ROW = 11;

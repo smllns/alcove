@@ -5,12 +5,16 @@ import { noteClass, sayClass } from './Chapter';
 import { byMonth, finishedOn, monthsSoFar, yearsOf } from './growth';
 import { pagesOf } from '@/entities/book/pages';
 import { MonthPages } from './MonthPages';
-import { MonthShelf } from '@/widgets/book-cards';
+import {
+  MonthShelf,
+  readingYear,
+  spanYears,
+  YearSpans,
+  type Span,
+} from '@/widgets/book-cards';
 import { startToFinish, unpagedNote } from './readingSayings';
-import { readingYear, spanYears, type Span } from './readingYears';
-import { ScaleHeading } from './ScaleHeading';
+import { ScaleHeading } from '@/shared/ui/ScaleHeading';
 import { monthly } from './sayings';
-import { SpanTimeline } from './SpanTimeline';
 import { YearSwitch } from './YearSwitch';
 
 // A year of reading, the year chosen over it, every drawing on the same
@@ -63,14 +67,7 @@ export function ReadingChapter({
         {span.laid.length > 0 && <> {startToFinish(span.average, span.rows)}</>}
       </p>
       <YearSwitch years={years} year={year} onChange={setChosen} />
-      {span.laid.length > 0 && (
-        <div className='mt-7'>
-          <ScaleHeading name='Start to finish' className='mb-4'>
-            {counted(span.average, 'day')} a book
-          </ScaleHeading>
-          <SpanTimeline found={span} year={year} />
-        </div>
-      )}
+      <YearSpans found={span} year={year} className='mt-7' />
       <div className='mt-8'>
         {/* Named, as the pages under it are */}
         <ScaleHeading name='Books' className='mb-4'>

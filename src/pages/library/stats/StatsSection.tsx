@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from 'react';
 import { isPhysical } from '@/entities/book/nonPhysical';
+import { useWritersKnown } from '@/entities/book/writers';
 import type { Book } from '@/entities/book/types';
 import type { Shelf } from '@/entities/book/useShelf';
 import { Loading } from '@/shared/ui/Loading';
@@ -58,10 +59,13 @@ function Chapters({ books }: { books: Book[] }) {
   const choosing = shelved.length < books.length;
   // Found once among them all, and again among the physical ones only when
   // there are others
+  // Again as more writers are known to be one
+  const known = useWritersKnown();
   const both = useMemo(() => {
     const all = scopedFindings(books);
     return { all, physical: choosing ? scopedFindings(shelved) : all };
-  }, [books, shelved, choosing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [books, shelved, choosing, known]);
   // One of those, starting on `start` (if there's anything to show there),
   // left out with nothing to go on among all the books
   const scoped = <K extends keyof Findings>(

@@ -5,8 +5,8 @@ import { BookCover } from '@/entities/book/ui/BookCover';
 import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/cn';
 import { MoreToggle } from '@/shared/ui/MoreToggle';
-import { AverageRating, Rating } from '@/shared/ui/Rating';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
+import { CardStars } from './CardStars';
 import { useGridFold } from './useGridFold';
 import { shelfItem } from './shelfItem';
 
@@ -106,14 +106,11 @@ export function WorkGrid({
                     {noted}
                   </span>
                 )}
-                {stars ? (
-                  <Rating value={stars} className='mt-1 flex text-xs' />
-                ) : work.averageRating ? (
-                  <AverageRating
-                    value={work.averageRating}
-                    className='mt-1 flex text-xs'
-                  />
-                ) : null}
+                <CardStars
+                  stars={stars}
+                  average={work.averageRating}
+                  className='mt-1 flex text-xs'
+                />
               </>
             );
             // Gliding to its new place as the list's ordered otherwise

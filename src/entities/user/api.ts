@@ -40,6 +40,15 @@ export const updateName = async (name: string) =>
     })
   ).user;
 
+// Their favourite books, by id, first to last (up to four of their own)
+export const updateFavourites = async (books: string[]) =>
+  (
+    await request<UserResponse>('/account/favourites', {
+      method: 'PATCH',
+      body: { books },
+    })
+  ).user;
+
 export const updateAbout = async (about: string) =>
   (
     await request<UserResponse>('/account/about', {
