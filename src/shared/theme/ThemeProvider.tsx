@@ -23,6 +23,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    // The browser's or the phone's bars in the paper of the page
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute(
+        'content',
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--bg-mid')
+          .trim(),
+      );
   }, [theme]);
 
   // Following the device, along with it as it changes (at dusk, say)

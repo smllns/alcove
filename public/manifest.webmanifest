@@ -1,0 +1,21 @@
+{
+  "name": "alcove",
+  "short_name": "alcove",
+  "description": "Every book you own, where it lives at home, what you thought of it.",
+  "id": "/library",
+  "start_url": "/library",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3e6cc",
+  "theme_color": "#f3e6cc",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ import {
   usernameTaken,
 } from '../auth/users.js';
 import { deleteAllBooks } from '../books/repository.js';
-import { books, type UserDoc } from '../db.js';
+import { books, pushSubscriptions, type UserDoc } from '../db.js';
 import { HttpError } from '../lib/errors.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
 import { passwordAttempts } from '../lib/rateLimit.js';
@@ -139,7 +139,11 @@ accountRouter.delete('/', passwordAttempts, async (req, res) => {
   // which those are; then their books and photos go with them: the photos
   // last, once nothing of theirs uses them (those another reader added
   // with a book stay)
-  await Promise.all([deleteLikes(me._id), forgetReader(me._id)]);
+  await Promise.all([
+    deleteLikes(me._id),
+    forgetReader(me._id),
+    pushSubscriptions().deleteMany({ userId: me._id }),
+  ]);
   await Promise.all([
     deleteAllBooks(me._id),
     deletePlaces(me._id),

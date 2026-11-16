@@ -9,6 +9,7 @@ import type { ActivityDoc } from './models/activity.js';
 import type { NewsDoc } from './models/news.js';
 import type { ListsDoc } from './models/lists.js';
 import type { PlacesDoc } from './models/places.js';
+import type { PushSubscriptionDoc } from './models/push.js';
 
 // The documents kept, each area's in a file of its own
 export * from './models/books.js';
@@ -19,6 +20,7 @@ export * from './models/activity.js';
 export * from './models/news.js';
 export * from './models/lists.js';
 export * from './models/places.js';
+export * from './models/push.js';
 
 export type UserDoc = {
   _id: ObjectId;
@@ -110,6 +112,8 @@ export const reviewLikes = () =>
   database().collection<ReviewLikeDoc>('reviewLikes');
 export const activity = () => database().collection<ActivityDoc>('activity');
 export const news = () => database().collection<NewsDoc>('news');
+export const pushSubscriptions = () =>
+  database().collection<PushSubscriptionDoc>('pushSubscriptions');
 // What's been done once to what's kept (migrations.ts), by its id
 export const meta = () =>
   database().collection<{ _id: string; at: Date }>('meta');

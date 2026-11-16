@@ -6,6 +6,7 @@ import type {
   FollowDoc,
   LookupCacheDoc,
   NewsDoc,
+  PushSubscriptionDoc,
   ReviewLikeDoc,
   SessionDoc,
   UserDoc,
@@ -71,6 +72,13 @@ export async function ensureIndexes(db: Db) {
     db.collection<WriterNameDoc>('writerNames').createIndex({ item: 1 }),
     // alcove's news, the latest first
     db.collection<NewsDoc>('news').createIndex({ createdAt: -1 }),
+    // Each device once, whoever it's signed in as now
+    db
+      .collection<PushSubscriptionDoc>('pushSubscriptions')
+      .createIndexes([
+        { key: { endpoint: 1 }, unique: true },
+        { key: { userId: 1 } },
+      ]),
     // A reader's shelf, newest first; the sort key doubles as the page cursor.
     // And as it came to them, newest first (their page, their lists)
     db.collection<BookDoc>('books').createIndexes([

@@ -62,10 +62,16 @@ npm test           # the API, the client's logic, contrast and type sizes (vites
   authors; the feed, settings and Add a book (by search, ISBN or barcode
   scan). The tabs end with the reader's own circle, leading to their page.
 - **Settings**: profile (edited on the reader's page), appearance (light,
-  dark or the device's), places, library (import from Goodreads or
+  dark or the device's), notifications on this device, places, library (import from Goodreads or
   StoryGraph, with undo; removing every book), sign-in, deleting the
   account; and for alcove's team, **News** (`/settings/news`: write, edit,
   take down).
+
+- **An app of its own**: installable on a phone's home screen or a
+  computer's dock (`public/manifest.webmanifest`), and **notifications**
+  there (`public/sw.js`, Web Push): a heart on your review, a new follower,
+  a request to follow you, alcove's news. On an iPhone they come only to
+  alcove opened from the home screen (Share → Add to Home Screen).
 
 Readers sign up with a **username** (`@name`, unique, what others will find
 them by); a name to be called by is optional. `callName(user)`
@@ -173,8 +179,10 @@ Project settings: framework preset **Vite**, defaults for everything else.
 The function runs in São Paulo (`regions: ["gru1"]` in `vercel.json`), next
 to the Atlas cluster (`sa-east-1`); keep the two together if either moves.
 Environment variables: `MONGODB_URI`, `MONGODB_DB`, and optionally
-`ADMIN_EMAILS` (who writes alcove's news, comma between) and
-`OPENLIBRARY_CONTACT`. In MongoDB Atlas, Network Access must allow
+`ADMIN_EMAILS` (who writes alcove's news, comma between),
+`OPENLIBRARY_CONTACT`, and `VAPID_PUBLIC_KEY` with `VAPID_PRIVATE_KEY` for
+notifications (made once with `npx web-push generate-vapid-keys`; without
+them notifications are off). In MongoDB Atlas, Network Access must allow
 `0.0.0.0/0`, since Vercel doesn't have fixed IPs.
 
 Server code imports with `.js` extensions (`./app.js` for `app.ts`), the
@@ -222,6 +230,7 @@ server/src/
   users/          Other readers: their pages, privacy, follows, the feed,
                   reviews and hearts, books shared among readers
   news/           alcove's own news, written by its team
+  push/           Notifications to readers' devices (Web Push)
   lookup/         Open Library, Wikidata, Wikipedia, Wikimedia and
                   Wikiquote, cached (with ratings blended with alcove's,
                   writers' other names, lists)
@@ -325,6 +334,9 @@ signed-in reader.
 | POST   | `/news`                               | `{ title, body, link? }` (team only)      | `{ news }`                                      |
 | PUT    | `/news/:id`                           | `{ title, body, link? }` (team only)      | `{ news }`                                      |
 | DELETE | `/news/:id`                           | (team only)                               | 204                                             |
+| GET    | `/push/key`                           |                                           | `{ key }` devices subscribe by, or null         |
+| POST   | `/push/devices`                       | the device's push subscription            | 204: this device told what's for the reader     |
+| DELETE | `/push/devices`                       | `{ endpoint }`                            | 204: no longer                                  |
 | GET    | `/uploads/status`                     |                                           | `{ enabled }`                                   |
 | POST   | `/uploads/cover`                      | `{ image }` (data URL)                    | `{ url }`                                       |
 | POST   | `/uploads/cover/fetch`                | `{ url }`                                 | the picture, for the browser to shrink          |

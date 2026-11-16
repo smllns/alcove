@@ -7,6 +7,13 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Installable, on a phone's home screen or a computer's dock, as an
+         app of its own (public/manifest.webmanifest) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="alcove" />
+    <!-- The browser's or the phone's bars in the page's paper; set to the
+         theme's own below and by ThemeProvider -->
+    <meta name="theme-color" content="#f3e6cc" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>alcove</title>
     <!-- Pick the theme before first paint so there's no flash of the wrong one -->
@@ -19,6 +26,9 @@
             : 'light';
         }
         document.documentElement.dataset.theme = theme;
+        document
+          .querySelector('meta[name="theme-color"]')
+          .setAttribute('content', theme === 'dark' ? '#221e1b' : '#f3e6cc');
       } catch (e) {}
     </script>
   </head>

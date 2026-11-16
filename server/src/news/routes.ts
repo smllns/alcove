@@ -2,6 +2,7 @@ import { Router, type RequestHandler } from 'express';
 import { z } from 'zod';
 import { currentUser } from '../auth/middleware.js';
 import { HttpError } from '../lib/errors.js';
+import { tellNews } from '../push/messages.js';
 import { objectIdOr, parseBody } from '../lib/validation.js';
 import {
   isAdmin,
@@ -46,10 +47,11 @@ newsRouter.get('/', async (_req, res) => {
   res.json({ news: await latestNews() });
 });
 
+// Written, and told on everyone's devices
 newsRouter.post('/', adminOnly, async (req, res) => {
-  res
-    .status(201)
-    .json({ news: await writeNews(parseBody(newsSchema, req.body)) });
+  const written = await writeNews(parseBody(newsSchema, req.body));
+  await tellNews(written).catch(() => {});
+  res.status(201).json({ news: written });
 });
 
 newsRouter.put('/:id', adminOnly, async (req, res) => {

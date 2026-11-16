@@ -11,6 +11,7 @@ import { Eyebrow, PageTitle } from '@/shared/ui/PageHeading';
 import { TransitionLink } from '@/shared/ui/TransitionLink';
 import { DeleteAccount } from './DeleteAccount';
 import { LibrarySettings } from './LibrarySettings';
+import { NotificationsGroup } from './NotificationsGroup';
 import { PlacesSettings } from './PlacesSettings';
 import { ProfileGroup } from './ProfileGroup';
 import { rowLinkClass } from './rowLink';
@@ -23,6 +24,7 @@ import { ThemeChoice } from './ThemeChoice';
 const groups = [
   { id: 'profile', label: 'Profile' },
   { id: 'appearance', label: 'Appearance' },
+  { id: 'notifications', label: 'Notifications' },
   { id: 'places', label: 'Places' },
   { id: 'library', label: 'Library' },
   { id: 'sign-in', label: 'Sign-in' },
@@ -98,6 +100,7 @@ export function SettingsPage() {
           <SettingsGroup id='appearance' title='Appearance' delay={delay(1)}>
             <ThemeChoice />
           </SettingsGroup>
+          <NotificationsGroup delay={delay(2)} />
           <SettingsGroup
             id='places'
             title='Places'
@@ -106,15 +109,15 @@ export function SettingsPage() {
                 Open in Places →
               </TransitionLink>
             }
-            delay={delay(2)}
+            delay={delay(3)}
           >
             <PlacesSettings />
           </SettingsGroup>
-          <SettingsGroup id='library' title='Library' delay={delay(3)}>
+          <SettingsGroup id='library' title='Library' delay={delay(4)}>
             <LibrarySettings />
           </SettingsGroup>
-          <SignInGroup user={user} delay={delay(4)} />
-          <DeleteAccount id='leaving' delay={delay(5)} />
+          <SignInGroup user={user} delay={delay(5)} />
+          <DeleteAccount id='leaving' delay={delay(6)} />
         </div>
       </div>
       <BackToTop after={top} />

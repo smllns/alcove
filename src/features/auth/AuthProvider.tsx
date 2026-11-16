@@ -8,6 +8,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { showOwnChanges } from '@/entities/reader/queries';
 import * as userApi from '@/entities/user/api';
+import { turnPushOff } from '@/entities/user/push';
 import type { User } from '@/entities/user/types';
 import { keepFor } from '@/shared/lib/storage';
 import { AuthContext, type AuthState } from './AuthContext';
@@ -55,6 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Signing out drops every cached answer, so the next person on this
   // browser never glimpses someone else's shelves
   const logout = useCallback(async () => {
+    // This device no longer told what's for them
+    await turnPushOff().catch(() => {});
     await userApi.logout();
     queryClient.clear();
     keepFor('');

@@ -33,6 +33,13 @@ const schema = z.object({
   // Who writes alcove's own news (everyone sees it in their feed): their
   // emails, comma between
   ADMIN_EMAILS: optional,
+  // Notifications on readers' phones and computers (Web Push): the pair of
+  // keys messages are signed with (npx web-push generate-vapid-keys), and
+  // who push services can reach about them (mailto: or https:, else the
+  // first of ADMIN_EMAILS). Without the keys, notifications are off.
+  VAPID_PUBLIC_KEY: optional,
+  VAPID_PRIVATE_KEY: optional,
+  VAPID_SUBJECT: optional,
 });
 
 const parsed = schema.safeParse(process.env);

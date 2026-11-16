@@ -1,14 +1,19 @@
 import type { Filter, ObjectId } from 'mongodb';
 import { activity, type ActivityDoc, type BookDoc } from '../db.js';
+import { tellDone } from '../push/messages.js';
 
 // What readers do, kept for the feeds (users/feed.ts): noted as it's done,
 // and let go of as it's undone (a heart taken back, a follow ended, a book
 // or a reader gone)
 
-export const note = (event: Omit<ActivityDoc, '_id' | 'createdAt'>) =>
-  activity()
-    .insertOne({ ...event, createdAt: new Date() } as ActivityDoc)
-    .then(() => {});
+// What's done for one reader alone is told on their devices too
+export async function note(event: Omit<ActivityDoc, '_id' | 'createdAt'>) {
+  await activity().insertOne({
+    ...event,
+    createdAt: new Date(),
+  } as ActivityDoc);
+  await tellDone(event).catch(() => {});
+}
 
 export const forget = (filter: Filter<ActivityDoc>) =>
   activity()
